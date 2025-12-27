@@ -1328,3 +1328,307 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ============================================
+   Activity Bar & Tab System
+   ============================================ */
+#app {
+  flex-direction: row;
+  /* Override to horizontal for activity bar */
+}
+
+.activity-bar {
+  width: 56px;
+  min-width: 56px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+}
+
+.activity-bar-top,
+.activity-bar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.activity-btn {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.activity-btn:hover {
+  background: var(--bg-tertiary);
+}
+
+.activity-btn.active {
+  background: var(--bg-tertiary);
+}
+
+.activity-btn.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background: var(--accent-blue);
+  border-radius: 0 2px 2px 0;
+}
+
+.activity-icon {
+  font-size: 1.25rem;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-content.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tab Page (for Downloads, ADB, Support) */
+.tab-page {
+  flex: 1;
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+}
+
+.tab-page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.tab-page-desc {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Downloads Grid */
+.download-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.download-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  transition: all 0.2s ease;
+}
+
+.download-card:hover {
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+}
+
+.download-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.download-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.download-card p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.download-card .btn {
+  margin-top: auto;
+}
+
+/* ADB Commands */
+.adb-commands {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.command-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+}
+
+.command-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.command-card p {
+  font-size: 0.813rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.command-box {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.command-box code {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--accent-green);
+}
+
+.btn-copy {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-copy:hover {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+}
+
+.btn-copy.copied {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: white;
+}
+
+/* Support & Donate Page */
+.support-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.support-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.support-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+}
+
+.support-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.author-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+}
+
+.author-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.author-link:hover {
+  color: var(--accent-blue);
+}
+
+.donate-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.donate-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: var(--bg-primary);
+  border-radius: 4px;
+}
+
+.donate-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.donate-value {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.support-footer {
+  text-align: center;
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.support-footer a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+
+.support-footer a:hover {
+  text-decoration: underline;
+}

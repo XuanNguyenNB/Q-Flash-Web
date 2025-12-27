@@ -45,178 +45,308 @@ let firehose: FirehoseProtocol;
 
 function createAppHTML(): string {
   return `
-    <header class="header">
-      <div class="header-title">
-        <h1>Q-Flash Web</h1>
-        <span class="badge">v1.0</span>
+    <!-- Activity Bar (Left Navigation) -->
+    <nav class="activity-bar">
+      <div class="activity-bar-top">
+        <button class="activity-btn active" data-tab="flash" title="Flash Tool">
+          <span class="activity-icon">⚡</span>
+        </button>
+        <button class="activity-btn" data-tab="downloads" title="Downloads">
+          <span class="activity-icon">⬇️</span>
+        </button>
+        <button class="activity-btn" data-tab="adb" title="ADB Tools">
+          <span class="activity-icon">📱</span>
+        </button>
       </div>
-      <div class="header-status" id="device-status">
-        <span class="status-dot" id="status-dot"></span>
-        <span id="status-text">Disconnected</span>
+      <div class="activity-bar-bottom">
+        <button class="activity-btn" data-tab="support" title="Support & Donate">
+          <span class="activity-icon">❤️</span>
+        </button>
       </div>
-    </header>
-    
-    <div class="main-container">
-      <aside class="sidebar">
-        <!-- Progress Steps -->
-        <div class="control-section progress-container">
-          <h2>Progress</h2>
-          <div class="progress-steps" id="progress-steps">
-            <div class="progress-step" data-step="0">
-              <span class="step-icon">○</span>
-              <span>Load Files</span>
-            </div>
-            <div class="progress-step" data-step="1">
-              <span class="step-icon">○</span>
-              <span>Connect Device</span>
-            </div>
-            <div class="progress-step" data-step="2">
-              <span class="step-icon">○</span>
-              <span>Sahara Upload</span>
-            </div>
-            <div class="progress-step" data-step="3">
-              <span class="step-icon">○</span>
-              <span>VIP Handshake</span>
-            </div>
-            <div class="progress-step" data-step="4">
-              <span class="step-icon">○</span>
-              <span>Configure Firehose</span>
-            </div>
-            <div class="progress-step" data-step="5">
-              <span class="step-icon">○</span>
-              <span>Ready</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Device Preset Selector -->
-        <div class="control-section">
-          <h2>Device Preset</h2>
-          <div class="preset-selector">
-            <select id="preset-select" class="preset-dropdown">
-              <option value="">-- Select Device --</option>
-              <option value="8Gen3">Snapdragon 8 Gen 3 (Find X7 Ultra)</option>
-              <option value="8Gen2">Snapdragon 8 Gen 2 (coming soon)</option>
-            </select>
-            <button class="btn btn-secondary" id="load-preset-btn" disabled>
-              ⬇️ Load Preset
-            </button>
-          </div>
-          <div class="preset-status" id="preset-status"></div>
-        </div>
-        
-        <!-- File Inputs (Manual) -->
-        <div class="control-section">
-          <h2>Or Load Files Manually</h2>
-          <div class="file-input-group">
-            <div class="file-input-wrapper">
-              <input type="file" class="file-input" id="programmer-input" accept=".melf,.elf,.mbn">
-              <label class="file-input-label" id="programmer-label">
-                <span>📦 Programmer (.melf)</span>
-                <span class="icon">📂</span>
-              </label>
-            </div>
-            <div class="file-input-wrapper">
-              <input type="file" class="file-input" id="digest-input" accept=".elf,.bin">
-              <label class="file-input-label" id="digest-label">
-                <span>🔑 Digest (.elf)</span>
-                <span class="icon">📂</span>
-              </label>
-            </div>
-            <div class="file-input-wrapper">
-              <input type="file" class="file-input" id="signature-input" accept=".bin">
-              <label class="file-input-label" id="signature-label">
-                <span>✍️ Signature (.bin)</span>
-                <span class="icon">📂</span>
-              </label>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Actions -->
-        <div class="control-section">
-          <h2>Actions</h2>
-          <button class="btn btn-primary" id="connect-btn" disabled>
-            🔌 Connect Device
-          </button>
-          <button class="btn btn-success" id="start-btn" disabled style="margin-top: 8px;">
-            ▶️ Start Unlock Flow
-          </button>
-          <button class="btn btn-secondary" id="partitions-btn" disabled style="margin-top: 8px;">
-            📋 Read Partitions
-          </button>
-          <button class="btn btn-warning" id="reboot-btn" disabled style="margin-top: 8px;">
-            🔄 Reboot Device
-          </button>
-          <button class="btn btn-danger" id="disconnect-btn" disabled style="margin-top: 8px;">
-            ⏏️ Disconnect
-          </button>
-        </div>
-        
+    </nav>
 
-        
-        <!-- Info -->
-        <div class="control-section">
-          <h2>Requirements</h2>
-          <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6;">
-            • Chrome/Edge browser<br>
-            • WinUSB driver via Zadig<br>
-            • Device in EDL mode (9008)<br>
-            • Valid programmer, digest, signature files
-          </p>
+    <!-- Main App Container -->
+    <div class="app-main">
+      <header class="header">
+        <div class="header-title">
+          <h1>Q-Flash Web</h1>
+          <span class="badge">v1.0</span>
         </div>
-      </aside>
-      
-      <!-- Partition Table Panel -->
-      <div class="partition-panel" id="partition-panel">
-        <div class="partition-header">
-          <h2>📋 Partition Table</h2>
-          <span class="partition-count" id="partition-count">0 partitions</span>
+        <div class="header-status" id="device-status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">Disconnected</span>
         </div>
-        <div class="partition-search">
-          <input type="text" id="partition-search" placeholder="🔍 Search partition name..." autocomplete="off" />
-        </div>
-        <div class="partition-batch-actions" id="partition-batch-actions" style="display: none;">
-          <div class="batch-select">
-            <label class="checkbox-label">
-              <input type="checkbox" id="select-all-partitions" />
-              <span>Select All</span>
-            </label>
-            <span class="selected-count" id="selected-count">0 selected</span>
+      </header>
+
+      <!-- Tab: Flash (Main Tool) -->
+      <div class="tab-content active" id="tab-flash">
+        <div class="main-container">
+          <aside class="sidebar">
+            <!-- Progress Steps -->
+            <div class="control-section progress-container">
+              <h2>Progress</h2>
+              <div class="progress-steps" id="progress-steps">
+                <div class="progress-step" data-step="0">
+                  <span class="step-icon">○</span>
+                  <span>Load Files</span>
+                </div>
+                <div class="progress-step" data-step="1">
+                  <span class="step-icon">○</span>
+                  <span>Connect Device</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                  <span class="step-icon">○</span>
+                  <span>Sahara Upload</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                  <span class="step-icon">○</span>
+                  <span>VIP Handshake</span>
+                </div>
+                <div class="progress-step" data-step="4">
+                  <span class="step-icon">○</span>
+                  <span>Configure Firehose</span>
+                </div>
+                <div class="progress-step" data-step="5">
+                  <span class="step-icon">○</span>
+                  <span>Ready</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Device Preset Selector -->
+            <div class="control-section">
+              <h2>Device Preset</h2>
+              <div class="preset-selector">
+                <select id="preset-select" class="preset-dropdown">
+                  <option value="">-- Select Device --</option>
+                  <option value="8Gen3">Snapdragon 8 Gen 3 (Find X7 Ultra)</option>
+                  <option value="8Gen2">Snapdragon 8 Gen 2 (coming soon)</option>
+                </select>
+                <button class="btn btn-secondary" id="load-preset-btn" disabled>
+                  ⬇️ Load Preset
+                </button>
+              </div>
+              <div class="preset-status" id="preset-status"></div>
+            </div>
+            
+            <!-- File Inputs (Manual) -->
+            <div class="control-section">
+              <h2>Or Load Files Manually</h2>
+              <div class="file-input-group">
+                <div class="file-input-wrapper">
+                  <input type="file" class="file-input" id="programmer-input" accept=".melf,.elf,.mbn">
+                  <label class="file-input-label" id="programmer-label">
+                    <span>📦 Programmer (.melf)</span>
+                    <span class="icon">📂</span>
+                  </label>
+                </div>
+                <div class="file-input-wrapper">
+                  <input type="file" class="file-input" id="digest-input" accept=".elf,.bin">
+                  <label class="file-input-label" id="digest-label">
+                    <span>🔑 Digest (.elf)</span>
+                    <span class="icon">📂</span>
+                  </label>
+                </div>
+                <div class="file-input-wrapper">
+                  <input type="file" class="file-input" id="signature-input" accept=".bin">
+                  <label class="file-input-label" id="signature-label">
+                    <span>✍️ Signature (.bin)</span>
+                    <span class="icon">📂</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="control-section">
+              <h2>Actions</h2>
+              <button class="btn btn-primary" id="connect-btn" disabled>
+                🔌 Connect Device
+              </button>
+              <button class="btn btn-success" id="start-btn" disabled style="margin-top: 8px;">
+                ▶️ Start Unlock Flow
+              </button>
+              <button class="btn btn-secondary" id="partitions-btn" disabled style="margin-top: 8px;">
+                📋 Read Partitions
+              </button>
+              <button class="btn btn-warning" id="reboot-btn" disabled style="margin-top: 8px;">
+                🔄 Reboot Device
+              </button>
+              <button class="btn btn-danger" id="disconnect-btn" disabled style="margin-top: 8px;">
+                ⏏️ Disconnect
+              </button>
+            </div>
+          </aside>
+          
+          <!-- Partition Table Panel -->
+          <div class="partition-panel" id="partition-panel">
+            <div class="partition-header">
+              <h2>📋 Partition Table</h2>
+              <span class="partition-count" id="partition-count">0 partitions</span>
+            </div>
+            <div class="partition-search">
+              <input type="text" id="partition-search" placeholder="🔍 Search partition name..." autocomplete="off" />
+            </div>
+            <div class="partition-batch-actions" id="partition-batch-actions" style="display: none;">
+              <div class="batch-select">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="select-all-partitions" />
+                  <span>Select All</span>
+                </label>
+                <span class="selected-count" id="selected-count">0 selected</span>
+              </div>
+              <div class="batch-buttons">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="generate-xml-option" checked />
+                  <span>Generate XML</span>
+                </label>
+                <button class="btn btn-batch" id="btn-backup-selected" disabled>
+                  📥 Backup Selected
+                </button>
+                <span class="flash-file-count" id="flash-file-count">0 files</span>
+                <button class="btn btn-batch btn-flash" id="btn-flash-selected" disabled>
+                  ⚡ Flash Selected
+                </button>
+                <button class="btn btn-batch btn-xml-flash" id="btn-flash-xml">
+                  📄 Flash from XML
+                </button>
+              </div>
+            </div>
+            <div class="partition-table-container" id="partition-table">
+              <div class="partition-empty">
+                <span>No partitions loaded</span>
+                <span class="hint">Click "Read Partitions" after device is ready</span>
+              </div>
+            </div>
           </div>
-          <div class="batch-buttons">
-            <label class="checkbox-label">
-              <input type="checkbox" id="generate-xml-option" checked />
-              <span>Generate XML</span>
-            </label>
-            <button class="btn btn-batch" id="btn-backup-selected" disabled>
-              📥 Backup Selected
-            </button>
-            <span class="flash-file-count" id="flash-file-count">0 files</span>
-            <button class="btn btn-batch btn-flash" id="btn-flash-selected" disabled>
-              ⚡ Flash Selected
-            </button>
-            <button class="btn btn-batch btn-xml-flash" id="btn-flash-xml">
-              📄 Flash from XML
-            </button>
-          </div>
-        </div>
-        <div class="partition-table-container" id="partition-table">
-          <div class="partition-empty">
-            <span>No partitions loaded</span>
-            <span class="hint">Click "Read Partitions" after device is ready</span>
+          
+          <!-- Terminal Log -->
+          <div class="terminal-container">
+            <div class="terminal-header">
+              <h2>📜 Log</h2>
+            </div>
+            <div class="terminal" id="terminal"></div>
           </div>
         </div>
       </div>
-      
 
-      
-      <!-- Terminal Log -->
-      <div class="terminal-container">
-        <div class="terminal-header">
-          <h2>📜 Log</h2>
+      <!-- Tab: Downloads -->
+      <div class="tab-content" id="tab-downloads">
+        <div class="tab-page">
+          <h2 class="tab-page-title">⬇️ Downloads</h2>
+          <p class="tab-page-desc">Essential drivers and tools for Qualcomm device flashing.</p>
+          <div class="download-grid">
+            <div class="download-card">
+              <div class="download-icon">🔧</div>
+              <h3>Qualcomm 9008 Driver</h3>
+              <p>WinUSB driver via Zadig for EDL mode</p>
+              <a href="https://zadig.akeo.ie/" target="_blank" class="btn btn-primary">Download Zadig</a>
+            </div>
+            <div class="download-card">
+              <div class="download-icon">📦</div>
+              <h3>ADB & Fastboot</h3>
+              <p>Google Platform Tools</p>
+              <a href="https://developer.android.com/tools/releases/platform-tools" target="_blank" class="btn btn-primary">Download</a>
+            </div>
+            <div class="download-card">
+              <div class="download-icon">🔥</div>
+              <h3>Q-Flash Forge</h3>
+              <p>Desktop companion tool for ROM conversion</p>
+              <a href="https://github.com/XuanNguyenNB/Q-Flash-Web" target="_blank" class="btn btn-primary">GitHub</a>
+            </div>
+            <div class="download-card">
+              <div class="download-icon">📋</div>
+              <h3>QFIL / QPST</h3>
+              <p>Official Qualcomm Flash Tools</p>
+              <a href="#" class="btn btn-secondary">Coming Soon</a>
+            </div>
+          </div>
         </div>
-        <div class="terminal" id="terminal"></div>
+      </div>
+
+      <!-- Tab: ADB Tools -->
+      <div class="tab-content" id="tab-adb">
+        <div class="tab-page">
+          <h2 class="tab-page-title">📱 ADB & Fastboot Commands</h2>
+          <p class="tab-page-desc">Copy these commands and run in your terminal (CMD/PowerShell).</p>
+          <div class="adb-commands">
+            <div class="command-card">
+              <h3>Reboot to EDL Mode</h3>
+              <p>Enter Emergency Download (9008) mode</p>
+              <div class="command-box">
+                <code>adb reboot edl</code>
+                <button class="btn-copy" data-cmd="adb reboot edl">📋 Copy</button>
+              </div>
+            </div>
+            <div class="command-card">
+              <h3>Reboot to Bootloader</h3>
+              <p>Enter Fastboot mode</p>
+              <div class="command-box">
+                <code>adb reboot bootloader</code>
+                <button class="btn-copy" data-cmd="adb reboot bootloader">📋 Copy</button>
+              </div>
+            </div>
+            <div class="command-card">
+              <h3>Fastboot Reboot</h3>
+              <p>Normal reboot from Fastboot</p>
+              <div class="command-box">
+                <code>fastboot reboot</code>
+                <button class="btn-copy" data-cmd="fastboot reboot">📋 Copy</button>
+              </div>
+            </div>
+            <div class="command-card">
+              <h3>Fastboot to FastbootD</h3>
+              <p>Enter userspace Fastboot</p>
+              <div class="command-box">
+                <code>fastboot reboot fastboot</code>
+                <button class="btn-copy" data-cmd="fastboot reboot fastboot">📋 Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Support & Donate -->
+      <div class="tab-content" id="tab-support">
+        <div class="tab-page support-page">
+          <h2 class="tab-page-title">❤️ Support & Donate</h2>
+          <p class="tab-page-desc">If this tool helped you, consider supporting the development!</p>
+          
+          <div class="support-grid">
+            <div class="support-card author-card">
+              <h3>👨‍💻 Author</h3>
+              <div class="author-info">
+                <span class="author-name">XuanNguyen</span>
+                <a href="https://t.me/mitomtreem" target="_blank" class="author-link">@mitomtreem</a>
+              </div>
+            </div>
+            
+            <div class="support-card">
+              <h3>💬 Community</h3>
+              <a href="https://t.me/qflashweb" target="_blank" class="btn btn-primary" style="width: 100%;">
+                Join Telegram Group
+              </a>
+            </div>
+            
+            <div class="support-card donate-card">
+              <h3>💰 Donate</h3>
+              <div class="donate-options">
+                <div class="donate-item">
+                  <span class="donate-label">Momo</span>
+                  <span class="donate-value">Scan QR (coming soon)</span>
+                </div>
+                <div class="donate-item">
+                  <span class="donate-label">Binance ID</span>
+                  <span class="donate-value" style="color: var(--accent-yellow); font-family: var(--font-mono);">381766288</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="support-footer">
+            <p>⭐ Star us on <a href="https://github.com/XuanNguyenNB/Q-Flash-Web" target="_blank">GitHub</a></p>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -283,7 +413,44 @@ function setupEventListeners(): void {
   document.getElementById('reboot-btn')?.addEventListener('click', handleRebootDevice);
   document.getElementById('disconnect-btn')?.addEventListener('click', handleDisconnect);
 
+  // Activity Bar - Tab switching
+  document.querySelectorAll('.activity-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.getAttribute('data-tab');
+      if (!tabId) return;
 
+      // Update active button
+      document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Show corresponding tab
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      const targetTab = document.getElementById(`tab-${tabId}`);
+      if (targetTab) targetTab.classList.add('active');
+    });
+  });
+
+  // ADB Copy buttons
+  document.querySelectorAll('.btn-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cmd = btn.getAttribute('data-cmd');
+      if (!cmd) return;
+
+      navigator.clipboard.writeText(cmd).then(() => {
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(() => {
+        btn.textContent = '❌ Failed';
+        setTimeout(() => {
+          btn.textContent = '📋 Copy';
+        }, 2000);
+      });
+    });
+  });
 }
 
 // ============================================================================
