@@ -47,7 +47,7 @@ function createAppHTML(): string {
   return `
     <header class="header">
       <div class="header-title">
-        <h1>WebUSB OplusTool</h1>
+        <h1>Q-Flash Web</h1>
         <span class="badge">v1.0</span>
       </div>
       <div class="header-status" id="device-status">
@@ -249,7 +249,7 @@ function init(): void {
   }
 
   // Log startup
-  terminal.info('Oppo Find X7 Ultra WebUSB Unlock Tool initialized');
+  terminal.info('Q-Flash Web initialized');
   terminal.info('Load the required files to begin');
   terminal.separator();
 
