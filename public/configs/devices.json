@@ -10,9 +10,9 @@
         "authMethod": "oppo_vip",
         "presetId": "8Gen3",
         "firehose": {
-            "programmerUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_prog.melf",
-            "digestUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_Digest.elf",
-            "signatureUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_Sign.bin"
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_Sign.bin"
         }
     },
     {
@@ -26,9 +26,9 @@
         "authMethod": "oppo_vip",
         "presetId": "8Gen3",
         "firehose": {
-            "programmerUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_prog.melf",
-            "digestUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_Digest.elf",
-            "signatureUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_Sign.bin"
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_Sign.bin"
         }
     },
     {
@@ -42,9 +42,9 @@
         "authMethod": "oppo_vip",
         "presetId": "8Gen2",
         "firehose": {
-            "programmerUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
-            "digestUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
-            "signatureUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
         }
     },
     {
@@ -58,9 +58,9 @@
         "authMethod": "oppo_vip",
         "presetId": "8Gen2",
         "firehose": {
-            "programmerUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
-            "digestUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
-            "signatureUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
         }
     },
     {
@@ -74,9 +74,9 @@
         "authMethod": "oppo_vip",
         "presetId": "8Gen2",
         "firehose": {
-            "programmerUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
-            "digestUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
-            "signatureUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
         }
     },
     {
@@ -90,9 +90,9 @@
         "authMethod": "oppo_vip",
         "presetId": "8Gen2",
         "firehose": {
-            "programmerUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
-            "digestUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
-            "signatureUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
         }
     },
     {
@@ -106,9 +106,9 @@
         "authMethod": "oppo_vip",
         "presetId": null,
         "firehose": {
-            "programmerUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_prog.melf",
-            "digestUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Digest.elf",
-            "signatureUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Sign.bin"
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_Sign.bin"
         }
     },
     {
@@ -122,9 +122,9 @@
         "authMethod": "oppo_vip",
         "presetId": null,
         "firehose": {
-            "programmerUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_prog.melf",
-            "digestUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Digest.elf",
-            "signatureUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Sign.bin"
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_Sign.bin"
         }
     }
 ]
