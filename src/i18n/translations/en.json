@@ -1,0 +1,128 @@
+{
+    "header": {
+        "title": "Q-Flash Universal Qualcomm Tool",
+        "status": {
+            "idle": "Not Connected",
+            "connecting": "Connecting...",
+            "connected": "Connected",
+            "ready": "Ready",
+            "error": "Error"
+        }
+    },
+    "sidebar": {
+        "devicePreset": "Device",
+        "selectDevice": "-- Select Device --",
+        "loadPreset": "Load Preset",
+        "firehoseFiles": "Firehose Files",
+        "programmer": "Programmer",
+        "digest": "Digest",
+        "signature": "Signature",
+        "selectFile": "Select File",
+        "actions": "Actions",
+        "connectDevice": "Connect Device",
+        "rebootDevice": "Reboot Device",
+        "requirements": "Requirements",
+        "requirementsList": "• Chrome/Edge browser\n• WinUSB driver via Zadig\n• Device in EDL mode (9008)\n• Valid programmer, digest, signature files"
+    },
+    "partition": {
+        "title": "Partition Table",
+        "count": "{{count}} partitions",
+        "searchPlaceholder": "🔍 Search partition name...",
+        "noPartitions": "No partitions loaded",
+        "hint": "Click \"Read List\" to load partition table",
+        "headers": {
+            "lun": "LUN",
+            "name": "Name",
+            "startSector": "Start Sector",
+            "size": "Size",
+            "read": "Read",
+            "write": "Write"
+        }
+    },
+    "actions": {
+        "readList": "Read List",
+        "backup": "Backup",
+        "flash": "Flash",
+        "romFlash": "ROM Flash",
+        "reboot": "Reboot Device",
+        "stop": "Stop"
+    },
+    "terminal": {
+        "title": "Log",
+        "copy": "Copy",
+        "copied": "Copied!"
+    },
+    "backup": {
+        "title": "Backup Options",
+        "description": "Choose backup format for selected partitions:",
+        "withXml": "With XML (Recommended)",
+        "withXmlDesc": "Generate rawprogram XML files for easy restoration with flash tools",
+        "withoutXml": "Without XML",
+        "withoutXmlDesc": "Only save partition images (manual restoration required)",
+        "cancel": "Cancel",
+        "startBackup": "Start Backup"
+    },
+    "messages": {
+        "deviceReady": "✅ Device ready! Click \"Read List\" to view partitions.",
+        "backupCancelled": "Backup cancelled",
+        "noPartitionsSelected": "No partitions selected",
+        "firehoseNotInitialized": "Firehose not initialized",
+        "partitionNotFound": "Partition not found",
+        "noFilesFound": "No files found",
+        "flashCancelled": "Flash cancelled",
+        "connecting": "Connecting to device...",
+        "saharaHandshake": "Step 1/5: Sahara Handshake - Loading programmer...",
+        "vipHandshake": "Step 2/5: VIP Handshake - Authenticating...",
+        "configuringFirehose": "Step 3/5: Configuring Firehose...",
+        "deviceReadyFull": "🎉 Device ready! You can now read partitions.",
+        "readingPartitions": "Reading partition table from all LUNs...",
+        "totalPartitions": "Total: {{count}} partitions",
+        "noPartitionsFound": "No partitions found",
+        "batchBackup": "📦 Batch backup: {{count}} partition(s)",
+        "willGenerateXml": "Will generate XML files for restoration",
+        "loadedFile": "Loaded: {{name}} ({{size}})",
+        "selectedFileForPartition": "Selected \"{{file}}\" for partition \"{{partition}}\"",
+        "fileSizeExceeds": "⚠️ File size ({{fileSize}}) exceeds partition size ({{partSize}})",
+        "fileSizeSmaller": "File size ({{fileSize}}) is smaller than partition ({{partSize}}). Will be padded with zeros.",
+        "criticalPartitionWarning": "⚠️ WARNING: \"{{name}}\" is a critical partition!",
+        "brickWarning": "Flashing incorrect data can BRICK your device!",
+        "flashSuccess": "✅ {{name}} flashed successfully ({{size}})",
+        "flashFailed": "❌ {{name}} flash failed: {{error}}",
+        "allFlashSuccess": "✅ All {{count}} partition(s) flashed successfully!",
+        "flashComplete": "Flash complete: {{success}} success, {{failed}} failed"
+    },
+    "flash": {
+        "confirmTitle": "⚠️ FLASH CONFIRMATION",
+        "selectPartitions": "Select partitions to flash:",
+        "selectAll": "Select All",
+        "selectNone": "Select None",
+        "confirm": "Confirm Flash",
+        "cancel": "Cancel",
+        "criticalWarning": "⚠️ CRITICAL PARTITIONS DETECTED!",
+        "lun5Warning": "⚠️ LUN5 contains calibration data. Flashing may cause hardware issues!",
+        "badges": {
+            "critical": "⚠️ CRITICAL",
+            "lun5": "⚡ LUN5",
+            "protected": "🛡️ PROTECTED"
+        }
+    },
+    "aiPanel": {
+        "title": "AI Assistant",
+        "welcome": "Hi! I can help you with Q-Flash WebUSB Tool. Ask me about EDL mode, partitions, flashing, or device recovery.",
+        "placeholder": "Ask a question...",
+        "send": "Send",
+        "settings": "Settings",
+        "apiUrl": "API URL",
+        "apiKey": "API Key",
+        "model": "Model",
+        "save": "Save",
+        "configureApi": "Please configure API settings first (click ⚙️)",
+        "error": "Error",
+        "noResponse": "No response from AI"
+    },
+    "firehosePopup": {
+        "title": "Manual File Selection",
+        "description": "Preset loading failed. Please select files manually:",
+        "confirm": "Use Selected Files"
+    }
+}

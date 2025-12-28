@@ -14,6 +14,8 @@ import { AppStage, EXPECTED_FILE_SIZES } from './types';
 import { loadBinaryFile } from './presets';
 import { loadDeviceConfigs, loadFirehoseForDevice } from './services/deviceConfig';
 import type { DeviceProfile } from './services/deviceConfig';
+import { t, getCurrentLanguage, setLanguage } from './i18n/i18n';
+import { renderAiChatPanel, initAiChat } from './components/ai-chat';
 
 // ============================================================================
 // Application State
@@ -46,163 +48,96 @@ let firehose: FirehoseProtocol;
 // ============================================================================
 
 function createToolHTML(): string {
+  const currentLang = getCurrentLanguage();
   return `
     <header class="header">
       <div class="header-title">
         <h1>WebUSB OplusTool</h1>
         <span class="badge">v1.0</span>
       </div>
-      <div class="header-status" id="device-status">
-        <span class="status-dot" id="status-dot"></span>
-        <span id="status-text">Disconnected</span>
+      <div class="header-controls">
+        <button class="btn-lang" id="btn-lang" title="Switch Language">
+          <span class="lang-icon">🌐</span>
+          <span class="lang-text">${currentLang.toUpperCase()}</span>
+        </button>
+        <div class="header-status" id="device-status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">${t('header.status.idle')}</span>
+        </div>
       </div>
     </header>
     
     <div class="main-container">
       <aside class="sidebar">
-        <!-- Progress Steps -->
-        <div class="control-section progress-container">
-          <h2>Progress</h2>
-          <div class="progress-steps" id="progress-steps">
-            <div class="progress-step" data-step="0">
-              <span class="step-icon">○</span>
-              <span>Load Files</span>
+        
+        <!-- Sidebar Top: Controls -->
+        <div class="sidebar-top">
+          <!-- Device Preset Selector -->
+          <div class="control-section">
+            <h2>${t('sidebar.devicePreset')}</h2>
+            <div class="preset-selector">
+              <select id="preset-select" class="preset-dropdown">
+                <option value="">-- Loading devices... --</option>
+              </select>
+              <button class="btn btn-secondary" id="load-preset-btn" disabled>
+                ⬇️ ${t('sidebar.loadPreset')}
+              </button>
             </div>
-            <div class="progress-step" data-step="1">
-              <span class="step-icon">○</span>
-              <span>Connect Device</span>
-            </div>
-            <div class="progress-step" data-step="2">
-              <span class="step-icon">○</span>
-              <span>Sahara Upload</span>
-            </div>
-            <div class="progress-step" data-step="3">
-              <span class="step-icon">○</span>
-              <span>VIP Handshake</span>
-            </div>
-            <div class="progress-step" data-step="4">
-              <span class="step-icon">○</span>
-              <span>Configure Firehose</span>
-            </div>
-            <div class="progress-step" data-step="5">
-              <span class="step-icon">○</span>
-              <span>Ready</span>
-            </div>
+            <div class="preset-status" id="preset-status"></div>
+          </div>
+          
+          <!-- Info -->
+          <div class="control-section">
+            <h2>${t('sidebar.requirements')}</h2>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6; white-space: pre-line;">
+              ${t('sidebar.requirementsList')}
+            </p>
           </div>
         </div>
         
-        <!-- Device Preset Selector -->
-        <div class="control-section">
-          <h2>Device Preset</h2>
-          <div class="preset-selector">
-            <select id="preset-select" class="preset-dropdown">
-              <option value="">-- Loading devices... --</option>
-            </select>
-            <button class="btn btn-secondary" id="load-preset-btn" disabled>
-              ⬇️ Load Firehose
-            </button>
-          </div>
-          <div class="preset-status" id="preset-status"></div>
-        </div>
-        
-        <!-- File Inputs (Manual) -->
-        <div class="control-section">
-          <h2>Or Load Files Manually</h2>
-          <div class="file-input-group">
-            <div class="file-input-wrapper">
-              <input type="file" class="file-input" id="programmer-input" accept=".melf,.elf,.mbn">
-              <label class="file-input-label" id="programmer-label">
-                <span>📦 Programmer (.melf)</span>
-                <span class="icon">📂</span>
-              </label>
-            </div>
-            <div class="file-input-wrapper">
-              <input type="file" class="file-input" id="digest-input" accept=".elf,.bin">
-              <label class="file-input-label" id="digest-label">
-                <span>🔑 Digest (.elf)</span>
-                <span class="icon">📂</span>
-              </label>
-            </div>
-            <div class="file-input-wrapper">
-              <input type="file" class="file-input" id="signature-input" accept=".bin">
-              <label class="file-input-label" id="signature-label">
-                <span>✍️ Signature (.bin)</span>
-                <span class="icon">📂</span>
-              </label>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Actions -->
-        <div class="control-section">
-          <h2>Actions</h2>
-          <button class="btn btn-primary" id="connect-btn" disabled>
-            🔌 Connect Device
-          </button>
-          <button class="btn btn-secondary" id="partitions-btn" disabled style="margin-top: 8px;">
-            📋 Read Partitions
-          </button>
-          <button class="btn btn-warning" id="reboot-btn" disabled style="margin-top: 8px;">
-            🔄 Reboot Device
-          </button>
-          <button class="btn btn-danger" id="disconnect-btn" disabled style="margin-top: 8px;">
-            ⏏️ Disconnect
-          </button>
-        </div>
-        
-
-        
-        <!-- Info -->
-        <div class="control-section">
-          <h2>Requirements</h2>
-          <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6;">
-            • Chrome/Edge browser<br>
-            • WinUSB driver via Zadig<br>
-            • Device in EDL mode (9008)<br>
-            • Valid programmer, digest, signature files
-          </p>
+        <!-- Sidebar Bottom: AI Chat Panel -->
+        <div class="sidebar-bottom">
+          ${renderAiChatPanel()}
         </div>
       </aside>
       
       <!-- Partition Table Panel -->
       <div class="partition-panel" id="partition-panel">
         <div class="partition-header">
-          <h2>📋 Partition Table</h2>
-          <span class="partition-count" id="partition-count">0 partitions</span>
+          <h2>📋 ${t('partition.title')}</h2>
+          <span class="partition-count" id="partition-count">${t('partition.count', { count: 0 })}</span>
         </div>
         <div class="partition-search">
-          <input type="text" id="partition-search" placeholder="🔍 Search partition name..." autocomplete="off" />
-        </div>
-        <div class="partition-batch-actions" id="partition-batch-actions" style="display: none;">
-          <div class="batch-select">
-            <label class="checkbox-label">
-              <input type="checkbox" id="select-all-partitions" />
-              <span>Select All</span>
-            </label>
-            <span class="selected-count" id="selected-count">0 selected</span>
-          </div>
-          <div class="batch-buttons">
-            <label class="checkbox-label">
-              <input type="checkbox" id="generate-xml-option" checked />
-              <span>Generate XML</span>
-            </label>
-            <button class="btn btn-batch" id="btn-backup-selected" disabled>
-              📥 Backup Selected
-            </button>
-            <span class="flash-file-count" id="flash-file-count">0 files</span>
-            <button class="btn btn-batch btn-flash" id="btn-flash-selected" disabled>
-              ⚡ Flash Selected
-            </button>
-            <button class="btn btn-batch btn-xml-flash" id="btn-flash-xml">
-              📄 Flash from XML
-            </button>
-          </div>
+          <input type="text" id="partition-search" placeholder="${t('partition.searchPlaceholder')}" autocomplete="off" />
         </div>
         <div class="partition-table-container" id="partition-table">
           <div class="partition-empty">
-            <span>No partitions loaded</span>
-            <span class="hint">Click "Read Partitions" after device is ready</span>
+            <span>${t('partition.noPartitions')}</span>
+            <span class="hint">${t('partition.hint')}</span>
           </div>
+        </div>
+        <div class="partition-actions-bar" id="partition-actions-bar">
+          <button class="btn btn-action btn-connect" id="connect-btn" disabled>
+            🔌 ${t('sidebar.connectDevice')}
+          </button>
+          <button class="btn btn-action" id="btn-read-partitions" disabled>
+            📋 ${t('actions.readList')}
+          </button>
+          <button class="btn btn-action" id="btn-backup-selected" disabled>
+            📥 ${t('actions.backup')} (<span id="selected-count">0</span>)
+          </button>
+          <button class="btn btn-action btn-flash" id="btn-flash-selected" disabled>
+            ⚡ ${t('actions.flash')} (<span id="flash-file-count">0</span>)
+          </button>
+          <button class="btn btn-action btn-xml-flash" id="btn-flash-xml">
+            📄 ${t('actions.romFlash')}
+          </button>
+          <button class="btn btn-action btn-warning" id="reboot-btn">
+            🔄 ${t('actions.reboot')}
+          </button>
+          <button class="btn btn-action btn-danger-outline" id="btn-stop-all" disabled>
+            ⏹️ ${t('actions.stop')}
+          </button>
         </div>
       </div>
       
@@ -211,9 +146,10 @@ function createToolHTML(): string {
       <!-- Terminal Log -->
       <div class="terminal-container">
         <div class="terminal-header">
-          <h2>📜 Log</h2>
+          <h2>📜 ${t('terminal.title')}</h2>
+          <button class="btn btn-sm" id="copy-log-btn" title="Copy log to clipboard">📋 ${t('terminal.copy')}</button>
         </div>
-        <div class="terminal" id="terminal"></div>
+        <div class="terminal terminal-compact" id="terminal"></div>
       </div>
     </div>
   `;
@@ -253,6 +189,9 @@ export function initTool(): void {
   // Set up event listeners
   setupEventListeners();
 
+  // Initialize AI Chat panel
+  initAiChat();
+
   // Load device configurations
   populateDeviceDropdown();
 
@@ -267,23 +206,98 @@ export function initTool(): void {
 // ============================================================================
 
 function setupEventListeners(): void {
-  // File inputs
-  document.getElementById('programmer-input')?.addEventListener('change', (e) => handleFileInput(e, 'programmer'));
-  document.getElementById('digest-input')?.addEventListener('change', (e) => handleFileInput(e, 'digest'));
-  document.getElementById('signature-input')?.addEventListener('change', (e) => handleFileInput(e, 'signature'));
-
   // Preset selector
   document.getElementById('preset-select')?.addEventListener('change', handlePresetChange);
   document.getElementById('load-preset-btn')?.addEventListener('click', handleLoadPreset);
 
   // Buttons
   document.getElementById('connect-btn')?.addEventListener('click', handleConnect);
-  document.getElementById('start-btn')?.addEventListener('click', handleStartUnlockFlow);
-  document.getElementById('partitions-btn')?.addEventListener('click', handleReadPartitions);
+  document.getElementById('btn-read-partitions')?.addEventListener('click', handleReadPartitions);
   document.getElementById('reboot-btn')?.addEventListener('click', handleRebootDevice);
-  document.getElementById('disconnect-btn')?.addEventListener('click', handleDisconnect);
+
+  // Language switcher
+  document.getElementById('btn-lang')?.addEventListener('click', handleLanguageSwitch);
+
+  // Copy log button
+  document.getElementById('copy-log-btn')?.addEventListener('click', handleCopyLog);
+}
 
 
+/**
+ * Copy terminal log to clipboard
+ */
+function handleCopyLog(): void {
+  const terminalEl = document.getElementById('terminal');
+  if (!terminalEl) return;
+
+  const logText = terminalEl.innerText || terminalEl.textContent || '';
+
+  navigator.clipboard.writeText(logText).then(() => {
+    const btn = document.getElementById('copy-log-btn');
+    if (btn) {
+      const originalText = btn.textContent;
+      btn.textContent = t('terminal.copied');
+      setTimeout(() => {
+        btn.textContent = originalText;
+      }, 2000);
+    }
+  }).catch((err) => {
+    terminal.error(`Failed to copy log: ${err}`);
+  });
+}
+
+/**
+ * Handle language switch
+ */
+function handleLanguageSwitch(): void {
+  const currentLang = getCurrentLanguage();
+  const newLang = currentLang === 'vi' ? 'en' : 'vi';
+  setLanguage(newLang);
+
+  // Re-render the tool UI with new language
+  const container = document.querySelector('.tool-container');
+  if (container) {
+    container.innerHTML = createToolHTML();
+
+    // Re-initialize
+    terminal = new Terminal('terminal');
+    setupEventListeners();
+    initAiChat();
+    updateStage(state.stage);
+    updateButtonStates();
+
+    // Re-render partitions if loaded
+    const partitions = (window as any).__partitions as import('./types').PartitionInfo[];
+    if (partitions && partitions.length > 0) {
+      const searchInput = document.getElementById('partition-search') as HTMLInputElement;
+      const currentFilter = searchInput?.value || '';
+      renderPartitionTable(partitions, currentFilter);
+    }
+
+    terminal.info(`Language changed to ${newLang.toUpperCase()}`);
+  }
+}
+
+/**
+ * Show toast notification
+ */
+function showToast(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+  // Remove existing toast
+  const existingToast = document.querySelector('.toast-notification');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast-notification toast-${type}`;
+  toast.innerHTML = `<span>${message}</span>`;
+  document.body.appendChild(toast);
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.classList.add('toast-hide');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
 }
 
 // ============================================================================
@@ -376,6 +390,19 @@ async function populateDeviceDropdown(): Promise<void> {
   }
 
   select.innerHTML = optionsHtml;
+
+  // Restore previously selected device from localStorage
+  const savedDeviceId = localStorage.getItem('qflash-selected-device');
+  if (savedDeviceId && loadedDevices.some(d => d.id === savedDeviceId)) {
+    select.value = savedDeviceId;
+    // Enable load button if a device is selected
+    const loadBtn = document.getElementById('load-preset-btn') as HTMLButtonElement;
+    if (loadBtn) {
+      loadBtn.disabled = false;
+    }
+    terminal.info(`📱 Restored device selection: ${loadedDevices.find(d => d.id === savedDeviceId)?.name || savedDeviceId}`);
+  }
+
   terminal.info(`📋 Loaded ${loadedDevices.length} device profiles`);
 }
 
@@ -389,6 +416,13 @@ function handlePresetChange(): void {
 
   const deviceId = select.value;
   const device = loadedDevices.find(d => d.id === deviceId);
+
+  // Save selected device to localStorage
+  if (deviceId) {
+    localStorage.setItem('qflash-selected-device', deviceId);
+  } else {
+    localStorage.removeItem('qflash-selected-device');
+  }
 
   if (!device) {
     loadBtn.disabled = true;
@@ -506,6 +540,14 @@ async function handleLoadPreset(): Promise<void> {
       statusEl.textContent = '❌ Failed to load firehose';
       statusEl.style.color = 'var(--accent-red)';
     }
+
+    // Show popup for manual file selection
+    terminal.info('💡 Opening manual file selection popup...');
+    const result = await showFirehoseFilesPopup();
+    if (result) {
+      terminal.success('✅ Firehose files loaded manually!');
+      updateButtonStates();
+    }
   } finally {
     loadBtn.disabled = false;
     select.disabled = false;
@@ -537,6 +579,138 @@ function updateFileLabel(labelId: string, fileName: string, loaded: boolean): vo
       <span class="status-icon">✓</span>
     `;
   }
+}
+
+/**
+ * Show popup dialog for manual Firehose file selection
+ * Returns true if all files were loaded successfully
+ */
+async function showFirehoseFilesPopup(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'firehose-popup-overlay';
+
+    // Track loaded files
+    const loadedFiles = {
+      programmer: false,
+      digest: false,
+      signature: false
+    };
+
+    overlay.innerHTML = `
+      <div class="firehose-popup-modal">
+        <h3>📁 ${t('firehosePopup.title')}</h3>
+        <p class="popup-description">${t('firehosePopup.description')}</p>
+        
+        <div class="firehose-file-inputs">
+          <div class="file-input-wrapper popup-file">
+            <input type="file" class="file-input" id="popup-programmer-input" accept=".melf,.elf,.mbn">
+            <label class="file-input-label" id="popup-programmer-label">
+              <span>📦 ${t('sidebar.programmer')}</span>
+              <span class="icon">📂</span>
+            </label>
+          </div>
+          <div class="file-input-wrapper popup-file">
+            <input type="file" class="file-input" id="popup-digest-input" accept=".elf,.bin">
+            <label class="file-input-label" id="popup-digest-label">
+              <span>🔑 ${t('sidebar.digest')}</span>
+              <span class="icon">📂</span>
+            </label>
+          </div>
+          <div class="file-input-wrapper popup-file">
+            <input type="file" class="file-input" id="popup-signature-input" accept=".bin">
+            <label class="file-input-label" id="popup-signature-label">
+              <span>✍️ ${t('sidebar.signature')}</span>
+              <span class="icon">📂</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="firehose-popup-buttons">
+          <button class="btn-cancel">${t('flash.cancel')}</button>
+          <button class="btn-confirm" disabled>${t('firehosePopup.confirm')}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const updateConfirmButton = () => {
+      const confirmBtn = overlay.querySelector('.btn-confirm') as HTMLButtonElement;
+      if (confirmBtn) {
+        confirmBtn.disabled = !(loadedFiles.programmer && loadedFiles.digest && loadedFiles.signature);
+      }
+    };
+
+    const handleFileLoad = async (inputId: string, labelId: string, fileType: 'programmer' | 'digest' | 'signature') => {
+      const input = document.getElementById(inputId) as HTMLInputElement;
+      const label = document.getElementById(labelId);
+
+      input?.addEventListener('change', async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        try {
+          const data = new Uint8Array(await file.arrayBuffer());
+
+          // Store in state
+          switch (fileType) {
+            case 'programmer':
+              state.programmerData = data;
+              break;
+            case 'digest':
+              state.digestData = data;
+              break;
+            case 'signature':
+              state.signatureData = data;
+              break;
+          }
+
+          loadedFiles[fileType] = true;
+
+          // Update label
+          if (label) {
+            label.classList.add('loaded');
+            label.innerHTML = `
+              <span>✅ ${file.name.substring(0, 15)}...</span>
+              <span class="status-icon">✓</span>
+            `;
+          }
+
+          terminal.success(`${fileType} loaded: ${file.name} (${formatBytes(data.length)})`);
+          updateConfirmButton();
+
+        } catch (error) {
+          terminal.error(`Failed to load ${fileType}: ${error}`);
+        }
+      });
+    };
+
+    // Set up file handlers
+    handleFileLoad('popup-programmer-input', 'popup-programmer-label', 'programmer');
+    handleFileLoad('popup-digest-input', 'popup-digest-label', 'digest');
+    handleFileLoad('popup-signature-input', 'popup-signature-label', 'signature');
+
+    // Confirm button
+    overlay.querySelector('.btn-confirm')?.addEventListener('click', () => {
+      overlay.remove();
+      resolve(true);
+    });
+
+    // Cancel button
+    overlay.querySelector('.btn-cancel')?.addEventListener('click', () => {
+      overlay.remove();
+      resolve(false);
+    });
+
+    // Click outside to cancel
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.remove();
+        resolve(false);
+      }
+    });
+  });
 }
 
 // ============================================================================
@@ -725,6 +899,15 @@ async function handleStartUnlockFlow(): Promise<void> {
     terminal.separator();
     terminal.success('🎉 Device ready! You can now read partitions.');
 
+    // Enable Read List button
+    const readListBtn = document.getElementById('btn-read-partitions') as HTMLButtonElement;
+    if (readListBtn) {
+      readListBtn.disabled = false;
+    }
+
+    // Show toast notification
+    showToast('✅ Device ready! Click "Read List" to view partitions.', 'success');
+
     updateButtonStates();
 
   } catch (error) {
@@ -766,7 +949,6 @@ function renderPartitionTable(partitions: import('./types').PartitionInfo[], sea
   const container = document.getElementById('partition-table');
   const countEl = document.getElementById('partition-count');
   const searchInput = document.getElementById('partition-search') as HTMLInputElement;
-  const batchActionsEl = document.getElementById('partition-batch-actions');
 
   if (!container) return;
 
@@ -778,11 +960,6 @@ function renderPartitionTable(partitions: import('./types').PartitionInfo[], sea
     (window as any).__selectedPartitions = new Set<number>();
   }
   const selectedPartitions = (window as any).__selectedPartitions as Set<number>;
-
-  // Show batch actions bar when partitions are loaded
-  if (batchActionsEl && partitions.length > 0) {
-    batchActionsEl.style.display = 'flex';
-  }
 
   // Filter partitions based on search
   const filter = searchFilter.toLowerCase().trim();
@@ -813,12 +990,15 @@ function renderPartitionTable(partitions: import('./types').PartitionInfo[], sea
   // Set up batch action handlers (only once)
   setupBatchHandlers();
 
-  // Build HTML table with checkboxes
+  // Build HTML table with checkboxes - Select All in header
+  const allSelected = partitions.length > 0 && selectedPartitions.size === partitions.length;
   let html = `
     <table class="partition-table">
       <thead>
         <tr>
-          <th class="checkbox-col"></th>
+          <th class="checkbox-col">
+            <input type="checkbox" id="select-all-partitions" ${allSelected ? 'checked' : ''} title="Select All" />
+          </th>
           <th>LUN</th>
           <th>Name</th>
           <th>Start Sector</th>
@@ -2061,6 +2241,92 @@ function showGroupedXmlSelectionDialog(groups: XmlGroup[]): Promise<string[]> {
 }
 
 /**
+ * Show backup options dialog
+ * @returns true if user wants XML, false if not, null if cancelled
+ */
+function showBackupOptionsDialog(): Promise<boolean | null> {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'flash-confirm-overlay';
+
+    overlay.innerHTML = `
+      <div class="flash-confirm-modal">
+        <h2>🗂️ Backup Options</h2>
+        <p style="margin-bottom: 16px; color: var(--text-secondary);">
+          Choose backup format for selected partitions:
+        </p>
+        
+        <div class="backup-options" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+          <label class="backup-option-item" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--border-radius); cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease;">
+            <input type="radio" name="backup-option" value="with-xml" checked style="margin-top: 4px;">
+            <div>
+              <div style="font-weight: 600; color: var(--accent-green);">📄 With XML (Recommended)</div>
+              <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 4px;">
+                Generate rawprogram XML files for easy restoration with flash tools
+              </div>
+            </div>
+          </label>
+          
+          <label class="backup-option-item" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--border-radius); cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease;">
+            <input type="radio" name="backup-option" value="no-xml" style="margin-top: 4px;">
+            <div>
+              <div style="font-weight: 600;">💾 Without XML</div>
+              <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 4px;">
+                Only save partition images (manual restoration required)
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary btn-cancel">Cancel</button>
+          <button class="btn btn-primary btn-confirm">Start Backup</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Add hover effect
+    const optionItems = overlay.querySelectorAll('.backup-option-item');
+    optionItems.forEach(item => {
+      const radio = item.querySelector('input[type="radio"]') as HTMLInputElement;
+      item.addEventListener('click', () => {
+        radio.checked = true;
+        optionItems.forEach(i => (i as HTMLElement).style.borderColor = 'transparent');
+        (item as HTMLElement).style.borderColor = 'var(--accent-blue)';
+      });
+    });
+
+    // Set initial border
+    const checkedItem = overlay.querySelector('input[type="radio"]:checked')?.closest('.backup-option-item') as HTMLElement;
+    if (checkedItem) checkedItem.style.borderColor = 'var(--accent-blue)';
+
+    // Confirm handler
+    overlay.querySelector('.btn-confirm')?.addEventListener('click', () => {
+      const selected = overlay.querySelector('input[name="backup-option"]:checked') as HTMLInputElement;
+      const generateXml = selected?.value === 'with-xml';
+      overlay.remove();
+      resolve(generateXml);
+    });
+
+    // Cancel handler
+    overlay.querySelector('.btn-cancel')?.addEventListener('click', () => {
+      overlay.remove();
+      resolve(null);
+    });
+
+    // Click outside to cancel
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.remove();
+        resolve(null);
+      }
+    });
+  });
+}
+
+/**
  * Handle batch backup of selected partitions
  */
 async function handleBatchBackup(): Promise<void> {
@@ -2071,10 +2337,16 @@ async function handleBatchBackup(): Promise<void> {
 
   const partitions = (window as any).__partitions as import('./types').PartitionInfo[];
   const selectedPartitions = (window as any).__selectedPartitions as Set<number>;
-  const generateXml = (document.getElementById('generate-xml-option') as HTMLInputElement)?.checked ?? true;
 
   if (!selectedPartitions || selectedPartitions.size === 0) {
     terminal.error('No partitions selected');
+    return;
+  }
+
+  // Ask user if they want to generate XML
+  const generateXml = await showBackupOptionsDialog();
+  if (generateXml === null) {
+    terminal.info('Backup cancelled');
     return;
   }
 
@@ -2461,36 +2733,22 @@ function updateStage(stage: AppStage): void {
 
 function updateButtonStates(): void {
   const connectBtn = document.getElementById('connect-btn') as HTMLButtonElement;
-  const startBtn = document.getElementById('start-btn') as HTMLButtonElement;
-  const partitionsBtn = document.getElementById('partitions-btn') as HTMLButtonElement;
-  const disconnectBtn = document.getElementById('disconnect-btn') as HTMLButtonElement;
+  const readListBtn = document.getElementById('btn-read-partitions') as HTMLButtonElement;
+  const rebootBtn = document.getElementById('reboot-btn') as HTMLButtonElement;
 
   // Connect enabled when files are loaded but not connected
   if (connectBtn) {
     connectBtn.disabled = !state.programmerData || state.isConnected;
   }
 
-  // Start enabled when connected and all files loaded, AND not currently running
-  if (startBtn) {
-    // Only enable if we are IDLE/CONNECTING (not running) and not yet READY
-    const isRunning = state.stage > AppStage.CONNECTING && state.stage < AppStage.READY;
-    startBtn.disabled = !state.isConnected || !state.programmerData || !state.digestData || !state.signatureData || isRunning || state.stage === AppStage.READY;
+  // Read List enabled when ready
+  if (readListBtn) {
+    readListBtn.disabled = state.stage < AppStage.READY;
   }
 
-  // Partitions enabled when ready
-  if (partitionsBtn) {
-    partitionsBtn.disabled = state.stage < AppStage.READY;
-  }
-
-  // Reboot enabled when ready
-  const rebootBtn = document.getElementById('reboot-btn') as HTMLButtonElement;
+  // Reboot button should always be enabled
   if (rebootBtn) {
-    rebootBtn.disabled = state.stage < AppStage.READY;
-  }
-
-  // Disconnect enabled when connected
-  if (disconnectBtn) {
-    disconnectBtn.disabled = !state.isConnected;
+    rebootBtn.disabled = false;
   }
 }
 

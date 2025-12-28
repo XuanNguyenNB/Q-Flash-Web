@@ -1,9 +1,3 @@
-/**
- * Q-Flash Universal Qualcomm Tool
- * 
- * Main entry point - App shell with sidebar navigation and router
- */
-
 import './style.css';
 import { router } from './router';
 import type { Route } from './router';
@@ -14,6 +8,7 @@ import { renderDriversPage } from './pages/drivers';
 import { renderDevicesPage } from './pages/devices';
 import { renderDonatePage } from './pages/donate';
 import { renderSupportPage } from './pages/support';
+import { initI18n, getCurrentLanguage, setLanguage, type Language } from './i18n/i18n';
 
 // ============================================================================
 // App Shell
@@ -112,6 +107,9 @@ function init(): void {
     console.error('App container not found');
     return;
   }
+
+  // Initialize i18n system
+  initI18n();
 
   // Render app shell
   app.innerHTML = createAppShell();

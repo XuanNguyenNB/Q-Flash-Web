@@ -1,0 +1,128 @@
+{
+    "header": {
+        "title": "Q-Flash Universal Qualcomm Tool",
+        "status": {
+            "idle": "Chưa kết nối",
+            "connecting": "Đang kết nối...",
+            "connected": "Đã kết nối",
+            "ready": "Sẵn sàng",
+            "error": "Lỗi"
+        }
+    },
+    "sidebar": {
+        "devicePreset": "Thiết bị",
+        "selectDevice": "-- Chọn thiết bị --",
+        "loadPreset": "Tải cấu hình",
+        "firehoseFiles": "Tệp Firehose",
+        "programmer": "Programmer",
+        "digest": "Digest",
+        "signature": "Signature",
+        "selectFile": "Chọn tệp",
+        "actions": "Thao tác",
+        "connectDevice": "Kết nối thiết bị",
+        "rebootDevice": "Khởi động lại",
+        "requirements": "Yêu cầu",
+        "requirementsList": "• Trình duyệt Chrome/Edge\n• Driver WinUSB qua Zadig\n• Thiết bị ở chế độ EDL (9008)\n• Các tệp programmer, digest, signature hợp lệ"
+    },
+    "partition": {
+        "title": "Bảng phân vùng",
+        "count": "{{count}} phân vùng",
+        "searchPlaceholder": "🔍 Tìm tên phân vùng...",
+        "noPartitions": "Chưa tải phân vùng",
+        "hint": "Nhấn \"Đọc danh sách\" để tải bảng phân vùng",
+        "headers": {
+            "lun": "LUN",
+            "name": "Tên",
+            "startSector": "Sector bắt đầu",
+            "size": "Kích thước",
+            "read": "Đọc",
+            "write": "Ghi"
+        }
+    },
+    "actions": {
+        "readList": "Đọc danh sách",
+        "backup": "Sao lưu",
+        "flash": "Ghi",
+        "romFlash": "Ghi ROM",
+        "reboot": "Khởi động lại",
+        "stop": "Dừng"
+    },
+    "terminal": {
+        "title": "Nhật ký",
+        "copy": "Sao chép",
+        "copied": "Đã sao chép!"
+    },
+    "backup": {
+        "title": "Tùy chọn sao lưu",
+        "description": "Chọn định dạng sao lưu cho các phân vùng đã chọn:",
+        "withXml": "Có XML (Đề xuất)",
+        "withXmlDesc": "Tạo tệp XML rawprogram để dễ dàng khôi phục bằng công cụ flash",
+        "withoutXml": "Không có XML",
+        "withoutXmlDesc": "Chỉ lưu file ảnh phân vùng (cần khôi phục thủ công)",
+        "cancel": "Hủy",
+        "startBackup": "Bắt đầu sao lưu"
+    },
+    "messages": {
+        "deviceReady": "✅ Thiết bị đã sẵn sàng! Nhấn \"Đọc danh sách\" để xem các phân vùng.",
+        "backupCancelled": "Đã hủy sao lưu",
+        "noPartitionsSelected": "Không có phân vùng nào được chọn",
+        "firehoseNotInitialized": "Chưa khởi tạo Firehose",
+        "partitionNotFound": "Không tìm thấy phân vùng",
+        "noFilesFound": "Không tìm thấy tệp nào",
+        "flashCancelled": "Đã hủy ghi flash",
+        "connecting": "Đang kết nối với thiết bị...",
+        "saharaHandshake": "Bước 1/5: Bắt tay Sahara - Đang tải programmer...",
+        "vipHandshake": "Bước 2/5: Bắt tay VIP - Đang xác thực...",
+        "configuringFirehose": "Bước 3/5: Đang cấu hình Firehose...",
+        "deviceReadyFull": "🎉 Thiết bị đã sẵn sàng! Bạn có thể đọc phân vùng ngay bây giờ.",
+        "readingPartitions": "Đang đọc bảng phân vùng từ tất cả LUN...",
+        "totalPartitions": "Tổng: {{count}} phân vùng",
+        "noPartitionsFound": "Không tìm thấy phân vùng",
+        "batchBackup": "📦 Sao lưu theo lô: {{count}} phân vùng",
+        "willGenerateXml": "Sẽ tạo tệp XML để khôi phục",
+        "loadedFile": "Đã tải: {{name}} ({{size}})",
+        "selectedFileForPartition": "Đã chọn \"{{file}}\" cho phân vùng \"{{partition}}\"",
+        "fileSizeExceeds": "⚠️ Kích thước tệp ({{fileSize}}) vượt quá kích thước phân vùng ({{partSize}})",
+        "fileSizeSmaller": "Kích thước tệp ({{fileSize}}) nhỏ hơn phân vùng ({{partSize}}). Sẽ được đệm bằng số 0.",
+        "criticalPartitionWarning": "⚠️ CẢNH BÁO: \"{{name}}\" là phân vùng quan trọng!",
+        "brickWarning": "Ghi dữ liệu không đúng có thể BRICK thiết bị của bạn!",
+        "flashSuccess": "✅ {{name}} đã ghi thành công ({{size}})",
+        "flashFailed": "❌ {{name}} ghi thất bại: {{error}}",
+        "allFlashSuccess": "✅ Đã ghi thành công tất cả {{count}} phân vùng!",
+        "flashComplete": "Hoàn tất ghi: {{success}} thành công, {{failed}} thất bại"
+    },
+    "flash": {
+        "confirmTitle": "⚠️ XÁC NHẬN GHI FLASH",
+        "selectPartitions": "Chọn các phân vùng để ghi:",
+        "selectAll": "Chọn tất cả",
+        "selectNone": "Bỏ chọn tất cả",
+        "confirm": "Xác nhận ghi",
+        "cancel": "Hủy",
+        "criticalWarning": "⚠️ ĐÃ PHÁT HIỆN PHÂN VÙNG QUAN TRỌNG!",
+        "lun5Warning": "⚠️ LUN5 chứa dữ liệu hiệu chuẩn. Ghi flash có thể gây ra vấn đề phần cứng!",
+        "badges": {
+            "critical": "⚠️ QUAN TRỌNG",
+            "lun5": "⚡ LUN5",
+            "protected": "🛡️ BẢO VỆ"
+        }
+    },
+    "aiPanel": {
+        "title": "Trợ lý AI",
+        "welcome": "Xin chào! Tôi có thể giúp bạn với Q-Flash WebUSB Tool. Hỏi tôi về chế độ EDL, phân vùng, flash, hoặc khôi phục thiết bị.",
+        "placeholder": "Đặt câu hỏi...",
+        "send": "Gửi",
+        "settings": "Cài đặt",
+        "apiUrl": "URL API",
+        "apiKey": "API Key",
+        "model": "Model",
+        "save": "Lưu",
+        "configureApi": "Vui lòng cấu hình API trước (nhấn ⚙️)",
+        "error": "Lỗi",
+        "noResponse": "Không nhận được phản hồi từ AI"
+    },
+    "firehosePopup": {
+        "title": "Chọn tệp thủ công",
+        "description": "Tải preset thất bại. Vui lòng chọn tệp thủ công:",
+        "confirm": "Sử dụng các tệp đã chọn"
+    }
+}
