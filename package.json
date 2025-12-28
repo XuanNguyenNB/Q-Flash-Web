@@ -1,13 +1,7 @@
 {
-  "name": "q-flash-web",
-  "name-display": "Q-Flash Web",
+  "name": "oppo-webusb-tool",
   "private": true,
-  "version": "1.0.0",
-  "description": "Universal Qualcomm WebUSB Flashing Tool",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/XuanNguyenNB/Q-Flash-Web.git"
-  },
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

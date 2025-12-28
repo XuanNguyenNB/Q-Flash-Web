@@ -1,0 +1,130 @@
+[
+    {
+        "id": "x7_ultra",
+        "brand": "oppo",
+        "name": "Find X7 Ultra",
+        "codename": "PHY110",
+        "chipset": "SM8650",
+        "chipsetName": "Snapdragon 8 Gen 3",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen3",
+        "firehose": {
+            "programmerUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_prog.melf",
+            "digestUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_Digest.elf",
+            "signatureUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_12",
+        "brand": "oneplus",
+        "name": "OnePlus 12",
+        "codename": "CPH2573",
+        "chipset": "SM8650",
+        "chipsetName": "Snapdragon 8 Gen 3",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen3",
+        "firehose": {
+            "programmerUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_prog.melf",
+            "digestUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_Digest.elf",
+            "signatureUrl": "/firehose/SM8650_8Gen3/OPPO_SM8650_Sign.bin"
+        }
+    },
+    {
+        "id": "x6_pro",
+        "brand": "oppo",
+        "name": "Find X6 Pro",
+        "codename": "PGEM10",
+        "chipset": "SM8550",
+        "chipsetName": "Snapdragon 8 Gen 2",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen2",
+        "firehose": {
+            "programmerUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+        }
+    },
+    {
+        "id": "find_n3",
+        "brand": "oppo",
+        "name": "Find N3",
+        "codename": "PHN110",
+        "chipset": "SM8550",
+        "chipsetName": "Snapdragon 8 Gen 2",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen2",
+        "firehose": {
+            "programmerUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_11",
+        "brand": "oneplus",
+        "name": "OnePlus 11",
+        "codename": "CPH2449",
+        "chipset": "SM8550",
+        "chipsetName": "Snapdragon 8 Gen 2",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen2",
+        "firehose": {
+            "programmerUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_ace3",
+        "brand": "oneplus",
+        "name": "OnePlus Ace 3",
+        "codename": "PJE110",
+        "chipset": "SM8550",
+        "chipsetName": "Snapdragon 8 Gen 2",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen2",
+        "firehose": {
+            "programmerUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+        }
+    },
+    {
+        "id": "find_n5",
+        "brand": "oppo",
+        "name": "Find N5",
+        "codename": "PHT110",
+        "chipset": "SM8750",
+        "chipsetName": "Snapdragon 8 Elite",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_prog.melf",
+            "digestUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Digest.elf",
+            "signatureUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_13",
+        "brand": "oneplus",
+        "name": "OnePlus 13",
+        "codename": "CPH2653",
+        "chipset": "SM8750",
+        "chipsetName": "Snapdragon 8 Elite",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_prog.melf",
+            "digestUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Digest.elf",
+            "signatureUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Sign.bin"
+        }
+    }
+]

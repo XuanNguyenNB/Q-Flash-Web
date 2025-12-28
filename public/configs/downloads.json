@@ -1,0 +1,42 @@
+{
+    "tools": [
+        {
+            "id": "qflashforge",
+            "name": "QFlashForge",
+            "description": "ROM Converter & Driver Tool - Convert sparse images, build super.img",
+            "version": "1.0.0",
+            "icon": "🔧",
+            "platforms": [
+                "windows"
+            ],
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "github": "https://github.com/user/QFlashForge/releases"
+            }
+        }
+    ],
+    "drivers": [
+        {
+            "id": "qualcomm_9008",
+            "name": "Qualcomm HS-USB QDLoader 9008",
+            "description": "Driver for EDL mode (install via Zadig)",
+            "icon": "📱",
+            "guide": "Use Zadig to install WinUSB driver",
+            "links": {
+                "zadig": "https://zadig.akeo.ie/",
+                "guide": "#drivers"
+            }
+        },
+        {
+            "id": "kedacom",
+            "name": "Kedacom USB Driver",
+            "description": "Required for some Oppo/OnePlus devices in certain modes",
+            "icon": "🔌",
+            "links": {
+                "download": ""
+            }
+        }
+    ],
+    "roms": []
+}
