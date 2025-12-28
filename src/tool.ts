@@ -139,9 +139,6 @@ function createToolHTML(): string {
           <button class="btn btn-primary" id="connect-btn" disabled>
             🔌 Connect Device
           </button>
-          <button class="btn btn-success" id="start-btn" disabled style="margin-top: 8px;">
-            ▶️ Start Unlock Flow
-          </button>
           <button class="btn btn-secondary" id="partitions-btn" disabled style="margin-top: 8px;">
             📋 Read Partitions
           </button>
