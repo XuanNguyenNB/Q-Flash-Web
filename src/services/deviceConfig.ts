@@ -130,42 +130,91 @@ export async function getAvailableDevices(): Promise<DeviceProfile[]> {
 // ============================================================================
 
 /**
- * Load a binary file from a remote URL (GitHub, etc.)
- * Uses XMLHttpRequest to avoid download manager interception
+ * Load a binary file from a URL
+ * Uses fetch() for remote URLs to avoid CORS preflight issues
+ * Uses XHR for local URLs to avoid IDM interception
  */
 async function loadRemoteBinaryFile(
     url: string,
     onProgress?: (loaded: number, total: number) => void
 ): Promise<Uint8Array> {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'arraybuffer';
+    const isRemote = url.startsWith('http://') || url.startsWith('https://');
 
-        // Headers to avoid download manager interception
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.setRequestHeader('Accept', 'application/octet-stream');
+    if (isRemote) {
+        // Use fetch for remote URLs (simpler, no CORS preflight for simple requests)
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'default'
+        });
 
-        xhr.onprogress = (e) => {
-            if (e.lengthComputable && onProgress) {
-                onProgress(e.loaded, e.total);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        // Try to get progress if possible
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+
+        if (response.body && onProgress && total > 0) {
+            // Stream with progress
+            const reader = response.body.getReader();
+            const chunks: Uint8Array[] = [];
+            let loaded = 0;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                loaded += value.length;
+                onProgress(loaded, total);
             }
-        };
 
-        xhr.onload = () => {
-            if (xhr.status === 200) {
-                resolve(new Uint8Array(xhr.response));
-            } else {
-                reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+            // Combine chunks
+            const result = new Uint8Array(loaded);
+            let offset = 0;
+            for (const chunk of chunks) {
+                result.set(chunk, offset);
+                offset += chunk.length;
             }
-        };
+            return result;
+        } else {
+            // No progress, just get arrayBuffer
+            const buffer = await response.arrayBuffer();
+            return new Uint8Array(buffer);
+        }
+    } else {
+        // Use XHR for local URLs to avoid IDM interception
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.responseType = 'arraybuffer';
 
-        xhr.onerror = () => reject(new Error('Network error loading remote file'));
-        xhr.ontimeout = () => reject(new Error('Timeout loading remote file'));
+            // Headers to avoid download manager interception (only for local)
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.setRequestHeader('Accept', 'application/octet-stream');
 
-        xhr.timeout = 60000; // 60 second timeout
-        xhr.send();
-    });
+            xhr.onprogress = (e) => {
+                if (e.lengthComputable && onProgress) {
+                    onProgress(e.loaded, e.total);
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    resolve(new Uint8Array(xhr.response));
+                } else {
+                    reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Network error loading file'));
+            xhr.ontimeout = () => reject(new Error('Timeout loading file'));
+
+            xhr.timeout = 60000; // 60 second timeout
+            xhr.send();
+        });
+    }
 }
 
 /**
