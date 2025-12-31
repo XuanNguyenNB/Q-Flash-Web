@@ -1,6 +1,43 @@
 {
+    "tool": {
+        "title": "Flash Tool",
+        "description": "Flash, backup, and manage partitions",
+        "noDevice": "No Device Connected",
+        "noDeviceHint": "Connect your device to start",
+        "waiting": "Waiting for device...",
+        "waitingDesc": "Connect your device in EDL mode to load partition table.",
+        "edl": {
+            "title": "EDL Flash",
+            "subtitle": "This mode can be used to unbrick devices, read user data, or manage partitions directly."
+        },
+        "guide": {
+            "title": "Connection Guide",
+            "intro": "To use EDL mode, your device must be recognized as \"Qualcomm HS-USB QDLoader 9008\" or \"QUSB_BULK\". If not detected, follow these steps:",
+            "step1": {
+                "title": "Enter EDL Mode",
+                "desc": "Power off device -> Hold Vol Up + Vol Down -> Connect USB cable."
+            },
+            "step2": {
+                "title": "Install Drivers (Zadig)",
+                "desc": "If device appears as \"QUSB_BULK\", use Zadig to install WinUSB driver."
+            },
+            "tip": {
+                "title": "Tip: Use Q-Flash Forge",
+                "desc": "Use our Q-Flash Forge tool for automatic driver fixing and Zadig guidance."
+            },
+            "openForge": "Open Q-Flash Forge Project"
+        },
+        "zadig": {
+            "title": "Driver Installation Guide",
+            "step1": "Step 1: Select 'Qualcomm HS-USB QDLoader 9008' from the dropdown",
+            "step2": "Step 2: Choose 'WinUSB' as the target driver",
+            "step3": "Step 3: Click 'Install Driver' or 'Replace Driver'"
+        }
+    },
     "header": {
         "title": "Q-Flash Universal Qualcomm Tool",
+        "showGuide": "Show Guide",
+        "showGuideTooltip": "Show Setup Guide",
         "status": {
             "idle": "Not Connected",
             "connecting": "Connecting...",
@@ -22,7 +59,33 @@
         "connectDevice": "Connect Device",
         "rebootDevice": "Reboot Device",
         "requirements": "Requirements",
-        "requirementsList": "• Chrome/Edge browser\n• WinUSB driver via Zadig\n• Device in EDL mode (9008)\n• Valid programmer, digest, signature files"
+        "requirementsList": "• Chrome/Edge browser\n• WinUSB driver via Zadig\n• Device in EDL mode (9008)\n• Valid programmer, digest, signature files",
+        "quickActions": "Quick Actions",
+        "connectFirst": "Connect a device first",
+        "collapse": "Collapse",
+        "expand": "Expand"
+    },
+    "firehose": {
+        "manual": {
+            "title": "Manual Firehose Loader",
+            "description": "Load firehose files manually for unsupported devices or when auto-detection fails.",
+            "programmer": "Programmer (.melf/.mbn)",
+            "digest": "Digest (.elf)",
+            "signature": "Signature (.bin)",
+            "select": "Select",
+            "replace": "Replace",
+            "clear": "Clear All",
+            "ready": "All files loaded - Ready to connect!",
+            "help": "Firehose files are device-specific. Get them from your device manufacturer or trusted ROM sources.",
+            "loading": "Loading",
+            "loaded": "Loaded",
+            "allLoaded": "All firehose files loaded successfully!",
+            "loadError": "Failed to load file",
+            "cleared": "Cleared all manually loaded firehose files",
+            "connect": "Connect to Device",
+            "connecting": "Connecting...",
+            "connectError": "Connection failed"
+        }
     },
     "partition": {
         "title": "Partition Table",
@@ -37,6 +100,39 @@
             "size": "Size",
             "read": "Read",
             "write": "Write"
+        },
+        "grid": {
+            "title": "Partitions",
+            "count": "{{count}} partitions",
+            "selectAll": "Select All",
+            "deselectAll": "Deselect All",
+            "empty": "No partitions loaded. Connect a device to view partitions.",
+            "emptyHint": "Connect your device and wait for the partition table to load.",
+            "loading": "Reading partition table...",
+            "noResults": "No partitions found",
+            "noResultsHint": "No partitions match \"{{filter}}\". Try a different search term."
+        },
+        "table": {
+            "select": "Select",
+            "name": "Name",
+            "lun": "LUN",
+            "size": "Size",
+            "flash": "Write",
+            "read": "Backup",
+            "pickFile": "Pick File",
+            "save": "Save"
+        },
+        "item": {
+            "select": "Select {{name}}",
+            "dangerous": "Critical partition - flash with caution",
+            "criticalTooltip": "⚠️ Critical Partition",
+            "criticalDesc": "Contains unique calibration data (fingerprint, proximity sensor, etc.).\nDo NOT flash/erase unless you have a backup!"
+        },
+        "search": {
+            "placeholder": "Search partitions...",
+            "clear": "Clear search",
+            "noResults": "No partitions match your search",
+            "count": "Showing {{filtered}} of {{total}} partitions"
         }
     },
     "actions": {
@@ -48,11 +144,43 @@
         "stop": "Stop"
     },
     "terminal": {
-        "title": "Log",
+        "title": "Console",
         "copy": "Copy",
-        "copied": "Copied!"
+        "copied": "Copied to clipboard!",
+        "clear": "Clear",
+        "empty": "No logs yet",
+        "expand": "Expand Console",
+        "filter": {
+            "all": "All",
+            "info": "Info",
+            "success": "Success",
+            "warning": "Warning",
+            "error": "Error"
+        },
+        "reset": "Reset Logs",
+        "search": {
+            "placeholder": "Search logs...",
+            "noResults": "No matching logs"
+        }
+    },
+    "scrcpy": {
+        "title": "ViewPhone - Cast Screen",
+        "subtitle": "Display screen content on PC",
+        "resolution_label": "MAX RESOLUTION",
+        "bitrate_label": "BITRATE (QUALITY)",
+        "start_stream": "Start Stream",
+        "initializing": "Initializing Connection...",
+        "stop": "Stop",
+        "start": "Start",
+        "live": "LIVE",
+        "ready_to_mirror": "Device Mirroring",
+        "ready_desc": "Ready to connect",
+        "error_not_connected": "Device not connected",
+        "copy_success": "Copied to Clipboard",
+        "paste_success": "Pasted to Device"
     },
     "backup": {
+        "button": "Backup Selected",
         "title": "Backup Options",
         "description": "Choose backup format for selected partitions:",
         "withXml": "With XML (Recommended)",
@@ -60,7 +188,45 @@
         "withoutXml": "Without XML",
         "withoutXmlDesc": "Only save partition images (manual restoration required)",
         "cancel": "Cancel",
-        "startBackup": "Start Backup"
+        "startBackup": "Start Backup",
+        "confirm": {
+            "title": "Confirm Backup",
+            "message": "You are about to backup {{count}} partition(s). Choose a location to save the backup files.",
+            "totalSize": "Total size: {{size}}",
+            "chooseLocation": "Choose Location",
+            "selecting": "Selecting..."
+        },
+        "progress": {
+            "title": "Backup in Progress",
+            "current": "Backing up: {{partition}}",
+            "bytes": "{{written}} / {{total}}",
+            "percentage": "{{percent}}%",
+            "eta": "ETA: {{time}}",
+            "cancel": "Cancel Backup",
+            "success_all": "✅ Successfully backed up {{count}} partitions",
+            "success_mixed": "⚠️ Backup completed: {{success}} success, {{error}} failed",
+            "cancelled": "⚠️ Backup operation cancelled",
+            "failed": "❌ Backup failed: {{count}} partitions error"
+        },
+        "status": {
+            "pending": "Pending",
+            "inProgress": "In Progress",
+            "done": "Done",
+            "error": "Error"
+        },
+        "success": {
+            "title": "Backup Completed",
+            "message": "{{count}} partition(s) backed up successfully to {{path}}"
+        },
+        "error": {
+            "title": "Backup Failed",
+            "message": "Failed to backup partitions: {{error}}",
+            "permission": "Permission denied to write to selected folder"
+        },
+        "cancelled": {
+            "title": "Backup Cancelled",
+            "message": "Backup operation was cancelled"
+        }
     },
     "messages": {
         "deviceReady": "✅ Device ready! Click \"Read List\" to view partitions.",
@@ -92,18 +258,57 @@
         "flashComplete": "Flash complete: {{success}} success, {{failed}} failed"
     },
     "flash": {
+        "button": "Flash Selected",
         "confirmTitle": "⚠️ FLASH CONFIRMATION",
         "selectPartitions": "Select partitions to flash:",
         "selectAll": "Select All",
         "selectNone": "Select None",
-        "confirm": "Confirm Flash",
-        "cancel": "Cancel",
         "criticalWarning": "⚠️ CRITICAL PARTITIONS DETECTED!",
         "lun5Warning": "⚠️ LUN5 contains calibration data. Flashing may cause hardware issues!",
         "badges": {
             "critical": "⚠️ CRITICAL",
             "lun5": "⚡ LUN5",
             "protected": "🛡️ PROTECTED"
+        },
+        "confirm": {
+            "title": "⚠️ Confirm Flash Operation",
+            "message": "You are about to flash {{count}} partition(s). This will overwrite existing data on your device.",
+            "warning": "This action cannot be undone. Make sure you have selected the correct partitions.",
+            "criticalPartition": "{{count}} critical partition(s) - flash with caution",
+            "totalSize": "Total size:",
+            "proceed": "Confirm Flash"
+        },
+        "progress": {
+            "title": "Flash in Progress",
+            "current": "Flashing: {{partition}}",
+            "bytes": "{{written}} / {{total}}",
+            "percentage": "{{percent}}%",
+            "eta": "ETA: {{time}}",
+            "cancel": "Cancel",
+            "success_all": "✅ Successfully flashed {{count}} partitions",
+            "success_mixed": "⚠️ Flash completed: {{success}} success, {{error}} failed",
+            "cancelled": "⚠️ Flash operation cancelled",
+            "failed": "❌ Flash failed: {{count}} partitions error"
+        },
+        "status": {
+            "pending": "Pending",
+            "inProgress": "In Progress",
+            "in-progress": "In Progress",
+            "done": "Done",
+            "error": "Error"
+        },
+        "success": {
+            "title": "Flash Completed",
+            "message": "{{count}} partition(s) flashed successfully"
+        },
+        "error": {
+            "title": "Flash Failed",
+            "message": "Failed to flash partitions: {{error}}",
+            "noRom": "No ROM files loaded. Please load ROM first."
+        },
+        "cancelled": {
+            "title": "Flash Cancelled",
+            "message": "Flash operation was cancelled"
         }
     },
     "aiPanel": {
@@ -124,5 +329,1122 @@
         "title": "Manual File Selection",
         "description": "Preset loading failed. Please select files manually:",
         "confirm": "Use Selected Files"
+    },
+    "common": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "yes": "Yes",
+        "no": "No",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "processing": "Processing...",
+        "error": "Error"
+    },
+    "nav": {
+        "home": "Tool",
+        "guide": "Guide",
+        "downloads": "Downloads",
+        "support": "Support",
+        "donate": "Donate Me",
+        "settings": "Settings"
+    },
+    "device": {
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "noDevice": "No device selected",
+        "selectDevice": "Select a device to start",
+        "connect": "Connect",
+        "disconnect": "Disconnect",
+        "card": {
+            "noDevice": "No device selected",
+            "selectDevice": "Select a device to begin",
+            "chipset": "Chipset"
+        },
+        "status": {
+            "disconnected": "Disconnected",
+            "connecting": "Connecting...",
+            "connected": "Connected",
+            "error": "Connection Error"
+        },
+        "action": {
+            "connect": "Connect Device",
+            "disconnect": "Disconnect",
+            "retry": "Retry"
+        },
+        "selector": {
+            "placeholder": "Select a device...",
+            "search": "Search devices...",
+            "noResults": "No devices found",
+            "loading": "Loading devices...",
+            "empty": "No devices configured"
+        },
+        "deviceStatus": {
+            "tested": "Tested",
+            "beta": "Beta",
+            "coming": "Coming soon"
+        }
+    },
+    "connection": {
+        "flow": {
+            "connecting": "Connecting to device...",
+            "sahara": "Sahara handshake...",
+            "uploading": "Uploading firehose...",
+            "authenticating": "VIP authentication...",
+            "reading": "Reading partitions...",
+            "connected": "Device ready"
+        },
+        "error": {
+            "usb": "USB connection failed",
+            "sahara": "Sahara handshake failed",
+            "firehose": "Firehose upload failed",
+            "vip": "VIP authentication failed",
+            "partition": "Failed to read partitions"
+        },
+        "action": {
+            "retry": "Retry Connection"
+        }
+    },
+    "settings": {
+        "language": "Language"
+    },
+    "mode": {
+        "edl": "EDL",
+        "adb": "ADB",
+        "fastboot": "Fastboot",
+        "switchDisabled": "Disconnect device to change mode"
+    },
+    "adb": {
+        "title": "ADB Mode",
+        "description": "Manage device via ADB protocol",
+        "comingSoon": "ADB mode features are coming soon. This will allow you to manage your device via ADB protocol, including file browsing, shell access, and more.",
+        "features": {
+            "quickActions": "Quick Actions",
+            "deviceInfo": "Device Info",
+            "deviceInfoDesc": "View device properties and status",
+            "deviceInfoLabels": {
+                "model": "Model",
+                "android": "Android Version",
+                "build": "Build Number",
+                "serial": "Serial Number",
+                "manufacturer": "Manufacturer",
+                "device": "Device Code"
+            },
+            "shell": "Shell Access",
+            "shellDesc": "Execute ADB shell commands",
+            "files": "File Manager",
+            "filesDesc": "Browse and transfer files",
+            "install": "APK Install",
+            "installDesc": "Install apps directly",
+            "appManager": "App Manager",
+            "appManagerDesc": "Manage installed applications",
+            "fileManager": "File Manager",
+            "terminal": "Terminal"
+        },
+        "info": {
+            "manufacturer": "Manufacturer",
+            "model": "Model",
+            "wifi": "Wi-Fi",
+            "ip": "IP Address",
+            "android": "Android Version",
+            "battery": "Battery Level",
+            "storage": "Storage Usage",
+            "memory": "Memory Usage"
+        },
+        "apps": {
+            "title": "App Manager",
+            "userApps": "User Apps",
+            "systemApps": "System Apps",
+            "install": "Install APK",
+            "uninstall": "Uninstall",
+            "packageName": "Package Name",
+            "actions": "Actions",
+            "search": "Search apps...",
+            "refresh": "Refresh List",
+            "confirmUninstall": "Are you sure you want to uninstall {{package}}?",
+            "installSuccess": "Successfully installed {{app}}",
+            "uninstallSuccess": "Successfully uninstalled {{package}}",
+            "installFailed": "Failed to install {{app}}",
+            "uninstallFailed": "Failed to uninstall {{package}}",
+            "selected": "Selected {{count}} apps",
+            "uninstallSelected": "Uninstall Selected",
+            "backupApk": "Backup APK(s) before uninstalling",
+            "confirmMultiUninstall": "Are you sure you want to uninstall {{count}} selected applications?",
+            "backupFailed": "Failed to backup {{app}}",
+            "backupSuccess": "Saved {{app}}",
+            "clearData": "Clear Data",
+            "disable": "Disable",
+            "enable": "Enable",
+            "saveApk": "Save APK",
+            "saveSelected": "Save Selected",
+            "confirmClearData": "Clear data for {{package}}?",
+            "clearedSuccess": "Data cleared for {{package}}",
+            "disableSuccess": "{{package}} disabled",
+            "enableSuccess": "{{package}} enabled",
+            "saveSuccess": "Saved {{count}} APKs",
+            "copyPackage": "Copy Package Name",
+            "copySuccess": "Copied {{text}}",
+            "statusEnabled": "Enabled",
+            "statusDisabled": "Disabled",
+            "permissions": "Permissions",
+            "searchPermissions": "Search permissions...",
+            "noPermissions": "No permissions found",
+            "permissionGranted": "Granted {{permission}}",
+            "permissionRevoked": "Revoked {{permission}}",
+            "permissionError": "Failed to update permission: {{error}}"
+        },
+        "files": {
+            "title": "File Manager",
+            "path": "Path",
+            "noFiles": "No files found",
+            "emptyDir": "Empty directory",
+            "upload": "Upload",
+            "download": "Download",
+            "delete": "Delete",
+            "newFolder": "New Folder",
+            "refresh": "Refresh",
+            "home": "Home",
+            "up": "Up",
+            "confirmDelete": "Are you sure you want to delete \"{{name}}\"?",
+            "uploadSuccess": "Successfully uploaded {{file}}",
+            "downloadSuccess": "Successfully downloaded {{file}}",
+            "deleteSuccess": "Successfully deleted {{file}}",
+            "createDirSuccess": "Created directory {{dir}}",
+            "actionFailed": "Action failed: {{error}}",
+            "size": "Size",
+            "date": "Date",
+            "type": "Type"
+        },
+        "connection": {
+            "title": "Connection",
+            "status": "Status"
+        },
+        "status": {
+            "disconnected": "Disconnected",
+            "connecting": "Connecting...",
+            "connected": "Connected"
+        },
+        "button": {
+            "connect": "Connect ADB",
+            "disconnect": "Disconnect",
+            "connecting": "Connecting..."
+        },
+        "toast": {
+            "connected": "ADB device connected",
+            "disconnected": "ADB device disconnected",
+            "connectionFailed": "Connection failed: {{message}}",
+            "disconnectFailed": "Disconnect failed: {{message}}",
+            "rebootEDLSuccess": "Command sent: Reboot to EDL",
+            "rebootEDLFailed": "Failed to reboot to EDL",
+            "rebootBootloaderSuccess": "Command sent: Reboot to Bootloader",
+            "rebootBootloaderFailed": "Failed to reboot to Bootloader",
+            "rebootFastbootDSuccess": "Command sent: Reboot to FastbootD",
+            "rebootFastbootDFailed": "Failed to reboot to FastbootD",
+            "rebootRecoverySuccess": "Command sent: Reboot to Recovery",
+            "rebootRecoveryFailed": "Failed to reboot to Recovery",
+            "rebootSystemSuccess": "Command sent: Reboot to System",
+            "rebootSystemFailed": "Failed to reboot to System",
+            "shutdownSuccess": "Command sent: Power Off",
+            "shutdownFailed": "Failed to power off",
+            "actionFailed": "Action failed: {{message}}"
+        },
+        "actions": {
+            "rebootEDL": "Reboot EDL",
+            "rebootBootloader": "Reboot Bootloader",
+            "rebootFastbootD": "Reboot FastbootD",
+            "rebootRecovery": "Reboot Recovery",
+            "rebootSystem": "Reboot System",
+            "powerOff": "Power Off",
+            "hint": "After reboot, switch to the appropriate mode tab"
+        },
+        "shutdown": {
+            "title": "Power Off Device?",
+            "description": "Are you sure you want to power off the device? You will need to manually turn it back on."
+        },
+        "guide": {
+            "title": "Enable USB Debugging",
+            "subtitle": "Follow the instructions below to enable USB Debugging",
+            "label": {
+                "brand": "Select Your Brand"
+            },
+            "brand": {
+                "oppo_realme_oneplus": "Oppo / Realme / OnePlus (ColorOS/OxygenOS)",
+                "vivo_iqoo": "Vivo / iQOO (FuntouchOS/OriginOS)",
+                "honor": "Huawei / Honor (EMUI/MagicOS)",
+                "xiaomi_poco_redmi": "Xiaomi / POCO / Redmi (MIUI/HyperOS)",
+                "samsung": "Samsung (OneUI)"
+            },
+            "steps": {
+                "oppo": {
+                    "dev": {
+                        "1": "Open the Settings app on your phone.",
+                        "2": "Scroll down and select **About Device**.",
+                        "3": "Scroll down and tap on **Version**.",
+                        "4": "Tap **Build number** 8 times continuously.",
+                        "5": "If prompted, enter your device password to confirm."
+                    },
+                    "oem": {
+                        "1": "Go back to the Settings screen.",
+                        "2": "Scroll down and select **Additional Settings** (or System and updates).",
+                        "3": "Select **Developer options**.",
+                        "4": "Find and toggle **OEM unlocking** switch > Tap **Enable** to confirm password.",
+                        "5": "Find and toggle **USB debugging** switch.",
+                        "6": "The system will show a warning. Tap **OK** to confirm."
+                    },
+                    "std": {
+                        "1": "Go back to the Settings screen.",
+                        "2": "Scroll down and select **Additional Settings** (or System and updates).",
+                        "3": "Select **Developer options**.",
+                        "4": "Find and toggle **USB debugging** switch.",
+                        "5": "The system will show a warning. Tap **OK** to confirm."
+                    }
+                },
+                "vivo": {
+                    "dev": {
+                        "1": "Go to **Settings** > **About phone** > **Software information**.",
+                        "2": "Tap **Build number** 7 times.",
+                        "3": "(Older versions: Settings > System Management > About phone)"
+                    },
+                    "oem": {
+                        "1": "Go back to **Settings** > **System** > **Developer options**.",
+                        "2": "Toggle **OEM unlocking** > Enable.",
+                        "3": "Toggle **USB debugging** > OK."
+                    },
+                    "std": {
+                        "1": "Go back to **Settings** > **System** > **Developer options**.",
+                        "2": "Toggle **USB debugging** > OK."
+                    }
+                },
+                "honor": {
+                    "dev": {
+                        "1": "Go to **Settings** > **About phone**.",
+                        "2": "Tap **Build number** 7 times."
+                    },
+                    "oem": {
+                        "1": "Go back to **Settings** > **System & updates** > **Developer options**.",
+                        "2": "Toggle **OEM unlocking** > Enable.",
+                        "3": "Toggle **USB debugging** > OK."
+                    },
+                    "std": {
+                        "1": "Go back to **Settings** > **System & updates** > **Developer options**.",
+                        "2": "Toggle **USB debugging** > OK."
+                    }
+                },
+                "xiaomi": {
+                    "dev": {
+                        "1": "Go to **Settings** > **About phone**.",
+                        "2": "Tap **MIUI Version** (or **OS Version**) 7 times."
+                    },
+                    "oem": {
+                        "1": "Go back to **Settings** > **Additional settings** > **Developer options**.",
+                        "2": "Toggle **OEM unlocking** > Enable.",
+                        "3": "Toggle **USB debugging** > Wait for countdown > OK.",
+                        "4": "(Xiaomi requires SIM card for OEM Unlock)"
+                    },
+                    "std": {
+                        "1": "Go back to **Settings** > **Additional settings** > **Developer options**.",
+                        "2": "Toggle **USB debugging** > Wait for countdown > OK.",
+                        "3": "Enable **USB Debugging (Security Settings)** if needed for full control."
+                    }
+                },
+                "samsung": {
+                    "dev": {
+                        "1": "Go to **Settings** > **About phone** > **Software information**.",
+                        "2": "Tap **Build number** 7 times."
+                    },
+                    "oem": {
+                        "1": "Go back to **Settings** > **Developer options** (at the very bottom).",
+                        "2": "Toggle **OEM unlocking** > Enable.",
+                        "3": "Toggle **USB debugging** > OK."
+                    },
+                    "std": {
+                        "1": "Go back to **Settings** > **Developer options**.",
+                        "2": "Toggle **USB debugging** > OK."
+                    }
+                }
+            },
+            "step1Title": "Enable Developer Options",
+            "step1": {
+                "1": "Open Settings > About Device",
+                "2": "Tap on 'Version'",
+                "3": "Tap 'Build Number' 7-8 times",
+                "4": "Enter lock screen password if asked"
+            },
+            "step2Title": "Enable USB Debugging",
+            "step2": {
+                "1": "Go back to Settings > Additional Settings (or System)",
+                "2": "Open 'Developer Options'",
+                "3": "Toggle on 'USB Debugging'",
+                "4": "Confirm warning dialog"
+            },
+            "includeOem": "Include OEM Unlock",
+            "step2TitleOem": "Enable OEM Unlock & USB Debugging",
+            "step2Oem": {
+                "1": "Back to Settings screen.",
+                "2": "Scroll down and select System & updates.",
+                "3": "Select Developer options.",
+                "4": "Find and enable OEM unlocking.",
+                "5": "Enter password and tap Enable to confirm."
+            },
+            "step3Title": "Authorize Computer",
+            "step3": {
+                "desc": "Connect your device via USB. Press button connect ADB and select your device. A popup will appear on your phone screen.",
+                "check": "Check **\"Always allow from this computer\"**",
+                "allow": "Tap **Allow** or **OK**"
+            },
+            "troubleshoot": "If popup doesn't appear, try:\n- Unplug and replug cable\n- Toggle USB Debugging off/on\n- Switch USB modes (Charging / File Transfer)",
+            "header": {
+                "build": "Build Number Path",
+                "dev": "Developer Options Path"
+            },
+            "path": {
+                "oppo": {
+                    "build": "Settings > About Device > Version",
+                    "dev": "Settings > Additional Settings"
+                },
+                "vivo": {
+                    "build": "Settings > About phone > Software information",
+                    "dev": "Settings > System"
+                },
+                "honor": {
+                    "build": "Settings > About phone",
+                    "dev": "Settings > System & updates"
+                },
+                "xiaomi": {
+                    "build": "Settings > About phone",
+                    "dev": "Settings > Additional settings"
+                },
+                "samsung": {
+                    "build": "Settings > About phone > Software information",
+                    "dev": "Settings > Developer options"
+                }
+            }
+        },
+        "terminal": {
+            "title": "ADB Shell",
+            "hint": "Enter ADB shell commands here",
+            "ready": "Ready for commands",
+            "description": "Enter shell commands below. Output will appear in the Log Panel on the right.",
+            "placeholder": "ls -la",
+            "error": "Command failed or not connected"
+        },
+        "scrcpy": {
+            "title": "Screen Mirror (scrcpy)",
+            "ready": "Ready to mirror device screen",
+            "connectFirst": "Connect a device first",
+            "notConnected": "Device not connected",
+            "noAdbInstance": "ADB instance not available",
+            "download": "Download scrcpy",
+            "docs": "View Documentation",
+            "hint": "After download, run scrcpy.exe with USB connected",
+            "feature": {
+                "mirror": "Screen Mirroring",
+                "mirrorDesc": "View your device screen on PC",
+                "control": "Full Control",
+                "controlDesc": "Use mouse & keyboard",
+                "noRoot": "No Root Needed",
+                "noRootDesc": "Works out of the box",
+                "latency": "Low Latency",
+                "latencyDesc": "30-120 FPS display",
+                "audio": "Audio Forward",
+                "audioDesc": "Mirror device audio"
+            },
+            "settings": {
+                "codec": "Video Codec",
+                "maxSize": "Max Size",
+                "bitrate": "Bitrate"
+            }
+        }
+    },
+    "fastboot": {
+        "title": "Fastboot Mode",
+        "description": "Flash partitions, manage bootloader, and perform low-level device operations",
+        "comingSoon": "Fastboot mode features are coming soon. This will allow you to flash partitions, unlock bootloader, and manage your device at the bootloader level.",
+        "fastbootdHeaderDesc": "Device is in FastbootD Userspace mode. Logical partitions are accessible.",
+        "features": {
+            "variables": "Device Variables",
+            "variablesDesc": "View bootloader variables",
+            "unlock": "Bootloader Status",
+            "unlockDesc": "Unlock/lock bootloader",
+            "flash": "Flash Partitions",
+            "flashDesc": "Flash images to device",
+            "boot": "Boot Image",
+            "bootDesc": "Boot custom images",
+            "reboot": "Reboot Options",
+            "rebootDesc": "Reboot to system, recovery, or bootloader",
+            "security": "Security Info",
+            "securityDesc": "View security states and anti-rollback info"
+        },
+        "connection": {
+            "connecting": "Connecting...",
+            "connected": "Connected",
+            "disconnected": "Disconnected"
+        },
+        "button": {
+            "connect": "Connect Fastboot",
+            "connecting": "Connecting...",
+            "disconnect": "Disconnect"
+        },
+        "label": {
+            "status": "Status"
+        },
+        "toast": {
+            "connected": "Fastboot device connected",
+            "disconnected": "Fastboot device disconnected",
+            "connectionFailed": "Failed to connect. Ensure device is in Fastboot mode."
+        },
+        "bootloader": {
+            "unlocked": "Bootloader is UNLOCKED",
+            "locked": "Bootloader is LOCKED",
+            "description": "Manage device bootloader lock state",
+            "unlock": "Unlock Bootloader",
+            "lock": "Lock Bootloader",
+            "unlockTitle": "Unlock Bootloader?",
+            "lockTitle": "Lock Bootloader?",
+            "unlockSuccess": "Unlock command sent! Check device screen to confirm.",
+            "lockSuccess": "Lock command sent! Check device screen to confirm.",
+            "unlockFailed": "Failed to send unlock command",
+            "lockFailed": "Failed to send lock command",
+            "confirmUnlock": "Yes, Unlock Bootloader",
+            "confirmLock": "Yes, Lock Bootloader",
+            "dataWarning": "WARNING: This will ERASE ALL DATA on your device!",
+            "warning": "Changing bootloader state will factory reset your device and erase all data. Please backup important data first.",
+            "warning1": "All apps, photos, and files will be deleted",
+            "warning2": "Device will undergo factory reset",
+            "warning3": "You must confirm the action on the device screen",
+            "warning4": "Device security features may be disabled",
+            "lockWarning": "Locking the bootloader will restore device security features. Ensure you have stock firmware installed effectively before locking to avoid bricking.",
+            "unlockInstructionTitle": "Physical Confirmation Required",
+            "unlockInstruction1": "Press Volume Down key to select 'Unlock the bootloader'",
+            "unlockInstruction2": "Press Power key to confirm",
+            "unlockInstructionInfo": "You must perform these steps on the device screen immediately.",
+            "userspaceWarning": "Bootloader actions are not available in FastbootD mode. Please reboot to Bootloader mode via Reboot Options."
+        },
+        "flash": {
+            "title": "Flash Partitions",
+            "description": "Flash images to device partitions.",
+            "lockedDesc": "Unlock bootloader first to flash partitions",
+            "locked": "Locked",
+            "boot": "Flash Boot",
+            "recovery": "Flash Recovery",
+            "vbmeta": "Flash Vbmeta",
+            "confirmTitle": "Confirm Flash",
+            "file": "File",
+            "size": "Size",
+            "target": "Target Partition",
+            "warning": "This will overwrite the current partition. Ensure the image is correct for your device.",
+            "button": "Flash Now",
+            "selectFile": "Select File",
+            "selectPartition": "Select partition...",
+            "searchPartition": "Search...",
+            "customPartition": "Or type partition name",
+            "devicePartitions": "Device Partitions",
+            "commonPartitions": "Common",
+            "partitionsLoaded": "Found {{count}} partitions",
+            "partitionCount": "{{count}} partitions detected from device",
+            "success": "Flash completed successfully",
+            "failed": "Flash failed",
+            "progressTitle": "Flashing {{partition}}...",
+            "progressDesc": "Please do not disconnect the device during this process."
+        },
+        "erase": {
+            "title": "Erase Partition",
+            "select": "Select partition...",
+            "search": "Search partition...",
+            "custom": "Or type partition name",
+            "button": "Erase",
+            "confirmTitle": "Confirm Erase",
+            "confirmDesc": "Are you sure you want to erase partition",
+            "confirmDataWarning": "This action cannot be undone and may result in data loss.",
+            "confirmButton": "Yes, Erase",
+            "success": "Partition erased successfully",
+            "failed": "Failed to erase partition"
+        },
+        "reboot": {
+            "system": "System",
+            "systemDesc": "Normal boot",
+            "systemSuccess": "Rebooting to system...",
+            "systemFailed": "Failed to reboot",
+            "recovery": "Recovery",
+            "recoveryDesc": "Recovery mode",
+            "recoverySuccess": "Rebooting to recovery...",
+            "recoveryFailed": "Failed to reboot to recovery",
+            "bootloader": "Bootloader",
+            "bootloaderDesc": "Stay in Fastboot",
+            "bootloaderSuccess": "Rebooting to bootloader...",
+            "bootloaderFailed": "Failed to reboot to bootloader",
+            "fastbootd": "FastbootD",
+            "fastbootdDesc": "Userspace Fastboot",
+            "fastbootdSuccess": "Rebooting to FastbootD...",
+            "fastbootdFailed": "Failed to reboot to FastbootD"
+        },
+        "terminal": {
+            "title": "Fastboot Shell",
+            "description": "Run fastboot commands directly",
+            "ready": "Type 'help' for available commands",
+            "disconnected": "Connect device to start",
+            "placeholder": "reboot, getvar, erase...",
+            "flashHint": "Use the Flash Panel above to flash .img files"
+        },
+        "variables": {
+            "title": "Device Variables",
+            "mode": "Connection Mode",
+            "bootloader": "Bootloader",
+            "unlocked": "Unlocked",
+            "locked": "Locked",
+            "product": "Product",
+            "variant": "Variant",
+            "serial": "Serial Number",
+            "secure": "Secure Boot",
+            "slot": "Current Slot",
+            "ofSlots": "of {{count}}",
+            "battery": "Battery Level",
+            "offModeCharge": "Off-Mode Charge",
+            "empty": {
+                "title": "No Device Connected",
+                "description": "Connect a device in Fastboot mode to view variables"
+            }
+        },
+        "empty": {
+            "title": "No Device Connected",
+            "description": "Connect your device in Fastboot mode to access bootloader operations. Press Volume Down + Power to enter Fastboot mode on most devices."
+        }
+    },
+    "page": {
+        "guide": {
+            "title": "Usage Guide",
+            "description": "Learn how to use Q-Flash Web Tool to flash your Qualcomm device."
+        },
+        "devices": {
+            "title": "Supported Devices",
+            "description": "Browse the list of supported Qualcomm devices by chipset."
+        },
+        "support": {
+            "title": "Help & Support",
+            "description": "Get help with common issues and contact our support team."
+        }
+    },
+    "wizard": {
+        "title": "Setup Wizard",
+        "stepIndicator": "Step {{current}} of {{total}}",
+        "navigation": {
+            "back": "Back",
+            "next": "Next",
+            "skip": "Skip",
+            "finish": "Finish"
+        },
+        "welcome": {
+            "title": "Welcome to Q-Flash!",
+            "description": "This wizard will guide you through flashing your Qualcomm device safely and easily.",
+            "getStarted": "Get Started"
+        },
+        "prerequisites": {
+            "title": "Before You Begin",
+            "description": "Make sure you have everything ready:",
+            "items": {
+                "edlMode": {
+                    "title": "Device in EDL Mode",
+                    "description": "Your device must be in Emergency Download (EDL) mode"
+                },
+                "usbCable": {
+                    "title": "USB Cable Connected",
+                    "description": "Use a good quality USB cable for stable connection"
+                },
+                "driver": {
+                    "title": "WinUSB Driver Installed",
+                    "description": "Install WinUSB driver using Zadig tool"
+                }
+            },
+            "needHelp": "Need help?",
+            "viewGuide": "View detailed guide",
+            "downloadDriver": "Download WinUSB driver"
+        },
+        "deviceSelection": {
+            "title": "Select Your Device",
+            "description": "Choose your device model from the list below:",
+            "selected": "Device selected",
+            "hint": "Select a device to continue"
+        },
+        "connect": {
+            "title": "Connect Your Device",
+            "description": "Click the button below to connect to your device:",
+            "connectButton": "Connect Device",
+            "connecting": "Connecting...",
+            "connectingHint": "Please wait while we establish connection",
+            "connected": "Connected Successfully!",
+            "connectedHint": "Your device is ready for flashing",
+            "error": "Connection Failed",
+            "errorGeneric": "Failed to connect to device",
+            "retry": "Try Again",
+            "helpText": "Make sure your device is in EDL mode and connected via USB"
+        },
+        "ready": {
+            "title": "You're All Set!",
+            "description": "Your device is connected and ready to flash",
+            "nextSteps": "What you can do now:",
+            "step1": "Backup important partitions before flashing",
+            "step2": "Flash new firmware or partitions",
+            "step3": "Reboot your device when done",
+            "dontShowAgain": "Don't show this wizard again",
+            "finish": "Start Using Q-Flash"
+        }
+    },
+    "guide": {
+        "title": "Complete Guide to Q-Flash",
+        "description": "Everything you need to know about flashing Qualcomm devices safely and effectively",
+        "quickStart": {
+            "title": "Quick Start",
+            "intro": "Follow these 5 simple steps to flash your Qualcomm device:",
+            "step1": {
+                "title": "Install WinUSB Driver",
+                "description": "Download and install the WinUSB driver using Zadig tool. This allows your browser to communicate with the device."
+            },
+            "step2": {
+                "title": "Enter EDL Mode",
+                "description": "Put your device into Emergency Download (EDL) mode. The device should appear as 'Qualcomm HS-USB QDLoader 9008' in Device Manager."
+            },
+            "step3": {
+                "title": "Connect Device",
+                "description": "Select your device model from the dropdown and click 'Connect Device'. Wait for the connection process to complete."
+            },
+            "step4": {
+                "title": "Load ROM or Select Partitions",
+                "description": "Either load a complete ROM folder or manually select partition files to flash. You can also backup partitions before flashing."
+            },
+            "step5": {
+                "title": "Flash or Backup",
+                "description": "Select the partitions you want to flash or backup, then click the corresponding button. Monitor progress in the terminal."
+            },
+            "tip": "💡 Tip: Always backup critical partitions before flashing to prevent data loss!"
+        },
+        "prerequisites": {
+            "title": "Prerequisites",
+            "intro": "Before you begin, make sure you have the following:",
+            "windows": {
+                "title": "Windows PC (7/8/10/11)",
+                "description": "Q-Flash Web Tool requires a Windows PC with Chrome or Edge browser (version 89+)"
+            },
+            "usbCable": {
+                "title": "USB Data Cable",
+                "description": "Use a good quality USB cable that supports data transfer, not just charging"
+            },
+            "driver": {
+                "title": "WinUSB Driver Installed",
+                "description": "Install WinUSB driver using Zadig tool to enable WebUSB communication"
+            },
+            "edlMode": {
+                "title": "Device in EDL Mode",
+                "description": "Your device must be in Emergency Download (EDL) mode, showing as 'QDLoader 9008' in Device Manager"
+            },
+            "cableWarning": {
+                "title": "⚠️ Important: Use a Data Cable",
+                "description": "Charge-only cables will NOT work. Make sure your cable supports data transfer. If the device is not detected, try a different cable or USB port."
+            },
+            "downloadDriver": "Download Q-FLASH-FORGE / Drivers →"
+        },
+        "installingDrivers": {
+            "title": "Installing Drivers",
+            "automatic": {
+                "title": "Automatic Setup (Q-FLASH-FORGE)",
+                "intro": "Use the All-in-One tool to install WinUSB drivers and ADB:",
+                "step1": "Download the latest Q-FLASH-FORGE from GitHub Releases",
+                "step2": "Run the tool as Administrator (right-click → Run as administrator)",
+                "step3": "Select 'Install Drivers / Auto Setup' for automatic installation"
+            },
+            "manual": {
+                "title": "Manual Installation with Zadig",
+                "intro": "If automatic installation fails, use Zadig to install the driver manually:",
+                "step1": "Download Zadig tool from zadig.akeo.ie",
+                "step2": "Put your device in EDL mode first (it should appear in Device Manager)",
+                "step3": "Run Zadig, select 'Qualcomm HS-USB QDLoader 9008' from the device list",
+                "step4": "Select 'WinUSB' as the target driver and click 'Install Driver' or 'Replace Driver'",
+                "imageAlt": "Zadig tool interface showing QDLoader 9008 device selection",
+                "screenshot1": "Step 1: Select Device",
+                "screenshot2": "Step 2: Choose WinUSB",
+                "screenshot3": "Step 3: Install Driver"
+            },
+            "troubleshootingTip": "💡 Troubleshooting: If the device is not showing in Zadig, try a different USB port (preferably USB 2.0) or check if the device is properly in EDL mode."
+        },
+        "enteringEDL": {
+            "title": "Entering EDL Mode",
+            "intro": "There are several methods to enter EDL mode. Choose the one that works best for your device:",
+            "method1": {
+                "title": "Method 1: Test Point (Most Reliable)",
+                "description": "Short specific test points on the device motherboard while connecting USB. This method requires opening the device.",
+                "warning": "⚠️ Warning: Requires opening device. Use only if hard-bricked or flashed wrong ROM. May void warranty."
+            },
+            "method2": {
+                "title": "Method 2: ADB Command",
+                "description": "If USB debugging is enabled and bootloader is unlocked, use ADB command:",
+                "note": "Note: Requires USB debugging enabled and unlocked bootloader"
+            },
+            "method3": {
+                "title": "Method 3: Fastboot Command",
+                "description": "Enter fastboot mode first, then use fastboot command:"
+            },
+            "method4": {
+                "title": "Method 4: Key Combination (OnePlus/Oppo/Realme)",
+                "step1": "Standard (Power Off): Hold Vol Up + Vol Down, then connect USB cable.",
+                "step2": "Bootloop/Brick: Hold Vol Up + Vol Down + Power (10-15s) until 9008 port appears.",
+                "step3": "Note: Screen will remain black. Check Device Manager to verify connection."
+            },
+            "verification": {
+                "title": "Verification",
+                "description": "Device should appear as 'Qualcomm HS-USB QDLoader 9008' in Windows Device Manager"
+            }
+        },
+        "usingTool": {
+            "title": "Using Q-Flash Tool",
+            "selectingDevice": {
+                "title": "Selecting Your Device",
+                "step1": "Open device selector dropdown in the sidebar",
+                "step2": "Search for your device model or browse by chipset",
+                "step3": "Devices are grouped by chipset family for easy navigation"
+            },
+            "connecting": {
+                "title": "Connecting to Device",
+                "description": "Click 'Connect Device' button. The tool will automatically: establish USB connection, perform Sahara handshake, upload Firehose, authenticate VIP (for Oppo/OnePlus/Realme), and read partition table. Green status indicator shows successful connection."
+            },
+            "viewingPartitions": {
+                "title": "Viewing Partitions",
+                "item1": "Partition grid shows all device partitions with names and sizes",
+                "item2": "Warning icons (⚠️) indicate critical partitions - flash with caution",
+                "item3": "Use search box to quickly find specific partitions"
+            },
+            "backup": {
+                "title": "Backup Operations",
+                "step1": "Select partitions you want to backup (check boxes)",
+                "step2": "Click 'Backup' button",
+                "step3": "Choose save location and backup format (with/without XML)",
+                "step4": "Monitor progress in terminal panel"
+            },
+            "flash": {
+                "title": "Flash Operations",
+                "step1": "Load ROM folder or manually select partition image files",
+                "step2": "Select partitions to flash (uncheck partitions you want to skip)",
+                "step3": "Review confirmation dialog - pay attention to critical partition warnings",
+                "step4": "Monitor progress and wait for completion message"
+            }
+        },
+        "romProcessing": {
+            "title": "ROM Processing",
+            "structure": {
+                "title": "ROM Structure",
+                "item1": "rawprogram.xml files - define partition layout and flash sequence",
+                "item2": "Partition image files (.img) - actual partition data",
+                "item3": "Sparse vs raw images - tool handles both formats automatically"
+            },
+            "loading": {
+                "title": "Loading ROM Folder",
+                "step1": "Click 'Load ROM' button in the tool",
+                "step2": "Select folder containing ROM files (rawprogram*.xml + .img files)",
+                "step3": "Tool automatically detects and parses rawprogram files",
+                "step4": "Partition grid updates to show ROM partitions ready to flash"
+            },
+            "selective": {
+                "title": "Selective Flashing",
+                "description": "You don't have to flash all partitions. Common scenarios:",
+                "tip1": "Flash only system/vendor/product to update OS while keeping data",
+                "tip2": "Keep userdata unchecked to preserve user data and apps"
+            },
+            "warning": "⚠️ Always backup critical partitions before flashing! Incorrect flashing can brick your device."
+        },
+        "troubleshooting": {
+            "title": "Troubleshooting",
+            "error1": {
+                "title": "Device not detected",
+                "solution1": "Check USB cable - use data cable, not charge-only",
+                "solution2": "Try different USB port - preferably USB 2.0",
+                "solution3": "Reinstall WinUSB driver using Zadig",
+                "solution4": "Verify EDL mode (shows as QDLoader 9008 or QUSB_BULK_CID...)"
+            },
+            "error2": {
+                "title": "Connection failed",
+                "solution1": "Disconnect and reconnect device",
+                "solution2": "Restart browser and try again",
+                "solution3": "Check device permissions in browser (allow WebUSB access)"
+            },
+            "error3": {
+                "title": "VIP authentication failed",
+                "solution1": "Ensure device is Oppo/OnePlus/Realme (VIP auth required)",
+                "solution2": "Try reconnecting device",
+                "solution3": "Verify firehose files match your chipset exactly"
+            },
+            "error4": {
+                "title": "Flash operation failed",
+                "solution1": "Verify ROM files are complete and not corrupted",
+                "solution2": "Check sufficient storage space on PC",
+                "solution3": "Try flashing partitions one by one to isolate issue"
+            },
+            "error5": {
+                "title": "Device stuck after flash",
+                "solution1": "Enter EDL mode again and flash stock ROM completely",
+                "solution2": "Do not skip critical partitions like abl, xbl, boot",
+                "solution3": "Contact support with device model and error details"
+            },
+            "stillHavingIssues": {
+                "title": "Still having issues?",
+                "link": "Visit Support page for more help →"
+            }
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "q1": {
+                "question": "Is Q-Flash safe to use?",
+                "answer": "Yes, Q-Flash uses official Qualcomm EDL protocols, the same as manufacturer tools. However, always backup important data before flashing."
+            },
+            "q2": {
+                "question": "Will flashing void my warranty?",
+                "answer": "It depends on manufacturer policy. Generally, unlocking bootloader or flashing custom firmware may void warranty. Check with your device manufacturer."
+            },
+            "q3": {
+                "question": "Can I unbrick my device with Q-Flash?",
+                "answer": "Yes, if your device can enter EDL mode and you have the correct stock ROM, Q-Flash can restore your device."
+            },
+            "q4": {
+                "question": "What's the difference between backup and flash?",
+                "answer": "Backup saves partition data from device to PC. Flash writes partition data from PC to device. Always backup before flashing."
+            },
+            "q5": {
+                "question": "Can I use this on Mac or Linux?",
+                "answer": "Currently Q-Flash Web Tool requires Windows due to WinUSB driver requirements. Mac/Linux support may be added in future."
+            },
+            "q6": {
+                "question": "Why does my device need VIP authentication?",
+                "answer": "Oppo, OnePlus, and Realme devices require VIP authentication for security. This is a manufacturer requirement, not a Q-Flash limitation."
+            },
+            "q7": {
+                "question": "How long does flashing take?",
+                "answer": "Depends on partition sizes and USB speed. Typically 5-15 minutes for full ROM flash. Individual partitions may take seconds to minutes."
+            },
+            "q8": {
+                "question": "Can I flash custom ROMs?",
+                "answer": "Yes, as long as the ROM is compatible with your device chipset and you have the correct partition images and rawprogram files."
+            }
+        }
+    },
+    "rom": {
+        "loadButton": "Load ROM",
+        "clearButton": "Clear ROM",
+        "loading": "Scanning ROM folder...",
+        "loaded": "ROM loaded successfully",
+        "cleared": "ROM data cleared",
+        "changeFolder": "Change Folder",
+        "partitionCount": "{{count}} partitions",
+        "partitionCount_one": "{{count}} partition",
+        "totalSize": "Total: {{size}}",
+        "missingFiles": "{{count}} files missing",
+        "missingFiles_one": "{{count}} file missing",
+        "noRomLoaded": "No ROM loaded",
+        "selectFolder": "Select folder containing rawprogram*.xml files",
+        "scanningFiles": "Scanning files...",
+        "parsingXml": "Parsing rawprogram XML...",
+        "rescan": "Re-scan folder",
+        "fileType": {
+            "sparse": "Sparse",
+            "raw": "Raw"
+        },
+        "sourceIndicator": "ROM",
+        "error": {
+            "notSupported": "File System Access API not supported in this browser",
+            "noXmlFound": "No rawprogram*.xml files found in this folder",
+            "invalidXml": "Invalid XML format",
+            "parseError": "Failed to parse ROM: {{error}}",
+            "permissionDenied": "Permission denied to access folder"
+        }
+    },
+    "downloads": {
+        "title": "Downloads",
+        "description": "Download companion tools and stock ROMs for your device.",
+        "companionTools": {
+            "title": "Companion Tools",
+            "description": "Essential tools for flashing Qualcomm devices",
+            "qFlashForge": {
+                "description": "ROM processing tool - Convert OZIP to standard flashable format",
+                "version": "Latest"
+            },
+            "platformTools": {
+                "description": "Android SDK Platform-Tools (ADB & Fastboot)",
+                "version": "Latest"
+            },
+            "zadig": {
+                "description": "USB driver installation tool (alternative method)",
+                "version": "v2.8"
+            }
+        },
+        "stockRoms": {
+            "title": "Stock ROMs",
+            "description": "Official stock ROMs for Qualcomm devices (Unbrick purpose)",
+            "unbrick": "Unbrick",
+            "size": "Size"
+        },
+        "common": {
+            "download": "Download",
+            "visitGithub": "Visit GitHub",
+            "version": "Version"
+        }
+    },
+    "support": {
+        "title": "Help & Support",
+        "description": "Get help with common issues, browse FAQs, or contact our support team.",
+        "contact": {
+            "title": "Contact Us",
+            "telegram": {
+                "description": "Get instant help from the community and developers"
+            },
+            "facebook": {
+                "description": "Join our Facebook group for discussions and updates"
+            },
+            "joinChannel": "Join Telegram",
+            "joinGroup": "Join Group"
+        },
+        "troubleshooting": {
+            "title": "Common Errors & Solutions",
+            "description": "Find solutions to frequently encountered issues when using Q-Flash.",
+            "error1": {
+                "title": "Device not found",
+                "description": "The tool cannot detect your device in EDL mode.",
+                "solution1": "Check USB cable - use a data cable, not charge-only",
+                "solution2": "Try a different USB port - preferably USB 2.0",
+                "solution3": "Reinstall WinUSB driver using Zadig tool",
+                "solution4": "Verify device shows as 'QDLoader 9008' or 'QUSB_BULK_CID' in Device Manager"
+            },
+            "error2": {
+                "title": "Bulk transfer timeout",
+                "description": "USB communication timed out during data transfer.",
+                "solution1": "Use a shorter USB cable or connect directly to PC (no hub)",
+                "solution2": "Try USB 2.0 port instead of USB 3.0",
+                "solution3": "Reduce transfer size by flashing fewer partitions at once"
+            },
+            "error3": {
+                "title": "VIP authentication failed",
+                "description": "Device rejected VIP authentication (Oppo/OnePlus/Realme devices).",
+                "solution1": "Verify firehose files match your exact chipset and device model",
+                "solution2": "Try reconnecting the device and start fresh",
+                "solution3": "Contact support if the issue persists with correct firehose files"
+            },
+            "error4": {
+                "title": "Session limit reached",
+                "description": "The device has reached its maximum allowed connection sessions.",
+                "solution1": "Disconnect USB cable and wait 30 seconds before reconnecting",
+                "solution2": "Restart your browser completely",
+                "solution3": "If persists, reboot the device and re-enter EDL mode"
+            },
+            "moreHelp": "Need more detailed instructions?",
+            "viewGuide": "View Complete Guide →"
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "q1": {
+                "question": "What is EDL mode and why do I need it?",
+                "answer": "EDL (Emergency Download) mode is a special boot mode on Qualcomm devices that allows low-level access for flashing firmware. It's required because it bypasses normal Android restrictions and enables direct partition access."
+            },
+            "q2": {
+                "question": "Is Q-Flash safe for my device?",
+                "answer": "Yes, Q-Flash uses official Qualcomm EDL protocols - the same protocols used by manufacturer tools. However, always backup critical partitions before flashing, and ensure you're using the correct ROM for your device model."
+            },
+            "q3": {
+                "question": "Can Q-Flash unbrick my device?",
+                "answer": "In most cases, yes. If your device can enter EDL mode (test point method works even for hard-bricked devices), Q-Flash can restore it by flashing stock firmware. Make sure you have the correct stock ROM for your specific device variant."
+            },
+            "q4": {
+                "question": "Why does my device need VIP authentication?",
+                "answer": "Oppo, OnePlus, and Realme devices require VIP (Verified Image Programming) authentication as a security measure. This ensures only authorized firmware can be flashed. Q-Flash handles this automatically with proper firehose files."
+            },
+            "q5": {
+                "question": "Which browsers are supported?",
+                "answer": "Q-Flash requires a Chromium-based browser (Chrome, Edge, Brave) version 89 or later with WebUSB support. Firefox and Safari are not supported due to lack of WebUSB API."
+            },
+            "q6": {
+                "question": "How long does flashing take?",
+                "answer": "Time depends on partition sizes and USB speed. Individual partitions can take seconds to minutes. A full ROM flash typically takes 5-15 minutes. Large partitions like 'super' may take longer."
+            }
+        }
+    },
+    "landing": {
+        "badge": "WebUSB Powered • No Installation Required",
+        "title": "Q-Flash Web",
+        "subtitle": "The Ultimate Android Device Flash Tool",
+        "description": "Flash firmware, manage bootloader, debug apps, and control your Android device - all from your browser.",
+        "donate": "Donate",
+        "startEDL": "Start EDL Mode",
+        "viewGuide": "View Guide",
+        "readFullGuide": "Read Full Guide",
+        "features": {
+            "title": "Why Q-Flash Web?",
+            "subtitle": "Built with modern web technologies for a seamless flashing experience."
+        },
+        "modes": {
+            "edl": {
+                "name": "EDL Mode",
+                "description": "Emergency Download Mode for Qualcomm devices. Unbrick, recover, and flash firmware at the lowest level.",
+                "feature1": "Unbrick bricked devices",
+                "feature2": "Read/Write partitions",
+                "feature3": "Full device recovery",
+                "feature4": "OEM VIP authentication"
+            },
+            "adb": {
+                "name": "ADB Mode",
+                "description": "Android Debug Bridge for connected devices. Install apps, manage files, mirror screen, and control device.",
+                "feature1": "Screen mirroring (Scrcpy)",
+                "feature2": "File manager",
+                "feature3": "App manager",
+                "feature4": "Shell terminal"
+            },
+            "fastboot": {
+                "name": "Fastboot Mode",
+                "description": "Bootloader mode for flashing images, managing partitions, and bootloader lock/unlock operations.",
+                "feature1": "Flash boot/recovery images",
+                "feature2": "Unlock/Lock bootloader",
+                "feature3": "A/B slot management",
+                "feature4": "FastbootD support"
+            }
+        },
+        "highlight": {
+            "browser": {
+                "title": "Browser-Based",
+                "desc": "No installation required. Works directly in Chrome, Edge, and other WebUSB-enabled browsers."
+            },
+            "secure": {
+                "title": "Secure & Private",
+                "desc": "All operations run locally. Your data never leaves your device."
+            },
+            "multidevice": {
+                "title": "Multi-Device Support",
+                "desc": "Supports Qualcomm, MediaTek, and major Android manufacturers."
+            },
+            "logs": {
+                "title": "Real-Time Logs",
+                "desc": "Detailed terminal output for every operation. Debug with confidence."
+            }
+        },
+        "quickstart": {
+            "title": "Quick Start",
+            "subtitle": "Get started in 3 simple steps",
+            "step1": {
+                "title": "Select Mode",
+                "desc": "Choose EDL, ADB, or Fastboot based on your device state."
+            },
+            "step2": {
+                "title": "Connect Device",
+                "desc": "Connect your Android device via USB and grant permission."
+            },
+            "step3": {
+                "title": "Start Flashing",
+                "desc": "Select partitions, load firmware, and begin the operation."
+            }
+        },
+        "footer": "Q-Flash Web - Android Flash Tool",
+        "footerCredit": "Created by Mitomtreem"
+    },
+    "donate": {
+        "badge": "Support the Developer",
+        "title": "Donate Me",
+        "description": "If Q-Flash Web has been helpful to you, consider supporting the development. Every contribution helps keep this project alive and growing!",
+        "accountNumber": "Account:",
+        "name": "Name:",
+        "copy": "Copy account number",
+        "copied": "Copied!",
+        "thankYou": "Thank you for your support!",
+        "thankYouDesc": "Every contribution helps me continue to develop and maintain this tool free for the community."
     }
 }

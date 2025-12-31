@@ -28,6 +28,7 @@ export class FirehoseProtocol {
     private usb: WebUSBManager;
     private config: FirehoseConfig = DEFAULT_CONFIG;
     private onLog: (message: string, level?: 'info' | 'debug' | 'error' | 'success') => void;
+    private isConfigured: boolean = false; // Track if Firehose has been configured
 
     constructor(usb: WebUSBManager, logger?: (message: string, level?: 'info' | 'debug' | 'error' | 'success') => void) {
         this.usb = usb;
@@ -45,6 +46,10 @@ export class FirehoseProtocol {
      * Configure Firehose with desired settings
      */
     async configure(config?: Partial<FirehoseConfig>): Promise<FirehoseResponse> {
+        // NOTE: We don't check isConnected here because it can be unreliable
+        // (device may be null or device.opened may be false even when device is still functional)
+        // Instead, we let the actual USB transfer fail if device is truly disconnected
+
         const newConfig = { ...DEFAULT_CONFIG, ...config };
 
         const command = buildXmlCommand('configure', {
@@ -61,6 +66,7 @@ export class FirehoseProtocol {
 
         if (response.success) {
             this.config = newConfig;
+            this.isConfigured = true; // Mark as configured
             this.onLog(`Firehose configured successfully`, 'success');
         } else {
             // Try fallback with smaller payload size
@@ -74,6 +80,7 @@ export class FirehoseProtocol {
             const fallbackResponse = await this.sendCommand(fallbackCommand);
             if (fallbackResponse.success) {
                 this.config = fallbackConfig;
+                this.isConfigured = true; // Mark as configured
                 this.onLog(`Firehose configured with fallback settings (4KB payload)`, 'success');
                 return fallbackResponse;
             }
@@ -285,7 +292,9 @@ export class FirehoseProtocol {
 
         this.onLog(`Reading partition "${partitionName}" (LUN ${lun}): ${numSectors} sectors, ${this.formatSize(BigInt(totalBytes))}`);
 
-        // Reconfigure before read (required for Oppo devices)
+        // ALWAYS reconfigure before each read - device requires this to reset Firehose state
+        // The skipConfigure optimization was causing "Bulk OUT transfer timeout" errors
+        // because the device's state wasn't properly reset between operations
         await this.drainBuffer();
         const configResult = await this.configure();
         if (!configResult.success) {
@@ -294,14 +303,14 @@ export class FirehoseProtocol {
         await this.drainBuffer();
 
         // Build read command
-        // Use BackupGPT/PrimaryGPT label to bypass permission check
+        // Use PrimaryGPT label to bypass permission check
         // NOTE: This has ~1.8GB limit per session - device limitation
         const command = buildXmlCommand('read', {
             SECTOR_SIZE_IN_BYTES: sectorSize,
             file_sector_offset: 0,
             filename: `${partitionName}.bin`,
             physical_partition_number: lun,
-            label: 'BackupGPT',  // Required - device rejects null label
+            label: 'PrimaryGPT',  // Use PrimaryGPT instead of BackupGPT to avoid "forbidden" errors
             start_sector: startSector.toString(),
             num_partition_sectors: numSectors.toString(),
             partofsingleimage: 'true',
@@ -378,15 +387,37 @@ export class FirehoseProtocol {
 
             // Check if this chunk contains XML (end marker)
             const text = bytesToString(result.data);
-            if (text.includes('rawmode="false"') || (text.includes('<?xml') && text.includes('</data>'))) {
-                this.onLog('Detected end-of-data in response', 'debug');
-                // Extract binary data before XML if any
-                const xmlStart = result.data.indexOf(0x3C); // '<'
-                if (xmlStart > 0) {
-                    dataChunks.push(result.data.slice(0, xmlStart));
-                    bytesRead += xmlStart;
+
+            // CRITICAL FIX: Only treat as end-of-data if we found explicit end marker OR we have read enough bytes
+            // Prevents false positives where binary data looks like XML (common in large partitions)
+            const isExplicitEnd = text.includes('rawmode="false"') || (text.includes('<?xml') && text.includes('</data>'));
+
+            // STRICTER ERROR CHECK: Only match specific XML error patterns
+            // Binary data often contains the string "ERROR" (e.g. inside logs/files in the image)
+            const isError = text.includes('<log value="ERROR') || text.includes('value="NAK"');
+
+            if (isError) {
+                this.onLog(`Device reported error: ${text.substring(0, 100)}`, 'error');
+                return { success: false, error: `Device Error: ${text}` };
+            }
+
+            if (isExplicitEnd) {
+                // If checking strictly for completion:
+                if (bytesRead < totalBytes && !text.includes('rawmode="false"')) {
+                    // We found XML-like data (e.g. <log>) but we aren't done yet, and it's not the final generic ACK.
+                    // This could be a false positive (binary data looking like XML) or a mid-stream log.
+                    // We'll treat it as data unless it's the specific rawmode="false" terminator.
+                    this.onLog('Warning: Detected XML-like data but transfer incomplete - treating as binary', 'debug');
+                } else {
+                    this.onLog('Detected end-of-data in response', 'debug');
+                    // Extract binary data before XML if any
+                    const xmlStart = result.data.indexOf(0x3C); // '<'
+                    if (xmlStart > 0) {
+                        dataChunks.push(result.data.slice(0, xmlStart));
+                        bytesRead += xmlStart;
+                    }
+                    break;
                 }
-                break;
             }
 
             dataChunks.push(result.data);
@@ -530,14 +561,32 @@ export class FirehoseProtocol {
                 let dataToWrite = result.data;
                 const text = bytesToString(result.data);
 
-                if (text.includes('rawmode="false"') || (text.includes('<?xml') && text.includes('</data>'))) {
-                    this.onLog('Detected end-of-transfer marker', 'debug');
-                    // Extract binary data before XML if any
-                    const xmlStart = result.data.indexOf(0x3C); // '<'
-                    if (xmlStart > 0) {
-                        dataToWrite = result.data.slice(0, xmlStart);
+                const isExplicitEnd = text.includes('rawmode="false"') || (text.includes('<?xml') && text.includes('</data>'));
+
+                // STRICTER ERROR CHECK: Only match specific XML error patterns
+                // Binary data often contains the string "ERROR" (e.g. inside logs/files in the image)
+                const isError = text.includes('<log value="ERROR') || text.includes('value="NAK"');
+
+                if (isError) {
+                    await writable.close();
+                    return { success: false, bytesWritten: totalBytesWritten, error: `Device Error: ${text}` };
+                }
+
+                if (isExplicitEnd) {
+                    // CRITICAL FIX: Only stop if we really are done or explicit stop command
+                    // If we haven't read enough bytes, this "XML" is likely binary data false positive
+                    if (totalBytesWritten < totalBytes && !text.includes('rawmode="false"')) {
+                        this.onLog('Warning: Detected XML-like data but transfer incomplete - treating as binary', 'debug');
+                        // Treat as pure data, do NOT strip header
                     } else {
-                        dataToWrite = new Uint8Array(0);
+                        this.onLog('Detected end-of-transfer marker', 'debug');
+                        // Extract binary data before XML if any
+                        const xmlStart = result.data.indexOf(0x3C); // '<'
+                        if (xmlStart > 0) {
+                            dataToWrite = result.data.slice(0, xmlStart);
+                        } else {
+                            dataToWrite = new Uint8Array(0);
+                        }
                     }
                 }
 
@@ -562,8 +611,9 @@ export class FirehoseProtocol {
                     this.onLog(`Streamed ${this.formatSize(BigInt(totalBytesWritten))} / ${this.formatSize(BigInt(totalBytes))}`, 'debug');
                 }
 
-                // Check if we hit end marker
-                if (text.includes('rawmode="false"')) {
+                // Check if we hit end marker (only if we processed it as such)
+                // If we treated it as binary, we continue
+                if (isExplicitEnd && (totalBytesWritten >= totalBytes || text.includes('rawmode="false"'))) {
                     break;
                 }
             }
@@ -579,6 +629,8 @@ export class FirehoseProtocol {
                 // Ignore - device may not send final ACK
             }
 
+            // Inform user that disk write may take time
+            this.onLog('Finalizing file to disk... (this may take a moment for large files)', 'info');
             await writable.close();
 
             this.onLog(`Stream complete: ${this.formatSize(BigInt(totalBytesWritten))}`, 'success');
@@ -599,6 +651,11 @@ export class FirehoseProtocol {
      * @param data - Binary data to write
      * @param onProgress - Progress callback (0-100)
      * @param _skipConfigure - DEPRECATED: Device requires reconfigure between writes
+     * @param filename - Optional: actual filename from XML (defaults to partitionName.bin if not specified)
+     * @param partofsingleimage - Optional: 'true' for single image writes, 'false' for partition writes (from XML)
+     * @param sparse - Optional: 'true' for sparse images, 'false' for raw images (from XML)
+     * @param spoofLabel - Optional: fake label for bypassing protected partitions
+     * @param spoofFilename - Optional: fake filename for spoof mode
      */
     async writePartition(
         lun: number,
@@ -607,7 +664,12 @@ export class FirehoseProtocol {
         partitionName: string,
         data: Uint8Array,
         onProgress?: (percent: number) => void,
-        _skipConfigure = false  // Kept for API compatibility, but ignored
+        _skipConfigure = false,  // Kept for API compatibility, but ignored
+        filename?: string,  // NEW: Optional filename from XML
+        partofsingleimage = false,  // Default to false for normal partition writes (true only for GPT)
+        sparse = false,  // NEW: sparse format flag from XML
+        spoofLabel?: string,      // For protected partitions: use "BackupGPT"
+        spoofFilename?: string    // For protected partitions: use "gpt_backup0.bin"
     ): Promise<{ success: boolean; bytesWritten: number; error?: string }> {
         const sectorSize = this.getSectorSize();
         const totalBytes = data.length;
@@ -650,17 +712,45 @@ export class FirehoseProtocol {
         }
 
         // Build program command
-        // Use BackupGPT label like read command
+        // SPOOF MODE: For protected partitions, device rejects writes with real label.
+        // If spoofLabel/spoofFilename are provided, use them to bypass protection.
+        // Otherwise, use normal filename logic:
+        // 1. If filename is provided from XML, ALWAYS use it (e.g., "gpt_main0.bin" for GPT)
+        // 2. If no filename AND partofsingleimage=true: device expects "${label}.img" format
+        // 3. If no filename AND partofsingleimage=false: fallback to "${label}.bin"
+        let finalFilename: string;
+        let finalLabel: string;
+
+        if (spoofLabel && spoofFilename) {
+            // SPOOF MODE: Use fake label/filename to bypass device protection
+            finalFilename = spoofFilename;
+            finalLabel = spoofLabel;
+        } else if (filename) {
+            // XML provided a specific filename - ALWAYS use it
+            // This is critical for GPT tables (gpt_main0.bin, etc.)
+            finalFilename = filename;
+            finalLabel = partitionName;
+        } else if (partofsingleimage) {
+            // No filename but partofsingleimage=true: use label.img format
+            finalFilename = `${partitionName}.img`;
+            finalLabel = partitionName;
+        } else {
+            // No filename and normal mode: use label.bin
+            finalFilename = `${partitionName}.bin`;
+            finalLabel = partitionName;
+        }
+
         const command = buildXmlCommand('program', {
             SECTOR_SIZE_IN_BYTES: sectorSize,
             file_sector_offset: 0,
-            filename: `${partitionName}.bin`,
+            filename: finalFilename,
             physical_partition_number: lun,
-            label: 'BackupGPT',
+            label: finalLabel,  // May be spoofed for protected partitions
             start_sector: startSector.toString(),
-            num_partition_sectors: actualSectors.toString(),  // Use actual file sectors!
-            partofsingleimage: 'true',
-            sparse: 'false',
+            num_partition_sectors: actualSectors.toString(),
+            // In spoof mode, omit partofsingleimage (device thinks it's BackupGPT)
+            ...(!(spoofLabel && spoofFilename) && { partofsingleimage: partofsingleimage ? 'true' : 'false' }),
+            sparse: sparse ? 'true' : 'false',
         });
 
         this.onLog(`TX: ${command}`, 'debug');
@@ -695,15 +785,17 @@ export class FirehoseProtocol {
 
         this.onLog('Got rawmode=true, sending binary data...', 'debug');
 
-        // Send binary data in chunks (use padded data)
+        // Send binary data in 16MB chunks (like native tool)
+        // Using subarray instead of slice to avoid memory copy
         let bytesWritten = 0;
-        const chunkSize = 1048576; // 1MB chunks for USB transfer
+        const chunkSize = 16 * 1024 * 1024; // 16MB USB transfer size (under 32MB WebUSB limit)
         const totalToSend = dataToSend.length;
 
         while (bytesWritten < totalToSend) {
             const remaining = totalToSend - bytesWritten;
             const currentChunkSize = Math.min(chunkSize, remaining);
-            const chunk = dataToSend.slice(bytesWritten, bytesWritten + currentChunkSize);
+            // subarray() returns a view without copying memory
+            const chunk = dataToSend.subarray(bytesWritten, bytesWritten + currentChunkSize);
 
             const writeResult = await this.usb.transferOut(chunk);
             if (!writeResult.success) {
@@ -756,6 +848,9 @@ export class FirehoseProtocol {
      * @param partitionName - Name of the partition (for logging)
      * @param file - File object to stream from
      * @param onProgress - Progress callback (0-100)
+     * @param filename - Optional: actual filename from XML (defaults to partitionName.bin if not specified)
+     * @param partofsingleimage - Optional: 'true' for single image writes, 'false' for partition writes (from XML)
+     * @param sparse - Optional: 'true' for sparse images, 'false' for raw images (from XML)
      */
     async writePartitionFromFile(
         lun: number,
@@ -763,7 +858,10 @@ export class FirehoseProtocol {
         numSectors: bigint,
         partitionName: string,
         file: File,
-        onProgress?: (percent: number) => void
+        onProgress?: (percent: number) => void,
+        filename?: string,  // NEW: Optional filename from XML
+        partofsingleimage = false,  // Default to false for normal partition writes (true only for GPT)
+        sparse = false  // NEW: sparse format flag from XML
     ): Promise<{ success: boolean; bytesWritten: number; error?: string }> {
         const sectorSize = this.getSectorSize();
         const totalBytes = file.size;
@@ -799,16 +897,29 @@ export class FirehoseProtocol {
         }
 
         // Build program command
+        // CRITICAL: Filename logic (same as writePartition):
+        // 1. If filename is provided from XML, ALWAYS use it
+        // 2. If no filename AND partofsingleimage=true: use label.img format
+        // 3. If no filename AND partofsingleimage=false: use label.bin
+        let finalFilename: string;
+        if (filename) {
+            finalFilename = filename;
+        } else if (partofsingleimage) {
+            finalFilename = `${partitionName}.img`;
+        } else {
+            finalFilename = `${partitionName}.bin`;
+        }
+
         const command = buildXmlCommand('program', {
             SECTOR_SIZE_IN_BYTES: sectorSize,
             file_sector_offset: 0,
-            filename: `${partitionName}.bin`,
+            filename: finalFilename,
             physical_partition_number: lun,
-            label: 'BackupGPT',
+            label: partitionName,
             start_sector: startSector.toString(),
             num_partition_sectors: actualSectors.toString(),
-            partofsingleimage: 'true',
-            sparse: 'false',
+            partofsingleimage: partofsingleimage ? 'true' : 'false',
+            sparse: sparse ? 'true' : 'false',
         });
 
         this.onLog(`TX: ${command}`, 'debug');
@@ -843,9 +954,9 @@ export class FirehoseProtocol {
 
         this.onLog('Got rawmode=true, streaming file data...', 'debug');
 
-        // Stream file in chunks using FileReader
+        // Stream file in 16MB chunks (like native tool)
         let bytesWritten = 0;
-        const chunkSize = 4 * 1024 * 1024; // 4MB chunks for streaming
+        const chunkSize = 16 * 1024 * 1024; // 16MB chunks for streaming (under 32MB WebUSB limit)
         let offset = 0;
 
         while (offset < file.size) {
@@ -902,6 +1013,302 @@ export class FirehoseProtocol {
         await this.drainBuffer();
 
         this.onLog(`Stream complete: ${this.formatSize(BigInt(bytesWritten))}`, 'success');
+        return { success: true, bytesWritten };
+    }
+
+    /**
+     * Apply an XML patch/command to the device.
+     */
+    async applyPatch(xmlContent: string): Promise<{ success: boolean; error?: string }> {
+        // Extract all <patch> tags
+        const patchRegex = /<patch\s+[^>]*\/>/gi;
+        const patches = xmlContent.match(patchRegex);
+
+        const xmlWithoutComments = xmlContent.replace(/<!--[\s\S]*?-->/g, '').trim();
+
+        if (!patches || patches.length === 0) {
+            // Fallback to sending raw logic if no individual tags found
+            let cleanXml = xmlWithoutComments.replace(/<\?xml.*?\?>/is, '').trim();
+            cleanXml = cleanXml.replace(/<patches[^>]*>/i, '').replace(/<\/patches>/i, '').trim();
+
+            if (!cleanXml.startsWith('<data>')) {
+                cleanXml = `<?xml version="1.0" ?><data>${cleanXml}</data>`;
+            } else {
+                cleanXml = `<?xml version="1.0" ?>${cleanXml}`;
+            }
+
+            // Try sending raw
+            const res = await this.sendCommand(cleanXml);
+            if (res.success) {
+                this.onLog('Patch file applied successfully', 'success');
+                return { success: true };
+            }
+            return { success: false, error: res.error };
+        }
+
+        // Processing individual patches
+        // Use debug log to avoid spamming the user, making it feel like "one operation"
+        this.onLog(`Processing patches...`, 'info');
+
+        for (let i = 0; i < patches.length; i++) {
+            const patch = patches[i];
+            const command = `<?xml version="1.0" ?><data>${patch}</data>`;
+
+            // Debug only - hidden from normal view
+            this.onLog(`Cmd ${i + 1}/${patches.length}`, 'debug');
+
+            const result = await this.sendCommand(command);
+
+            if (!result.success) {
+                this.onLog(`Failed to apply patch command ${i + 1}: ${result.error}`, 'error');
+                return { success: false, error: result.error };
+            }
+        }
+
+        this.onLog(`Patch file applied successfully`, 'success');
+        return { success: true };
+    }
+
+    /**
+     * Send reset command to reboot the device.
+     */
+    /**
+     * Send reset command to reboot the device.
+     */
+    async reset(): Promise<{ success: boolean; error?: string }> {
+        return this.power('reset');
+    }
+
+    /**
+     * Write/flash a large file using chunked writes like native tool.
+     * This method sends a SEPARATE program command for each 64MB chunk,
+     * which is how the native tool successfully flashes large files like super.img.
+     * 
+     * From native tool log for super.img (14.28 GB):
+     * - Total chunks: 229 x 64MB chunks
+     * - Each chunk takes ~1 second to write
+     * - Device is reconfigured between chunks automatically
+     * 
+     * @param lun - Physical partition number (LUN)
+     * @param startSector - Start sector of the partition
+     * @param numSectors - Number of sectors (unused, calculated from file)
+     * @param partitionName - Name of the partition
+     * @param file - File object to stream from
+     * @param onProgress - Progress callback (0-100)
+     * @param chunkProgress - Called for each chunk (chunkIndex, totalChunks)
+     * @param filename - Optional: actual filename from XML
+     * @param partofsingleimage - Optional: true for name-based matching after GPT reload
+     * @param spoofLabel - Optional: fake label for bypassing protected partitions (e.g., "BackupGPT")
+     * @param spoofFilename - Optional: fake filename for spoof mode (e.g., "gpt_backup0.bin")
+     */
+    async writePartitionChunked(
+        lun: number,
+        startSector: bigint,
+        _numSectors: bigint,
+        partitionName: string,
+        file: File,
+        onProgress?: (percent: number) => void,
+        chunkProgress?: (chunkIndex: number, totalChunks: number, chunkSize: number) => void,
+        filename?: string,
+        partofsingleimage = true,  // Default true for post-GPT flash operations
+        spoofLabel?: string,       // For protected partitions: use "BackupGPT"
+        spoofFilename?: string     // For protected partitions: use "gpt_backup0.bin"
+    ): Promise<{ success: boolean; bytesWritten: number; error?: string }> {
+        const sectorSize = this.getSectorSize();
+        const totalBytes = file.size;
+
+        // Use 512MB chunks to reduce Firehose reconfigure overhead
+        // Each 512MB chunk is split into 16MB USB transfers (under WebUSB 32MB limit)
+        const CHUNK_SIZE = 512 * 1024 * 1024; // 512MB per chunk
+        const totalChunks = Math.ceil(totalBytes / CHUNK_SIZE);
+
+        this.onLog(`Chunked write partition "${partitionName}" (LUN ${lun}): ${this.formatSize(BigInt(totalBytes))}`);
+        this.onLog(`Strategy: ${totalChunks} chunks × 512 MB`, 'info');
+
+        let bytesWritten = 0;
+        let currentSector = startSector;
+
+        try {
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                const chunkStart = chunkIndex * CHUNK_SIZE;
+                const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, totalBytes);
+                const chunkBytes = chunkEnd - chunkStart;
+                const chunkSectors = Math.ceil(chunkBytes / sectorSize);
+
+                this.onLog(`Processing chunk ${chunkIndex + 1}/${totalChunks}`, 'debug');
+
+                // Log progress for each chunk
+                if (chunkProgress) {
+                    chunkProgress(chunkIndex + 1, totalChunks, Math.round(chunkBytes / (1024 * 1024)));
+                }
+
+                // Reconfigure before each chunk (like native tool)
+                await this.drainBuffer();
+                const configResult = await this.configure();
+                if (!configResult.success) {
+                    this.onLog(`Configure failed at chunk ${chunkIndex + 1}`, 'error');
+                    return {
+                        success: false,
+                        bytesWritten,
+                        error: `Failed to configure before chunk ${chunkIndex + 1}`
+                    };
+                }
+                await this.drainBuffer();
+
+                // Pad chunk data to sector boundary
+                const paddedChunkSize = chunkSectors * sectorSize;
+
+                // Build program command for this chunk
+                // SPOOF MODE: For protected partitions like 'super', device rejects writes with real label.
+                // Native tool uses "BackupGPT" label + "gpt_backup0.bin" filename to bypass protection.
+                // The start_sector is still the REAL partition sector, so data goes to correct location.
+                // 
+                // If spoofLabel/spoofFilename are provided, use them to spoof the device.
+                // Otherwise use normal logic.
+                let finalFilename: string;
+                let finalLabel: string;
+
+                if (spoofLabel && spoofFilename) {
+                    // SPOOF MODE: Pretend to be writing GPT backup, but actually write to partition sector
+                    finalFilename = spoofFilename;  // e.g., "gpt_backup0.bin"
+                    finalLabel = spoofLabel;        // e.g., "BackupGPT"
+                } else if (filename) {
+                    finalFilename = filename;
+                    finalLabel = partitionName;
+                } else if (partofsingleimage) {
+                    finalFilename = `${partitionName}.img`;
+                    finalLabel = partitionName;
+                } else {
+                    finalFilename = `${partitionName}.bin`;
+                    finalLabel = partitionName;
+                }
+
+                const command = buildXmlCommand('program', {
+                    SECTOR_SIZE_IN_BYTES: sectorSize,
+                    file_sector_offset: 0,
+                    filename: finalFilename,
+                    physical_partition_number: lun,
+                    label: finalLabel,  // Use spoofed or real label
+                    start_sector: currentSector.toString(),
+                    num_partition_sectors: chunkSectors.toString(),
+                    // Note: In spoof mode, partofsingleimage is not needed since we're faking BackupGPT
+                    sparse: 'false',
+                });
+
+                this.onLog(`TX: ${command}`, 'debug');
+
+                // Send command
+                const sendResult = await this.usb.transferOut(stringToBytes(command));
+                if (!sendResult.success) {
+                    this.onLog(`Send command failed: ${sendResult.error}`, 'error');
+                    return {
+                        success: false,
+                        bytesWritten,
+                        error: `Send failed at chunk ${chunkIndex + 1}: ${sendResult.error}`
+                    };
+                }
+
+                // Wait for rawmode=true ACK
+                let gotRawMode = false;
+                for (let i = 0; i < 10; i++) {
+                    const response = await this.usb.transferIn(READ_BUFFER_SIZE);
+                    if (response.success && response.data) {
+                        const text = bytesToString(response.data);
+                        if (text.includes('rawmode="true"')) {
+                            gotRawMode = true;
+                            break;
+                        }
+                        if (text.includes('NAK') || text.includes('ERROR')) {
+                            this.onLog(`Device rejected chunk: ${text}`, 'error');
+                            return {
+                                success: false,
+                                bytesWritten,
+                                error: `Device rejected chunk ${chunkIndex + 1}: ${text}`
+                            };
+                        }
+                    }
+                }
+
+                if (!gotRawMode) {
+                    this.onLog('Never got rawmode=true ACK', 'error');
+                    return {
+                        success: false,
+                        bytesWritten,
+                        error: `No rawmode ACK for chunk ${chunkIndex + 1}`
+                    };
+                }
+
+                // Read chunk data from file
+                // Note: file.slice returns a Blob. reading it is async.
+                const blob = file.slice(chunkStart, chunkEnd);
+                const chunkData = new Uint8Array(await blob.arrayBuffer());
+
+                // Pad to sector boundary if needed
+                let dataToSend = chunkData;
+                if (chunkData.length < paddedChunkSize) {
+                    dataToSend = new Uint8Array(paddedChunkSize);
+                    dataToSend.set(chunkData);
+                }
+
+                // Send chunk data in 16MB USB transfers (must stay under WebUSB 32MB limit)
+                // Using 16MB instead of 1MB = 16x fewer await calls = much faster
+                const USB_CHUNK = 16 * 1024 * 1024; // 16MB USB transfer size
+                let chunkOffset = 0;
+                while (chunkOffset < dataToSend.length) {
+                    const usbEnd = Math.min(chunkOffset + USB_CHUNK, dataToSend.length);
+                    // Use subarray instead of slice to avoid memory copy
+                    const usbData = dataToSend.subarray(chunkOffset, usbEnd);
+
+                    const writeResult = await this.usb.transferOut(usbData);
+                    if (!writeResult.success) {
+                        this.onLog(`USB transfer failed: ${writeResult.error}`, 'error');
+                        return {
+                            success: false,
+                            bytesWritten,
+                            error: `USB transfer failed at chunk ${chunkIndex + 1}: ${writeResult.error}`
+                        };
+                    }
+                    chunkOffset = usbEnd;
+                }
+
+                // Wait for ACK
+                const ackResponse = await this.usb.transferInQuick(READ_BUFFER_SIZE, 5000);
+                if (ackResponse.success && ackResponse.data && ackResponse.data.length > 0) {
+                    const text = bytesToString(ackResponse.data);
+                    this.onLog(`RX: ${text.substring(0, 100)}...`, 'debug');
+                    if (text.includes('NAK') || text.includes('ERROR')) {
+                        this.onLog(`Write failed: ${text}`, 'error');
+                        return {
+                            success: false,
+                            bytesWritten,
+                            error: `Chunk ${chunkIndex + 1} write error: ${text}`
+                        };
+                    }
+                }
+
+                await this.drainBuffer();
+
+                bytesWritten += chunkBytes;
+                currentSector += BigInt(chunkSectors);
+
+                // Report overall progress
+                if (onProgress) {
+                    const percent = Math.min(100, Math.round((bytesWritten / totalBytes) * 100));
+                    onProgress(percent);
+                }
+
+                if (chunkIndex % 5 === 0) {
+                    this.onLog(`Chunk ${chunkIndex + 1}/${totalChunks} complete`, 'debug');
+                }
+            }
+        } catch (error) {
+            const msg = error instanceof Error ? error.message : String(error);
+            this.onLog(`Exception in chunked write: ${msg}`, 'error');
+            return { success: false, bytesWritten, error: msg };
+        }
+
+        await this.drainBuffer();
+        this.onLog(`Chunked write complete: ${this.formatSize(BigInt(bytesWritten))}`, 'success');
         return { success: true, bytesWritten };
     }
 
@@ -1071,7 +1478,10 @@ export class FirehoseProtocol {
      */
     private async drainBuffer(): Promise<void> {
         for (let i = 0; i < 5; i++) {
-            const result = await this.usb.transferInQuick(READ_BUFFER_SIZE, 200);
+            // OPTIMIZATION: Shortened timeout from 200ms to 10ms
+            // If buffer is empty (normal case), this was wasting 200ms per call.
+            // We call this multiple times per op, so this saves seconds/minutes total.
+            const result = await this.usb.transferInQuick(READ_BUFFER_SIZE, 10);
             if (!result.success || !result.data || result.data.length === 0) {
                 break;
             }
@@ -1179,14 +1589,7 @@ export class FirehoseProtocol {
         return { success: true };
     }
 
-    /**
-     * Reset the device (soft reset)
-     */
-    async reset(): Promise<FirehoseResponse> {
-        const command = buildXmlCommand('reset');
-        this.onLog('Sending reset command...');
-        return this.sendCommand(command);
-    }
+
 
     /**
      * Power off/reboot the device
@@ -1290,11 +1693,19 @@ export class FirehoseProtocol {
         }
 
         // Read response(s)
+        // Increased retries for first configure after Sahara (device may be slow to respond)
         let fullResponse = '';
-        for (let i = 0; i < 10; i++) {
+        const MAX_RETRIES = 50; // 50 * 100ms = 5 seconds max wait
+        const RETRY_DELAY = 100; // 100ms between retries
+
+        for (let i = 0; i < MAX_RETRIES; i++) {
             const result = await this.usb.transferIn(READ_BUFFER_SIZE);
             if (!result.success || !result.data || result.data.length === 0) {
-                await this.delay(50);
+                // Log every 10 retries to show we're still waiting
+                if (i > 0 && i % 10 === 0) {
+                    this.onLog(`Waiting for response... (${i * RETRY_DELAY}ms)`, 'debug');
+                }
+                await this.delay(RETRY_DELAY);
                 continue;
             }
 
@@ -1399,9 +1810,11 @@ export class FirehoseProtocol {
 
                 partitions.push({
                     name,
+                    lun: 0, // Will be updated by caller if needed
                     startSector: startLBA,
                     endSector: endLBA,
                     sizeInSectors,
+                    size: Number(sizeInBytes),
                     sizeFormatted: this.formatSize(sizeInBytes),
                     typeGuid: this.bytesToGuid(typeGuidBytes),
                     uniqueGuid: this.bytesToGuid(data.slice(entryOffset + 16, entryOffset + 32)),

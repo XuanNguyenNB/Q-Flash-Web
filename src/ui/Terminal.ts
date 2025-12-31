@@ -9,7 +9,8 @@ import type { LogLevel, LogEntry } from '../types';
 export class Terminal {
     private container: HTMLElement;
     private logEntries: LogEntry[] = [];
-    private maxEntries = 1000;
+    private maxEntries = 10000;
+    private showDebug = false;
 
     constructor(containerId: string) {
         const element = document.getElementById(containerId);
@@ -18,6 +19,46 @@ export class Terminal {
         }
         this.container = element;
         this.container.className = 'terminal';
+
+        // Create debug toggle checkbox above terminal
+        this.createDebugToggle();
+    }
+
+    /**
+     * Create debug toggle checkbox
+     */
+    private createDebugToggle(): void {
+        const parent = this.container.parentElement;
+        if (!parent) return;
+
+        const toggleContainer = document.createElement('div');
+        toggleContainer.className = 'terminal-debug-toggle';
+        toggleContainer.innerHTML = `
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-secondary); padding: 4px 8px; cursor: pointer;">
+                <input type="checkbox" id="show-debug-logs" style="cursor: pointer;" />
+                <span>Show DEBUG logs</span>
+            </label>
+        `;
+
+        // Insert before terminal container
+        parent.insertBefore(toggleContainer, this.container);
+
+        // Handle toggle
+        const checkbox = toggleContainer.querySelector('#show-debug-logs') as HTMLInputElement;
+        checkbox.addEventListener('change', () => {
+            this.showDebug = checkbox.checked;
+            this.refreshVisibility();
+        });
+    }
+
+    /**
+     * Refresh visibility of debug entries
+     */
+    private refreshVisibility(): void {
+        const debugLines = this.container.querySelectorAll('.log-debug');
+        debugLines.forEach(line => {
+            (line as HTMLElement).style.display = this.showDebug ? '' : 'none';
+        });
     }
 
     /**
@@ -41,6 +82,11 @@ export class Terminal {
         // Create and append log line
         const line = document.createElement('div');
         line.className = `log-line log-${level}`;
+
+        // Hide debug entries by default
+        if (level === 'debug' && !this.showDebug) {
+            line.style.display = 'none';
+        }
 
         const timestamp = document.createElement('span');
         timestamp.className = 'log-timestamp';

@@ -8,6 +8,7 @@
  * Build an XML command string for Firehose protocol
  */
 export function buildXmlCommand(tagName: string, attributes: Record<string, string | number | boolean> = {}, selfClosing = true): string {
+    // NOTE: We no longer filter empty strings - some devices require filename="" to be sent explicitly
     const attrString = Object.entries(attributes)
         .map(([key, value]) => `${key}="${value}"`)
         .join(' ');

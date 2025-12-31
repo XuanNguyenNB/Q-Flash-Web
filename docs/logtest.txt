@@ -1,0 +1,1645 @@
+[07:32:46]
+28 partition(s) skipped (no file available)
+[07:32:46]
+Flashing 49 partition(s)...
+[07:32:46]
+Starting flash of 49 partition(s) (473.26 GB)...
+[07:32:46]
+Flashing partition: vbmeta_system_a (64 KB)
+[07:32:46]
+Writing partition "vbmeta_system_a" (LUN 0): 4.00 KB
+[07:32:46]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:32:46]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:32:46]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Mode = " /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:32:47]
+Firehose configured successfully
+[07:32:47]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="vbmeta_system_a.bin" physical_partition_number="0" label="vbmeta_system_a" start_sector="8712" num_partition_sectors="1" partofsingleimage="false" sparse="false" /></data>
+[07:32:47]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:vbmeta_system_a, w:1, r:1, e:...
+[07:32:47]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:32:47]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:32:47]
+Got rawmode=true, sending binary data...
+[07:32:47]
+Progress: 100% (4 KB/4 KB) - ETA: 1912607m 6s
+[07:32:47]
+Written 4.00 KB / 4.00 KB
+[07:32:49]
+Write complete: 4.00 KB
+[07:32:49]
+Flash completed: vbmeta_system_a
+[07:32:49]
+Flashing partition: vbmeta_vendor_a (64 KB)
+[07:32:49]
+Writing partition "vbmeta_vendor_a" (LUN 0): 4.00 KB
+[07:32:49]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:32:49]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:32:50]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:32:50]
+Firehose configured successfully
+[07:32:50]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="vbmeta_vendor_a.bin" physical_partition_number="0" label="vbmeta_vendor_a" start_sector="8744" num_partition_sectors="1" partofsingleimage="false" sparse="false" /></data>
+[07:32:50]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:vbmeta_vendor_a, w:1, r:1, e:...
+[07:32:50]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:32:50]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:32:50]
+Got rawmode=true, sending binary data...
+[07:32:50]
+Progress: 100% (4 KB/4 KB) - ETA: 475932m
+[07:32:50]
+Written 4.00 KB / 4.00 KB
+[07:32:52]
+Write complete: 4.00 KB
+[07:32:52]
+Flash completed: vbmeta_vendor_a
+[07:32:52]
+Flashing partition: vbmeta_vendor_b (64 KB)
+[07:32:52]
+Writing partition "vbmeta_vendor_b" (LUN 0): 4.00 KB
+[07:32:52]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:32:52]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:32:53]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:32:53]
+Firehose configured successfully
+[07:32:53]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="vbmeta_vendor_b.bin" physical_partition_number="0" label="vbmeta_vendor_b" start_sector="8760" num_partition_sectors="1" partofsingleimage="false" sparse="false" /></data>
+[07:32:53]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:vbmeta_vendor_b, w:1, r:1, e:...
+[07:32:53]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:32:53]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:32:53]
+Got rawmode=true, sending binary data...
+[07:32:53]
+Progress: 100% (4 KB/4 KB) - ETA: 434025m 26s
+[07:32:53]
+Written 4.00 KB / 4.00 KB
+[07:32:55]
+Write complete: 4.00 KB
+[07:32:55]
+Flash completed: vbmeta_vendor_b
+[07:32:55]
+Flashing partition: metadata (64 MB)
+[07:32:55]
+Writing partition "metadata" (LUN 0): 64.00 MB
+[07:32:56]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:32:56]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:32:56]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:32:56]
+Firehose configured successfully
+[07:32:56]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="metadata.bin" physical_partition_number="0" label="metadata" start_sector="8776" num_partition_sectors="16384" partofsingleimage="false" sparse="false" /></data>
+[07:32:56]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:metadata, w:1, r:1, e:1, c:0,...
+[07:32:56]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:32:56]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:32:56]
+Got rawmode=true, sending binary data...
+[07:32:56]
+Progress: 50% (32 MB/64 MB) - ETA: 2575m 9s
+[07:32:57]
+Progress: 100% (64 MB/64 MB) - ETA: 1318m 26s
+[07:32:57]
+Written 64.00 MB / 64.00 MB
+[07:32:58]
+Cancelling flash...
+[07:32:59]
+Write complete: 64.00 MB
+[07:32:59]
+Flash completed: metadata
+[07:32:59]
+Flash cancelled by user
+[07:33:09]
+28 partition(s) skipped (no file available)
+[07:33:09]
+Flashing 49 partition(s)...
+[07:33:09]
+Starting flash of 49 partition(s) (473.26 GB)...
+[07:33:09]
+Flashing partition: vbmeta_system_a (64 KB)
+[07:33:09]
+Writing partition "vbmeta_system_a" (LUN 0): 4.00 KB
+[07:33:09]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:09]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:10]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:10]
+Firehose configured successfully
+[07:33:10]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="vbmeta_system_a.bin" physical_partition_number="0" label="vbmeta_system_a" start_sector="8712" num_partition_sectors="1" partofsingleimage="false" sparse="false" /></data>
+[07:33:10]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:vbmeta_system_a, w:1, r:1, e:...
+[07:33:10]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:10]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:10]
+Got rawmode=true, sending binary data...
+[07:33:10]
+Progress: 100% (4 KB/4 KB) - ETA: 2092495m 34s
+[07:33:10]
+Written 4.00 KB / 4.00 KB
+[07:33:12]
+Write complete: 4.00 KB
+[07:33:12]
+Flash completed: vbmeta_system_a
+[07:33:12]
+Flashing partition: vbmeta_vendor_a (64 KB)
+[07:33:12]
+Writing partition "vbmeta_vendor_a" (LUN 0): 4.00 KB
+[07:33:13]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:13]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:13]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:13]
+Firehose configured successfully
+[07:33:13]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="vbmeta_vendor_a.bin" physical_partition_number="0" label="vbmeta_vendor_a" start_sector="8744" num_partition_sectors="1" partofsingleimage="false" sparse="false" /></data>
+[07:33:13]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:vbmeta_vendor_a, w:1, r:1, e:...
+[07:33:13]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:13]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:13]
+Got rawmode=true, sending binary data...
+[07:33:13]
+Progress: 100% (4 KB/4 KB) - ETA: 492838m 21s
+[07:33:13]
+Written 4.00 KB / 4.00 KB
+[07:33:15]
+Write complete: 4.00 KB
+[07:33:15]
+Flash completed: vbmeta_vendor_a
+[07:33:15]
+Flashing partition: vbmeta_vendor_b (64 KB)
+[07:33:16]
+Writing partition "vbmeta_vendor_b" (LUN 0): 4.00 KB
+[07:33:16]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:16]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:16]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:16]
+Firehose configured successfully
+[07:33:16]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="vbmeta_vendor_b.bin" physical_partition_number="0" label="vbmeta_vendor_b" start_sector="8760" num_partition_sectors="1" partofsingleimage="false" sparse="false" /></data>
+[07:33:16]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:vbmeta_vendor_b, w:1, r:1, e:...
+[07:33:16]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:16]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:16]
+Got rawmode=true, sending binary data...
+[07:33:16]
+Progress: 100% (4 KB/4 KB) - ETA: 443674m 37s
+[07:33:16]
+Written 4.00 KB / 4.00 KB
+[07:33:18]
+Write complete: 4.00 KB
+[07:33:18]
+Flash completed: vbmeta_vendor_b
+[07:33:18]
+Flashing partition: metadata (64 MB)
+[07:33:19]
+Writing partition "metadata" (LUN 0): 64.00 MB
+[07:33:19]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:19]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:19]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:19]
+Firehose configured successfully
+[07:33:19]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="metadata.bin" physical_partition_number="0" label="metadata" start_sector="8776" num_partition_sectors="16384" partofsingleimage="false" sparse="false" /></data>
+[07:33:19]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:metadata, w:1, r:1, e:1, c:0,...
+[07:33:19]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:19]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:19]
+Got rawmode=true, sending binary data...
+[07:33:20]
+Progress: 50% (32 MB/64 MB) - ETA: 2639m 39s
+[07:33:20]
+Progress: 100% (64 MB/64 MB) - ETA: 1351m 39s
+[07:33:20]
+Written 64.00 MB / 64.00 MB
+[07:33:22]
+Write complete: 64.00 MB
+[07:33:22]
+Flash completed: metadata
+[07:33:22]
+Flashing partition: splash_odm (32.64 MB)
+[07:33:22]
+Writing partition "splash_odm" (LUN 0): 14.56 MB
+[07:33:22]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:22]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:23]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:23]
+Firehose configured successfully
+[07:33:23]
+Padding 15263897 bytes to 15265792 bytes (sector aligned)
+[07:33:23]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="splash_odm.bin" physical_partition_number="0" label="splash_odm" start_sector="90696" num_partition_sectors="3727" partofsingleimage="false" sparse="false" /></data>
+[07:33:23]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:splash_odm, w:1, r:1, e:1, c:...
+[07:33:23]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:23]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:23]
+Got rawmode=true, sending binary data...
+[07:33:23]
+Progress: 100% (14.56 MB/14.56 MB) - ETA: 1440m 5s
+[07:33:23]
+Written 14.56 MB / 14.56 MB
+[07:33:25]
+Write complete: 14.56 MB
+[07:33:25]
+Flash completed: splash_odm
+[07:33:25]
+Flashing partition: super (16.5 GB)
+[07:33:26]
+Failed to flash super: The requested file could not be read, typically due to permission problems that have occurred after a reference to a file was acquired.
+
+[07:33:26]
+Flashing partition: userdata (455.33 GB)
+[07:33:27]
+Writing partition "userdata" (LUN 0): 2.79 MB
+[07:33:27]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:27]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:27]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:27]
+Firehose configured successfully
+[07:33:27]
+Padding 2924836 bytes to 2928640 bytes (sector aligned)
+[07:33:27]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="userdata.bin" physical_partition_number="0" label="userdata" start_sector="4424428" num_partition_sectors="715" partofsingleimage="false" sparse="false" /></data>
+[07:33:27]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:userdata, w:1, r:1, e:1, c:0,...
+[07:33:27]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:27]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:27]
+Got rawmode=true, sending binary data...
+[07:33:27]
+Progress: 100% (2.79 MB/2.79 MB) - ETA: 1482m 38s
+[07:33:27]
+Written 2.79 MB / 2.79 MB
+[07:33:30]
+Write complete: 2.79 MB
+[07:33:30]
+Flash completed: userdata
+[07:33:30]
+Flashing partition: xbl_a (6 MB)
+[07:33:30]
+Writing partition "xbl_a" (LUN 1): 1.07 MB
+[07:33:30]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:30]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:30]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:30]
+Firehose configured successfully
+[07:33:30]
+Padding 1117008 bytes to 1118208 bytes (sector aligned)
+[07:33:30]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="xbl_a.bin" physical_partition_number="1" label="xbl_a" start_sector="6" num_partition_sectors="273" partofsingleimage="false" sparse="false" /></data>
+[07:33:30]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:xbl_a, w:1, r:1, e:1, c:0, s:...
+[07:33:30]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:30]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:30]
+Got rawmode=true, sending binary data...
+[07:33:31]
+Progress: 100% (1.07 MB/1.07 MB) - ETA: 1s
+[07:33:31]
+Written 1.07 MB / 1.07 MB
+[07:33:33]
+Write complete: 1.07 MB
+[07:33:33]
+Flash completed: xbl_a
+[07:33:33]
+Flashing partition: xbl_config_a (300 KB)
+[07:33:33]
+Writing partition "xbl_config_a" (LUN 1): 229.44 KB
+[07:33:33]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:33]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:33]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:33]
+Firehose configured successfully
+[07:33:33]
+Padding 234944 bytes to 237568 bytes (sector aligned)
+[07:33:33]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="xbl_config_a.bin" physical_partition_number="1" label="xbl_config_a" start_sector="1542" num_partition_sectors="58" partofsingleimage="false" sparse="false" /></data>
+[07:33:33]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:xbl_config_a, w:1, r:1, e:1, ...
+[07:33:33]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:34]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:34]
+Got rawmode=true, sending binary data...
+[07:33:34]
+Progress: 100% (229.44 KB/229.44 KB) - ETA: 1s
+[07:33:34]
+Written 232.00 KB / 232.00 KB
+[07:33:36]
+Write complete: 232.00 KB
+[07:33:36]
+Flash completed: xbl_config_a
+[07:33:36]
+Flashing partition: apdp (256 KB)
+[07:33:36]
+Writing partition "apdp" (LUN 1): 11.80 KB
+[07:33:36]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:36]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:36]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:36]
+Firehose configured successfully
+[07:33:36]
+Padding 12088 bytes to 12288 bytes (sector aligned)
+[07:33:36]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="apdp.bin" physical_partition_number="1" label="apdp" start_sector="1633" num_partition_sectors="3" partofsingleimage="false" sparse="false" /></data>
+[07:33:37]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:apdp, w:1, r:1, e:1, c:0, s:0...
+[07:33:37]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:37]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:37]
+Got rawmode=true, sending binary data...
+[07:33:37]
+Progress: 100% (11.8 KB/11.8 KB) - ETA: 2s
+[07:33:37]
+Written 12.00 KB / 12.00 KB
+[07:33:39]
+Write complete: 12.00 KB
+[07:33:39]
+Flash completed: apdp
+[07:33:39]
+Flashing partition: apdpb (256 KB)
+[07:33:39]
+Writing partition "apdpb" (LUN 2): 11.80 KB
+[07:33:39]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:39]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:39]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:40]
+Firehose configured successfully
+[07:33:40]
+Padding 12088 bytes to 12288 bytes (sector aligned)
+[07:33:40]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="apdpb.bin" physical_partition_number="2" label="apdpb" start_sector="1633" num_partition_sectors="3" partofsingleimage="false" sparse="false" /></data>
+[07:33:40]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:apdpb, w:1, r:1, e:1, c:0, s:...
+[07:33:40]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:40]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:40]
+Got rawmode=true, sending binary data...
+[07:33:40]
+Progress: 100% (11.8 KB/11.8 KB) - ETA: 2s
+[07:33:40]
+Written 12.00 KB / 12.00 KB
+[07:33:42]
+Write complete: 12.00 KB
+[07:33:42]
+Flash completed: apdpb
+[07:33:42]
+Flashing partition: ddr (1 MB)
+[07:33:42]
+Writing partition "ddr" (LUN 3): 20.00 KB
+[07:33:43]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:43]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:43]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:43]
+Firehose configured successfully
+[07:33:43]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="ddr.bin" physical_partition_number="3" label="ddr" start_sector="64" num_partition_sectors="5" partofsingleimage="false" sparse="false" /></data>
+[07:33:43]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:ddr, w:1, r:1, e:1, c:0, s:0,...
+[07:33:43]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:43]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:43]
+Got rawmode=true, sending binary data...
+[07:33:43]
+Progress: 100% (20 KB/20 KB) - ETA: 2s
+[07:33:43]
+Written 20.00 KB / 20.00 KB
+[07:33:45]
+Write complete: 20.00 KB
+[07:33:46]
+Flash completed: ddr
+[07:33:46]
+Flashing partition: engineering_cdt_a (1 MB)
+[07:33:46]
+Writing partition "engineering_cdt_a" (LUN 3): 1.00 MB
+[07:33:46]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:46]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:46]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:46]
+Firehose configured successfully
+[07:33:46]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="engineering_cdt_a.bin" physical_partition_number="3" label="engineering_cdt_a" start_sector="320" num_partition_sectors="256" partofsingleimage="false" sparse="false" /></data>
+[07:33:46]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:engineering_cdt_a, w:1, r:1, ...
+[07:33:46]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:46]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:46]
+Got rawmode=true, sending binary data...
+[07:33:47]
+Progress: 100% (1 MB/1 MB) - ETA: 2s
+[07:33:47]
+Written 1.00 MB / 1.00 MB
+[07:33:49]
+Write complete: 1.00 MB
+[07:33:49]
+Flash completed: engineering_cdt_a
+[07:33:49]
+Flashing partition: engineering_cdt_b (1 MB)
+[07:33:49]
+Writing partition "engineering_cdt_b" (LUN 3): 1.00 MB
+[07:33:49]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:49]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:49]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:49]
+Firehose configured successfully
+[07:33:49]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="engineering_cdt_b.bin" physical_partition_number="3" label="engineering_cdt_b" start_sector="612" num_partition_sectors="256" partofsingleimage="false" sparse="false" /></data>
+[07:33:50]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:engineering_cdt_b, w:1, r:1, ...
+[07:33:50]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:50]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:50]
+Got rawmode=true, sending binary data...
+[07:33:50]
+Progress: 100% (1 MB/1 MB) - ETA: 2s
+[07:33:50]
+Written 1.00 MB / 1.00 MB
+[07:33:52]
+Write complete: 1.00 MB
+[07:33:52]
+Flash completed: engineering_cdt_b
+[07:33:52]
+Flashing partition: uefi_a (5 MB)
+[07:33:52]
+Writing partition "uefi_a" (LUN 4): 3.01 MB
+[07:33:52]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:52]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:52]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:52]
+Firehose configured successfully
+[07:33:53]
+Padding 3154972 bytes to 3158016 bytes (sector aligned)
+[07:33:53]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="uefi_a.bin" physical_partition_number="4" label="uefi_a" start_sector="6" num_partition_sectors="771" partofsingleimage="false" sparse="false" /></data>
+[07:33:53]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:uefi_a, w:1, r:1, e:1, c:0, s...
+[07:33:53]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:53]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:53]
+Got rawmode=true, sending binary data...
+[07:33:53]
+Progress: 100% (3.01 MB/3.01 MB) - ETA: 2s
+[07:33:53]
+Written 3.01 MB / 3.01 MB
+[07:33:55]
+Write complete: 3.01 MB
+[07:33:55]
+Flash completed: uefi_a
+[07:33:55]
+Flashing partition: aop_a (512 KB)
+[07:33:55]
+Writing partition "aop_a" (LUN 4): 327.06 KB
+[07:33:56]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:56]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:56]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:56]
+Firehose configured successfully
+[07:33:56]
+Padding 334912 bytes to 335872 bytes (sector aligned)
+[07:33:56]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="aop_a.bin" physical_partition_number="4" label="aop_a" start_sector="1286" num_partition_sectors="82" partofsingleimage="false" sparse="false" /></data>
+[07:33:56]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:aop_a, w:1, r:1, e:1, c:0, s:...
+[07:33:56]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:33:56]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:33:56]
+Got rawmode=true, sending binary data...
+[07:33:57]
+Progress: 100% (327.06 KB/327.06 KB) - ETA: 2s
+[07:33:57]
+Written 328.00 KB / 328.00 KB
+[07:33:59]
+Write complete: 328.00 KB
+[07:33:59]
+Flash completed: aop_a
+[07:33:59]
+Flashing partition: aop_config_a (512 KB)
+[07:33:59]
+Writing partition "aop_config_a" (LUN 4): 24.44 KB
+[07:33:59]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:33:59]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:33:59]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:33:59]
+Firehose configured successfully
+[07:33:59]
+Padding 25028 bytes to 28672 bytes (sector aligned)
+[07:33:59]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="aop_config_a.bin" physical_partition_number="4" label="aop_config_a" start_sector="1414" num_partition_sectors="7" partofsingleimage="false" sparse="false" /></data>
+[07:33:59]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:aop_config_a, w:1, r:1, e:1, ...
+[07:34:00]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:00]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:00]
+Got rawmode=true, sending binary data...
+[07:34:00]
+Progress: 100% (24.44 KB/24.44 KB) - ETA: 2s
+[07:34:00]
+Written 28.00 KB / 28.00 KB
+[07:34:02]
+Write complete: 28.00 KB
+[07:34:02]
+Flash completed: aop_config_a
+[07:34:02]
+Flashing partition: tz_a (4 MB)
+[07:34:02]
+Writing partition "tz_a" (LUN 4): 3.95 MB
+[07:34:02]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:02]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:02]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:03]
+Firehose configured successfully
+[07:34:03]
+Padding 4137440 bytes to 4141056 bytes (sector aligned)
+[07:34:03]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="tz_a.bin" physical_partition_number="4" label="tz_a" start_sector="1542" num_partition_sectors="1011" partofsingleimage="false" sparse="false" /></data>
+[07:34:03]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:tz_a, w:1, r:1, e:1, c:0, s:0...
+[07:34:03]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:03]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:03]
+Got rawmode=true, sending binary data...
+[07:34:03]
+Progress: 100% (3.95 MB/3.95 MB) - ETA: 3s
+[07:34:03]
+Written 3.95 MB / 3.95 MB
+[07:34:05]
+Write complete: 3.95 MB
+[07:34:06]
+Flash completed: tz_a
+[07:34:06]
+Flashing partition: hyp_a (8 MB)
+[07:34:06]
+Writing partition "hyp_a" (LUN 4): 1.57 MB
+[07:34:06]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:06]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:06]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:06]
+Firehose configured successfully
+[07:34:06]
+Padding 1641344 bytes to 1642496 bytes (sector aligned)
+[07:34:06]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="hyp_a.bin" physical_partition_number="4" label="hyp_a" start_sector="2566" num_partition_sectors="401" partofsingleimage="false" sparse="false" /></data>
+[07:34:06]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:hyp_a, w:1, r:1, e:1, c:0, s:...
+[07:34:07]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:07]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:07]
+Got rawmode=true, sending binary data...
+[07:34:07]
+Progress: 100% (1.57 MB/1.57 MB) - ETA: 3s
+[07:34:07]
+Written 1.57 MB / 1.57 MB
+[07:34:09]
+Write complete: 1.57 MB
+[07:34:09]
+Flash completed: hyp_a
+[07:34:09]
+Flashing partition: modem_a (350 MB)
+[07:34:10]
+Writing partition "modem_a" (LUN 4): 298.61 MB
+[07:34:10]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:10]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:10]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:10]
+Firehose configured successfully
+[07:34:11]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="modem_a.bin" physical_partition_number="4" label="modem_a" start_sector="4614" num_partition_sectors="76443" partofsingleimage="false" sparse="false" /></data>
+[07:34:11]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:modem_a, w:1, r:1, e:1, c:0, ...
+[07:34:11]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:11]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:11]
+Got rawmode=true, sending binary data...
+[07:34:11]
+Progress: 10% (32.85 MB/298.61 MB) - ETA: 3s
+[07:34:12]
+Progress: 20% (62.71 MB/298.61 MB) - ETA: 3s
+[07:34:12]
+Written 64.00 MB / 298.61 MB
+[07:34:12]
+Written 112.00 MB / 298.61 MB
+[07:34:13]
+Written 160.00 MB / 298.61 MB
+[07:34:13]
+Written 208.00 MB / 298.61 MB
+[07:34:13]
+Written 256.00 MB / 298.61 MB
+[07:34:14]
+Progress: 90% (271.73 MB/298.61 MB) - ETA: 3s
+[07:34:14]
+Progress: 100% (298.61 MB/298.61 MB) - ETA: 3s
+[07:34:16]
+Write complete: 298.61 MB
+[07:34:16]
+Flash completed: modem_a
+[07:34:16]
+Flashing partition: bluetooth_a (6 MB)
+[07:34:16]
+Writing partition "bluetooth_a" (LUN 4): 1.39 MB
+[07:34:16]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:16]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:17]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:17]
+Firehose configured successfully
+[07:34:17]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="bluetooth_a.bin" physical_partition_number="4" label="bluetooth_a" start_sector="94214" num_partition_sectors="355" partofsingleimage="false" sparse="false" /></data>
+[07:34:17]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:bluetooth_a, w:1, r:1, e:1, c...
+[07:34:17]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:17]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:17]
+Got rawmode=true, sending binary data...
+[07:34:17]
+Progress: 100% (1.39 MB/1.39 MB) - ETA: 3s
+[07:34:17]
+Written 1.39 MB / 1.39 MB
+[07:34:20]
+Write complete: 1.39 MB
+[07:34:20]
+Flash completed: bluetooth_a
+[07:34:20]
+Flashing partition: abl_a (1 MB)
+[07:34:20]
+Writing partition "abl_a" (LUN 4): 271.80 KB
+[07:34:20]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:20]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:20]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:20]
+Firehose configured successfully
+[07:34:20]
+Padding 278328 bytes to 278528 bytes (sector aligned)
+[07:34:20]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="abl_a.bin" physical_partition_number="4" label="abl_a" start_sector="104966" num_partition_sectors="68" partofsingleimage="false" sparse="false" /></data>
+[07:34:21]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:abl_a, w:1, r:1, e:1, c:0, s:...
+[07:34:21]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:21]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:21]
+Got rawmode=true, sending binary data...
+[07:34:21]
+Progress: 100% (271.8 KB/271.8 KB) - ETA: 3s
+[07:34:21]
+Written 272.00 KB / 272.00 KB
+[07:34:23]
+Write complete: 272.00 KB
+[07:34:23]
+Flash completed: abl_a
+[07:34:23]
+Flashing partition: dsp_a (64 MB)
+[07:34:23]
+Writing partition "dsp_a" (LUN 4): 64.00 MB
+[07:34:24]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:24]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:24]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:24]
+Firehose configured successfully
+[07:34:24]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="dsp_a.bin" physical_partition_number="4" label="dsp_a" start_sector="105222" num_partition_sectors="16384" partofsingleimage="false" sparse="false" /></data>
+[07:34:24]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:dsp_a, w:1, r:1, e:1, c:0, s:...
+[07:34:24]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:25]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:25]
+Got rawmode=true, sending binary data...
+[07:34:25]
+Progress: 50% (32 MB/64 MB) - ETA: 3s
+[07:34:25]
+Progress: 100% (64 MB/64 MB) - ETA: 3s
+[07:34:25]
+Written 64.00 MB / 64.00 MB
+[07:34:27]
+Write complete: 64.00 MB
+[07:34:27]
+Flash completed: dsp_a
+[07:34:27]
+Flashing partition: keymaster_a (512 KB)
+[07:34:27]
+Writing partition "keymaster_a" (LUN 4): 418.97 KB
+[07:34:28]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:28]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:28]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:28]
+Firehose configured successfully
+[07:34:28]
+Padding 429024 bytes to 430080 bytes (sector aligned)
+[07:34:28]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="keymaster_a.bin" physical_partition_number="4" label="keymaster_a" start_sector="121606" num_partition_sectors="105" partofsingleimage="false" sparse="false" /></data>
+[07:34:28]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:keymaster_a, w:1, r:1, e:1, c...
+[07:34:28]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:28]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:28]
+Got rawmode=true, sending binary data...
+[07:34:29]
+Progress: 100% (418.97 KB/418.97 KB) - ETA: 4s
+[07:34:29]
+Written 420.00 KB / 420.00 KB
+[07:34:31]
+Write complete: 420.00 KB
+[07:34:31]
+Flash completed: keymaster_a
+[07:34:31]
+Flashing partition: boot_a (192 MB)
+[07:34:31]
+Writing partition "boot_a" (LUN 4): 192.00 MB
+[07:34:31]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:31]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:32]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:32]
+Firehose configured successfully
+[07:34:32]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="boot_a.bin" physical_partition_number="4" label="boot_a" start_sector="121734" num_partition_sectors="49152" partofsingleimage="false" sparse="false" /></data>
+[07:34:32]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:boot_a, w:1, r:1, e:1, c:0, s...
+[07:34:32]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:32]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:32]
+Got rawmode=true, sending binary data...
+[07:34:33]
+Written 64.00 MB / 192.00 MB
+[07:34:33]
+Progress: 50% (96 MB/192 MB) - ETA: 4s
+[07:34:33]
+Written 112.00 MB / 192.00 MB
+[07:34:34]
+Written 160.00 MB / 192.00 MB
+[07:34:34]
+Progress: 100% (192 MB/192 MB) - ETA: 4s
+[07:34:36]
+Write complete: 192.00 MB
+[07:34:36]
+Flash completed: boot_a
+[07:34:36]
+Flashing partition: devcfg_a (128 KB)
+[07:34:37]
+Writing partition "devcfg_a" (LUN 4): 56.44 KB
+[07:34:37]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:37]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:37]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:37]
+Firehose configured successfully
+[07:34:37]
+Padding 57796 bytes to 61440 bytes (sector aligned)
+[07:34:37]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="devcfg_a.bin" physical_partition_number="4" label="devcfg_a" start_sector="170886" num_partition_sectors="15" partofsingleimage="false" sparse="false" /></data>
+[07:34:37]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:devcfg_a, w:1, r:1, e:1, c:0,...
+[07:34:37]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:38]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:38]
+Got rawmode=true, sending binary data...
+[07:34:38]
+Progress: 100% (56.44 KB/56.44 KB) - ETA: 4s
+[07:34:38]
+Written 60.00 KB / 60.00 KB
+[07:34:40]
+Write complete: 60.00 KB
+[07:34:40]
+Flash completed: devcfg_a
+[07:34:40]
+Flashing partition: qupfw_a (80 KB)
+[07:34:40]
+Writing partition "qupfw_a" (LUN 4): 59.16 KB
+[07:34:40]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:40]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:41]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:41]
+Firehose configured successfully
+[07:34:41]
+Padding 60576 bytes to 61440 bytes (sector aligned)
+[07:34:41]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="qupfw_a.bin" physical_partition_number="4" label="qupfw_a" start_sector="170918" num_partition_sectors="15" partofsingleimage="false" sparse="false" /></data>
+[07:34:41]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:qupfw_a, w:1, r:1, e:1, c:0, ...
+[07:34:41]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:41]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:41]
+Got rawmode=true, sending binary data...
+[07:34:41]
+Progress: 100% (59.16 KB/59.16 KB) - ETA: 4s
+[07:34:41]
+Written 60.00 KB / 60.00 KB
+[07:34:43]
+Write complete: 60.00 KB
+[07:34:44]
+Flash completed: qupfw_a
+[07:34:44]
+Flashing partition: vbmeta_a (64 KB)
+[07:34:44]
+Writing partition "vbmeta_a" (LUN 4): 12.00 KB
+[07:34:44]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:44]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:44]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:44]
+Firehose configured successfully
+[07:34:45]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="vbmeta_a.bin" physical_partition_number="4" label="vbmeta_a" start_sector="170938" num_partition_sectors="3" partofsingleimage="false" sparse="false" /></data>
+[07:34:45]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:vbmeta_a, w:1, r:1, e:1, c:0,...
+[07:34:45]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:45]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:45]
+Got rawmode=true, sending binary data...
+[07:34:45]
+Progress: 100% (12 KB/12 KB) - ETA: 4s
+[07:34:45]
+Written 12.00 KB / 12.00 KB
+[07:34:47]
+Write complete: 12.00 KB
+[07:34:47]
+Flash completed: vbmeta_a
+[07:34:47]
+Flashing partition: dtbo_a (24 MB)
+[07:34:48]
+Writing partition "dtbo_a" (LUN 4): 24.00 MB
+[07:34:48]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:48]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:48]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:48]
+Firehose configured successfully
+[07:34:48]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="dtbo_a.bin" physical_partition_number="4" label="dtbo_a" start_sector="170954" num_partition_sectors="6144" partofsingleimage="false" sparse="false" /></data>
+[07:34:49]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:dtbo_a, w:1, r:1, e:1, c:0, s...
+[07:34:49]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:49]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:49]
+Got rawmode=true, sending binary data...
+[07:34:49]
+Progress: 100% (24 MB/24 MB) - ETA: 4s
+[07:34:51]
+Write complete: 24.00 MB
+[07:34:51]
+Flash completed: dtbo_a
+[07:34:51]
+Flashing partition: uefisecapp_a (2 MB)
+[07:34:52]
+Writing partition "uefisecapp_a" (LUN 4): 192.09 KB
+[07:34:52]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:52]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:52]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:52]
+Firehose configured successfully
+[07:34:52]
+Padding 196696 bytes to 200704 bytes (sector aligned)
+[07:34:52]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="uefisecapp_a.bin" physical_partition_number="4" label="uefisecapp_a" start_sector="177098" num_partition_sectors="49" partofsingleimage="false" sparse="false" /></data>
+[07:34:52]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:uefisecapp_a, w:1, r:1, e:1, ...
+[07:34:53]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:53]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:53]
+Got rawmode=true, sending binary data...
+[07:34:53]
+Progress: 100% (192.09 KB/192.09 KB) - ETA: 4s
+[07:34:53]
+Written 196.00 KB / 196.00 KB
+[07:34:55]
+Write complete: 196.00 KB
+[07:34:55]
+Flash completed: uefisecapp_a
+[07:34:55]
+Flashing partition: imagefv_a (2 MB)
+[07:34:55]
+Writing partition "imagefv_a" (LUN 4): 103.80 KB
+[07:34:56]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:56]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:56]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:34:56]
+Firehose configured successfully
+[07:34:56]
+Padding 106296 bytes to 106496 bytes (sector aligned)
+[07:34:56]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="imagefv_a.bin" physical_partition_number="4" label="imagefv_a" start_sector="177610" num_partition_sectors="26" partofsingleimage="false" sparse="false" /></data>
+[07:34:56]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:imagefv_a, w:1, r:1, e:1, c:0...
+[07:34:56]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:34:57]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:34:57]
+Got rawmode=true, sending binary data...
+[07:34:57]
+Progress: 100% (103.8 KB/103.8 KB) - ETA: 5s
+[07:34:57]
+Written 104.00 KB / 104.00 KB
+[07:34:59]
+Write complete: 104.00 KB
+[07:34:59]
+Flash completed: imagefv_a
+[07:34:59]
+Flashing partition: shrm_a (256 KB)
+[07:34:59]
+Writing partition "shrm_a" (LUN 4): 134.73 KB
+[07:34:59]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:34:59]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:34:59]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:00]
+Firehose configured successfully
+[07:35:00]
+Padding 137968 bytes to 139264 bytes (sector aligned)
+[07:35:00]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="shrm_a.bin" physical_partition_number="4" label="shrm_a" start_sector="178122" num_partition_sectors="34" partofsingleimage="false" sparse="false" /></data>
+[07:35:00]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:shrm_a, w:1, r:1, e:1, c:0, s...
+[07:35:00]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:00]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:00]
+Got rawmode=true, sending binary data...
+[07:35:00]
+Progress: 100% (134.73 KB/134.73 KB) - ETA: 5s
+[07:35:00]
+Written 136.00 KB / 136.00 KB
+[07:35:02]
+Write complete: 136.00 KB
+[07:35:03]
+Flash completed: shrm_a
+[07:35:03]
+Flashing partition: cpucp_a (1 MB)
+[07:35:03]
+Writing partition "cpucp_a" (LUN 4): 247.20 KB
+[07:35:03]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:03]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:03]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:03]
+Firehose configured successfully
+[07:35:04]
+Padding 253136 bytes to 253952 bytes (sector aligned)
+[07:35:04]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="cpucp_a.bin" physical_partition_number="4" label="cpucp_a" start_sector="315686" num_partition_sectors="62" partofsingleimage="false" sparse="false" /></data>
+[07:35:04]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:cpucp_a, w:1, r:1, e:1, c:0, ...
+[07:35:04]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:04]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:04]
+Got rawmode=true, sending binary data...
+[07:35:04]
+Progress: 100% (247.2 KB/247.2 KB) - ETA: 5s
+[07:35:04]
+Written 248.00 KB / 248.00 KB
+[07:35:06]
+Write complete: 248.00 KB
+[07:35:06]
+Flash completed: cpucp_a
+[07:35:06]
+Flashing partition: featenabler_a (128 KB)
+[07:35:07]
+Writing partition "featenabler_a" (LUN 4): 102.97 KB
+[07:35:07]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:07]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:07]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:07]
+Firehose configured successfully
+[07:35:07]
+Padding 105440 bytes to 106496 bytes (sector aligned)
+[07:35:07]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="featenabler_a.bin" physical_partition_number="4" label="featenabler_a" start_sector="315942" num_partition_sectors="26" partofsingleimage="false" sparse="false" /></data>
+[07:35:07]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:featenabler_a, w:1, r:1, e:1,...
+[07:35:08]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:08]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:08]
+Got rawmode=true, sending binary data...
+[07:35:08]
+Progress: 100% (102.97 KB/102.97 KB) - ETA: 5s
+[07:35:08]
+Written 104.00 KB / 104.00 KB
+[07:35:10]
+Write complete: 104.00 KB
+[07:35:10]
+Flash completed: featenabler_a
+[07:35:10]
+Flashing partition: vendor_boot_a (192 MB)
+[07:35:11]
+Writing partition "vendor_boot_a" (LUN 4): 192.00 MB
+[07:35:11]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:11]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:11]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:11]
+Firehose configured successfully
+[07:35:11]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="vendor_boot_a.bin" physical_partition_number="4" label="vendor_boot_a" start_sector="315974" num_partition_sectors="49152" partofsingleimage="false" sparse="false" /></data>
+[07:35:12]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:vendor_boot_a, w:1, r:1, e:1,...
+[07:35:12]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:12]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:12]
+Got rawmode=true, sending binary data...
+[07:35:12]
+Written 64.00 MB / 192.00 MB
+[07:35:13]
+Progress: 50% (96 MB/192 MB) - ETA: 5s
+[07:35:13]
+Written 112.00 MB / 192.00 MB
+[07:35:13]
+Written 160.00 MB / 192.00 MB
+[07:35:14]
+Progress: 100% (192 MB/192 MB) - ETA: 5s
+[07:35:16]
+Write complete: 192.00 MB
+[07:35:16]
+Flash completed: vendor_boot_a
+[07:35:16]
+Flashing partition: oplus_sec_a (10 MB)
+[07:35:16]
+Writing partition "oplus_sec_a" (LUN 4): 848.09 KB
+[07:35:16]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:16]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:16]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:17]
+Firehose configured successfully
+[07:35:17]
+Padding 868440 bytes to 872448 bytes (sector aligned)
+[07:35:17]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="oplus_sec_a.bin" physical_partition_number="4" label="oplus_sec_a" start_sector="372870" num_partition_sectors="213" partofsingleimage="false" sparse="false" /></data>
+[07:35:17]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:oplus_sec_a, w:1, r:1, e:1, c...
+[07:35:17]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:17]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:17]
+Got rawmode=true, sending binary data...
+[07:35:18]
+Progress: 100% (848.09 KB/848.09 KB) - ETA: 5s
+[07:35:18]
+Written 852.00 KB / 852.00 KB
+[07:35:20]
+Write complete: 852.00 KB
+[07:35:20]
+Flash completed: oplus_sec_a
+[07:35:20]
+Flashing partition: recovery_a (100 MB)
+[07:35:20]
+Writing partition "recovery_a" (LUN 4): 100.00 MB
+[07:35:21]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:21]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:21]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:21]
+Firehose configured successfully
+[07:35:21]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="recovery_a.bin" physical_partition_number="4" label="recovery_a" start_sector="375430" num_partition_sectors="25600" partofsingleimage="false" sparse="false" /></data>
+[07:35:21]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:recovery_a, w:1, r:1, e:1, c:...
+[07:35:21]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:22]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:22]
+Got rawmode=true, sending binary data...
+[07:35:22]
+Written 64.00 MB / 100.00 MB
+[07:35:23]
+Progress: 80% (80 MB/100 MB) - ETA: 5s
+[07:35:23]
+Progress: 100% (100 MB/100 MB) - ETA: 5s
+[07:35:23]
+Written 100.00 MB / 100.00 MB
+[07:35:25]
+Write complete: 100.00 MB
+[07:35:25]
+Flash completed: recovery_a
+[07:35:25]
+Flashing partition: splash_a (32.64 MB)
+[07:35:25]
+Writing partition "splash_a" (LUN 4): 14.56 MB
+[07:35:26]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:26]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:26]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:26]
+Firehose configured successfully
+[07:35:26]
+Padding 15263897 bytes to 15265792 bytes (sector aligned)
+[07:35:26]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="splash_a.bin" physical_partition_number="4" label="splash_a" start_sector="401030" num_partition_sectors="3727" partofsingleimage="false" sparse="false" /></data>
+[07:35:27]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:splash_a, w:1, r:1, e:1, c:0,...
+[07:35:27]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:27]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:27]
+Got rawmode=true, sending binary data...
+[07:35:27]
+Progress: 100% (14.56 MB/14.56 MB) - ETA: 6s
+[07:35:27]
+Written 14.56 MB / 14.56 MB
+[07:35:29]
+Write complete: 14.56 MB
+[07:35:30]
+Flash completed: splash_a
+[07:35:30]
+Flashing partition: xbl_ramdump_a (2 MB)
+[07:35:30]
+Writing partition "xbl_ramdump_a" (LUN 4): 884.52 KB
+[07:35:30]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:30]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:30]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:31]
+Firehose configured successfully
+[07:35:31]
+Padding 905744 bytes to 909312 bytes (sector aligned)
+[07:35:31]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="xbl_ramdump_a.bin" physical_partition_number="4" label="xbl_ramdump_a" start_sector="409386" num_partition_sectors="222" partofsingleimage="false" sparse="false" /></data>
+[07:35:31]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:xbl_ramdump_a, w:1, r:1, e:1,...
+[07:35:31]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:32]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:32]
+Got rawmode=true, sending binary data...
+[07:35:32]
+Progress: 100% (884.52 KB/884.52 KB) - ETA: 6s
+[07:35:32]
+Written 888.00 KB / 888.00 KB
+[07:35:35]
+Write complete: 888.00 KB
+[07:35:35]
+Flash completed: xbl_ramdump_a
+[07:35:35]
+Flashing partition: init_boot_a (8 MB)
+[07:35:36]
+Writing partition "init_boot_a" (LUN 4): 8.00 MB
+[07:35:36]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:36]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:37]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:37]
+Firehose configured successfully
+[07:35:38]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="init_boot_a.bin" physical_partition_number="4" label="init_boot_a" start_sector="409911" num_partition_sectors="2048" partofsingleimage="false" sparse="false" /></data>
+[07:35:38]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:init_boot_a, w:1, r:1, e:1, c...
+[07:35:39]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:39]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:39]
+Got rawmode=true, sending binary data...
+[07:35:39]
+Progress: 100% (8 MB/8 MB) - ETA: 6s
+[07:35:39]
+Written 8.00 MB / 8.00 MB
+[07:35:41]
+Write complete: 8.00 MB
+[07:35:41]
+Flash completed: init_boot_a
+[07:35:41]
+Flashing partition: cpucp_dtb_a (64 KB)
+[07:35:41]
+Writing partition "cpucp_dtb_a" (LUN 4): 12.37 KB
+[07:35:42]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:42]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:42]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:42]
+Firehose configured successfully
+[07:35:42]
+Padding 12664 bytes to 16384 bytes (sector aligned)
+[07:35:42]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="cpucp_dtb_a.bin" physical_partition_number="4" label="cpucp_dtb_a" start_sector="411959" num_partition_sectors="4" partofsingleimage="false" sparse="false" /></data>
+[07:35:42]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:cpucp_dtb_a, w:1, r:1, e:1, c...
+[07:35:42]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:43]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:43]
+Got rawmode=true, sending binary data...
+[07:35:43]
+Progress: 100% (12.37 KB/12.37 KB) - ETA: 6s
+[07:35:43]
+Written 16.00 KB / 16.00 KB
+[07:35:45]
+Write complete: 16.00 KB
+[07:35:45]
+Flash completed: cpucp_dtb_a
+[07:35:45]
+Flashing partition: oplus_sec_b (10 MB)
+[07:35:45]
+Writing partition "oplus_sec_b" (LUN 4): 848.09 KB
+[07:35:45]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:45]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:46]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:46]
+Firehose configured successfully
+[07:35:46]
+Padding 868440 bytes to 872448 bytes (sector aligned)
+[07:35:46]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="oplus_sec_b.bin" physical_partition_number="4" label="oplus_sec_b" start_sector="777447" num_partition_sectors="213" partofsingleimage="false" sparse="false" /></data>
+[07:35:46]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:oplus_sec_b, w:1, r:1, e:1, c...
+[07:35:46]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:47]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:47]
+Got rawmode=true, sending binary data...
+[07:35:47]
+Progress: 100% (848.09 KB/848.09 KB) - ETA: 6s
+[07:35:47]
+Written 852.00 KB / 852.00 KB
+[07:35:49]
+Write complete: 852.00 KB
+[07:35:49]
+Flash completed: oplus_sec_b
+[07:35:49]
+Flashing partition: splash_b (32.64 MB)
+[07:35:49]
+Writing partition "splash_b" (LUN 4): 14.56 MB
+[07:35:50]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:50]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:50]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:50]
+Firehose configured successfully
+[07:35:50]
+Padding 15263897 bytes to 15265792 bytes (sector aligned)
+[07:35:50]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="splash_b.bin" physical_partition_number="4" label="splash_b" start_sector="805607" num_partition_sectors="3727" partofsingleimage="false" sparse="false" /></data>
+[07:35:50]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:splash_b, w:1, r:1, e:1, c:0,...
+[07:35:51]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:51]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:51]
+Got rawmode=true, sending binary data...
+[07:35:51]
+Progress: 100% (14.56 MB/14.56 MB) - ETA: 6s
+[07:35:51]
+Written 14.56 MB / 14.56 MB
+[07:35:53]
+Write complete: 14.56 MB
+[07:35:53]
+Flash completed: splash_b
+[07:35:53]
+Flashing partition: toolsfv (1 MB)
+[07:35:53]
+Writing partition "toolsfv" (LUN 4): 384.00 KB
+[07:35:54]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:54]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:54]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:54]
+Firehose configured successfully
+[07:35:54]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="toolsfv.bin" physical_partition_number="4" label="toolsfv" start_sector="817099" num_partition_sectors="96" partofsingleimage="false" sparse="false" /></data>
+[07:35:54]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:toolsfv, w:1, r:1, e:1, c:0, ...
+[07:35:54]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:55]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:55]
+Got rawmode=true, sending binary data...
+[07:35:55]
+Progress: 100% (384 KB/384 KB) - ETA: 7s
+[07:35:55]
+Written 384.00 KB / 384.00 KB
+[07:35:57]
+Write complete: 384.00 KB
+[07:35:57]
+Flash completed: toolsfv
+[07:35:57]
+Flashing partition: logfs (8 MB)
+[07:35:57]
+Writing partition "logfs" (LUN 4): 16.00 KB
+[07:35:57]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:35:57]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:35:58]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:35:58]
+Firehose configured successfully
+[07:35:58]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="logfs.bin" physical_partition_number="4" label="logfs" start_sector="817355" num_partition_sectors="4" partofsingleimage="false" sparse="false" /></data>
+[07:35:58]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:logfs, w:1, r:1, e:1, c:0, s:...
+[07:35:58]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:35:59]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:35:59]
+Got rawmode=true, sending binary data...
+[07:35:59]
+Progress: 100% (16 KB/16 KB) - ETA: 7s
+[07:35:59]
+Written 16.00 KB / 16.00 KB
+[07:36:01]
+Write complete: 16.00 KB
+[07:36:01]
+Flash completed: logfs
+[07:36:01]
+Flashing partition: storsec (128 KB)
+[07:36:01]
+Writing partition "storsec" (LUN 4): 32.09 KB
+[07:36:01]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:36:01]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:36:02]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:36:02]
+Firehose configured successfully
+[07:36:02]
+Padding 32856 bytes to 36864 bytes (sector aligned)
+[07:36:02]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="storsec.bin" physical_partition_number="4" label="storsec" start_sector="950475" num_partition_sectors="9" partofsingleimage="false" sparse="false" /></data>
+[07:36:02]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:storsec, w:1, r:1, e:1, c:0, ...
+[07:36:02]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:36:03]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:36:03]
+Got rawmode=true, sending binary data...
+[07:36:03]
+Progress: 100% (32.09 KB/32.09 KB) - ETA: 7s
+[07:36:03]
+Written 36.00 KB / 36.00 KB
+[07:36:05]
+Write complete: 36.00 KB
+[07:36:05]
+Flash completed: storsec
+[07:36:05]
+Flashing partition: oplusreserve1 (8 MB)
+[07:36:05]
+Writing partition "oplusreserve1" (LUN 5): 4.00 MB
+[07:36:05]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:36:05]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:36:06]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:36:06]
+Firehose configured successfully
+[07:36:06]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="oplusreserve1.bin" physical_partition_number="5" label="oplusreserve1" start_sector="32" num_partition_sectors="1024" partofsingleimage="false" sparse="false" /></data>
+[07:36:06]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:oplusreserve1, w:1, r:1, e:0,...
+[07:36:06]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:36:07]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:36:07]
+Got rawmode=true, sending binary data...
+[07:36:07]
+Progress: 100% (4 MB/4 MB) - ETA: 7s
+[07:36:07]
+Written 4.00 MB / 4.00 MB
+[07:36:09]
+Write complete: 4.00 MB
+[07:36:09]
+Flash completed: oplusreserve1
+[07:36:09]
+Flashing partition: oplusreserve2 (256 MB)
+[07:36:09]
+Writing partition "oplusreserve2" (LUN 5): 56.12 KB
+[07:36:10]
+Configuring Firehose: ufs, MaxPayload=1048576
+[07:36:10]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[07:36:10]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[07:36:10]
+Firehose configured successfully
+[07:36:10]
+Padding 57468 bytes to 61440 bytes (sector aligned)
+[07:36:10]
+TX: <?xml version="1.0" ?><data><program SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="oplusreserve2.bin" physical_partition_number="5" label="oplusreserve2" start_sector="2080" num_partition_sectors="15" partofsingleimage="false" sparse="false" /></data>
+[07:36:10]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:oplusreserve2, w:1, r:0, e:1,...
+[07:36:11]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[07:36:11]
+Response: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[07:36:11]
+Got rawmode=true, sending binary data...
+[07:36:11]
+Progress: 100% (56.12 KB/56.12 KB) - ETA: 7s
+[07:36:11]
+Written 60.00 KB / 60.00 KB
+[07:36:13]
+Write complete: 60.00 KB
+[07:36:13]
+Flash completed: oplusreserve2
+[07:36:13]
+Skipping DRIVER: No ROM file loaded
+[07:36:13]
+Flash complete: 47 success, 2 failed in 184.2s

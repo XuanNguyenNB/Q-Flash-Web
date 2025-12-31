@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/*
+ * Q-Flash-Web Global Styles
+ * Theme: Linear Violet (Dark)
+ * Design System: shadcn/ui with New York style
+ */
+
+@theme {
+  /* Background Colors */
+  --color-background: oklch(0.141 0.005 285.823);
+  --color-foreground: oklch(0.985 0.002 247.839);
+  
+  /* Card Colors */
+  --color-card: oklch(0.161 0.007 285.823);
+  --color-card-foreground: oklch(0.985 0.002 247.839);
+  
+  /* Popover Colors */
+  --color-popover: oklch(0.161 0.007 285.823);
+  --color-popover-foreground: oklch(0.985 0.002 247.839);
+  
+  /* Primary Colors (Violet) */
+  --color-primary: oklch(0.707 0.165 313.189);
+  --color-primary-foreground: oklch(0.2 0.06 310);
+  
+  /* Secondary Colors */
+  --color-secondary: oklch(0.274 0.025 256.801);
+  --color-secondary-foreground: oklch(0.985 0.002 247.839);
+  
+  /* Muted Colors */
+  --color-muted: oklch(0.274 0.025 256.801);
+  --color-muted-foreground: oklch(0.706 0.015 256.801);
+  
+  /* Accent Colors */
+  --color-accent: oklch(0.274 0.025 256.801);
+  --color-accent-foreground: oklch(0.985 0.002 247.839);
+  
+  /* Destructive Colors */
+  --color-destructive: oklch(0.664 0.21 28.752);
+  --color-destructive-foreground: oklch(0.985 0.002 247.839);
+  
+  /* Border & Input Colors */
+  --color-border: oklch(0.274 0.025 256.801);
+  --color-input: oklch(0.274 0.025 256.801);
+  --color-ring: oklch(0.707 0.165 313.189);
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  
+  /* Chart Colors */
+  --color-chart-1: oklch(0.707 0.165 313.189);
+  --color-chart-2: oklch(0.6 0.2 150);
+  --color-chart-3: oklch(0.7 0.15 50);
+  --color-chart-4: oklch(0.65 0.18 250);
+  --color-chart-5: oklch(0.55 0.22 30);
+  
+  /* Sidebar Colors */
+  --color-sidebar: oklch(0.141 0.005 285.823);
+  --color-sidebar-foreground: oklch(0.985 0.002 247.839);
+  --color-sidebar-primary: oklch(0.707 0.165 313.189);
+  --color-sidebar-primary-foreground: oklch(0.2 0.06 310);
+  --color-sidebar-accent: oklch(0.274 0.025 256.801);
+  --color-sidebar-accent-foreground: oklch(0.985 0.002 247.839);
+  --color-sidebar-border: oklch(0.274 0.025 256.801);
+  --color-sidebar-ring: oklch(0.707 0.165 313.189);
+}
+
+/* Base Styles */
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Ensure dark mode by default */
+:root {
+  color-scheme: dark;
+}

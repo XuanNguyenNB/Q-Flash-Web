@@ -32,6 +32,22 @@
         }
     },
     {
+        "id": "oneplus_ace5",
+        "brand": "oneplus",
+        "name": "OnePlus Ace 5",
+        "codename": "PJQ110",
+        "chipset": "SM8650",
+        "chipsetName": "Snapdragon 8 Gen 3",
+        "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen3",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_Sign.bin"
+        }
+    },
+    {
         "id": "x6_pro",
         "brand": "oppo",
         "name": "Find X6 Pro",
@@ -64,6 +80,22 @@
         }
     },
     {
+        "id": "find_n3_flip",
+        "brand": "oppo",
+        "name": "Find N3 Flip",
+        "codename": "PHC110",
+        "chipset": "SM8550",
+        "chipsetName": "Snapdragon 8 Gen 2",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen2",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+        }
+    },
+    {
         "id": "oneplus_11",
         "brand": "oneplus",
         "name": "OnePlus 11",
@@ -71,6 +103,22 @@
         "chipset": "SM8550",
         "chipsetName": "Snapdragon 8 Gen 2",
         "status": "tested",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen2",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_ace2_pro",
+        "brand": "oneplus",
+        "name": "OnePlus Ace 2 Pro",
+        "codename": "PJD110",
+        "chipset": "SM8550",
+        "chipsetName": "Snapdragon 8 Gen 2",
+        "status": "coming",
         "authMethod": "oppo_vip",
         "presetId": "8Gen2",
         "firehose": {
@@ -141,6 +189,326 @@
             "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475__prog.melf",
             "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475_Digest.elf",
             "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475_Sign.bin"
+        }
+    },
+    {
+        "id": "find_n2_flip",
+        "brand": "oppo",
+        "name": "Find N2 Flip",
+        "codename": "PHC210",
+        "chipset": "SM8475",
+        "chipsetName": "Snapdragon 8+ Gen 1",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": "8+Gen1",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475__prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_10t",
+        "brand": "oneplus",
+        "name": "OnePlus 10T",
+        "codename": "PGP110",
+        "chipset": "SM8475",
+        "chipsetName": "Snapdragon 8+ Gen 1",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": "8+Gen1",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475__prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_ace_pro",
+        "brand": "oneplus",
+        "name": "OnePlus Ace Pro",
+        "codename": "PGP110",
+        "chipset": "SM8475",
+        "chipsetName": "Snapdragon 8+ Gen 1",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": "8+Gen1",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475__prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8475_8+Gen1/OPPO_SM8475_Sign.bin"
+        }
+    },
+    {
+        "id": "x3_pro",
+        "brand": "oppo",
+        "name": "Find X3 Pro",
+        "codename": "PEEM00",
+        "chipset": "SM8350",
+        "chipsetName": "Snapdragon 888",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_V2.6.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_9",
+        "brand": "oneplus",
+        "name": "OnePlus 9",
+        "codename": "LE2110",
+        "chipset": "SM8350",
+        "chipsetName": "Snapdragon 888",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_V2.6.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_9_pro",
+        "brand": "oneplus",
+        "name": "OnePlus 9 Pro",
+        "codename": "LE2120",
+        "chipset": "SM8350",
+        "chipsetName": "Snapdragon 888",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_V2.6.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_9r",
+        "brand": "oneplus",
+        "name": "OnePlus 9R",
+        "codename": "LE2100",
+        "chipset": "SM8350",
+        "chipsetName": "Snapdragon 870",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_V2.6.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8350_888_888+/OPPO_SM8350_New_Chimera_Sign.bin"
+        }
+    },
+    {
+        "id": "oneplus_ace3v",
+        "brand": "oneplus",
+        "name": "OnePlus Ace 3V",
+        "codename": "PJV110",
+        "chipset": "SM7675",
+        "chipsetName": "Snapdragon 7+ Gen 3",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM7675_7+Gen3/OPPO_SM7675_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM7675_7+Gen3/OPPO_SM7675_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM7675_7+Gen3/OPPO_SM7675_Sign.bin"
+        }
+    },
+    {
+        "id": "reno12_pro",
+        "brand": "oppo",
+        "name": "Reno 12 Pro",
+        "codename": "PJZ110",
+        "chipset": "SM7675",
+        "chipsetName": "Snapdragon 7+ Gen 3",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM7675_7+Gen3/OPPO_SM7675_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM7675_7+Gen3/OPPO_SM7675_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM7675_7+Gen3/OPPO_SM7675_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_gt5_pro",
+        "brand": "realme",
+        "name": "Realme GT5 Pro",
+        "codename": "RMX3888",
+        "chipset": "SM8650",
+        "chipsetName": "Snapdragon 8 Gen 3",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen3",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8650_8Gen3/OPPO_SM8650_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_gt3",
+        "brand": "realme",
+        "name": "Realme GT3",
+        "codename": "RMX3709",
+        "chipset": "SM8550",
+        "chipsetName": "Snapdragon 8 Gen 2",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen2",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_gt5",
+        "brand": "realme",
+        "name": "Realme GT5",
+        "codename": "RMX3708",
+        "chipset": "SM8550",
+        "chipsetName": "Snapdragon 8 Gen 2",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": "8Gen2",
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8550_8Gen2/OPPO_SM8550_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_c55",
+        "brand": "realme",
+        "name": "Realme C55",
+        "codename": "RMX3710",
+        "chipset": "SM6115",
+        "chipsetName": "Snapdragon 680",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_prog.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_c53",
+        "brand": "realme",
+        "name": "Realme C53",
+        "codename": "RMX3760",
+        "chipset": "SM6115",
+        "chipsetName": "Snapdragon 680",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_prog.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_Sign.bin"
+        }
+    },
+    {
+        "id": "oppo_a78",
+        "brand": "oppo",
+        "name": "Oppo A78",
+        "codename": "CPH2565",
+        "chipset": "SM6115",
+        "chipsetName": "Snapdragon 680",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_prog.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6115_460_662/OPPO_SM6115_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_10_pro_plus",
+        "brand": "realme",
+        "name": "Realme 10 Pro+",
+        "codename": "RMX3686",
+        "chipset": "SM6375",
+        "chipsetName": "Snapdragon 695",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_prog.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_10_pro",
+        "brand": "realme",
+        "name": "Realme 10 Pro",
+        "codename": "RMX3660",
+        "chipset": "SM6375",
+        "chipsetName": "Snapdragon 695",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_prog.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_9_pro_plus",
+        "brand": "realme",
+        "name": "Realme 9 Pro+",
+        "codename": "RMX3392",
+        "chipset": "SM6375",
+        "chipsetName": "Snapdragon 695",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_prog.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_Sign.bin"
+        }
+    },
+    {
+        "id": "oppo_reno8_pro",
+        "brand": "oppo",
+        "name": "Oppo Reno8 Pro",
+        "codename": "CPH2357",
+        "chipset": "SM6375",
+        "chipsetName": "Snapdragon 695",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_prog.elf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM6375_695_6sGen3/OPPO_SM6375_Sign.bin"
+        }
+    },
+    {
+        "id": "realme_gt7_pro",
+        "brand": "realme",
+        "name": "Realme GT7 Pro",
+        "codename": "RMX3998",
+        "chipset": "SM8750",
+        "chipsetName": "Snapdragon 8 Elite",
+        "status": "coming",
+        "authMethod": "oppo_vip",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_prog.melf",
+            "digestUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_Digest.elf",
+            "signatureUrl": "https://raw.githubusercontent.com/XuanNguyenNB/Q-Flash-Web/main/public/firehose/SM8750_8Elite/OPPO_SM8750_Sign.bin"
         }
     }
 ]

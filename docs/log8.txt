@@ -1,0 +1,150 @@
+[18:12:52]
+Loading firehose files for Find X7 Ultra (Snapdragon 8 Gen 3)...
+[18:12:52]
+Downloading programmer.melf...
+[18:12:52]
+Already loading firehose for SM8650
+[18:12:52]
+Downloaded programmer.melf (1513.7 KB)
+[18:12:52]
+Downloading digest.elf...
+[18:12:52]
+Downloaded digest.elf (32.4 KB)
+[18:12:52]
+Downloading signature.bin...
+[18:12:53]
+Downloaded signature.bin (4.0 KB)
+[18:12:53]
+Firehose loaded successfully for Snapdragon 8 Gen 3
+[18:12:54]
+[USB] Connecting to device...
+[18:12:54]
+Connecting to device...
+[18:13:01]
+Device connected successfully
+[18:13:01]
+Device: Vendor 5c6, Product 9008
+[18:13:01]
+[USB] Device connected
+[18:13:01]
+[Sahara] Initiating handshake...
+[18:13:01]
+Starting programmer upload sequence...
+[18:13:01]
+Loading programmer binary (1513.7 KB)...
+[18:13:01]
+Programmer loaded: 1549988 bytes
+[18:13:01]
+Programmer loaded into memory
+[18:13:01]
+Sahara handshake starting...
+[18:13:01]
+Waiting for Sahara HELLO...
+[18:13:01]
+Received HELLO: version=3, mode=0
+[18:13:01]
+Sending HELLO response...
+[18:13:01]
+Starting programmer upload...
+[18:13:01]
+READ_DATA_64: offset=0, length=64
+[18:13:01]
+Uploading: 0% (64 / 1549988 bytes)
+[18:13:01]
+READ_DATA_64: offset=52, length=64
+[18:13:01]
+Uploading: 0% (128 / 1549988 bytes)
+[18:13:01]
+READ_DATA_64: offset=132, length=1536
+[18:13:01]
+READ_DATA_64: offset=1668, length=640
+[18:13:01]
+READ_DATA_64: offset=2308, length=64
+[18:13:01]
+READ_DATA_64: offset=2360, length=384
+[18:13:01]
+READ_DATA_64: offset=182532, length=11376
+[18:13:01]
+READ_DATA_64: offset=5636, length=147544
+[18:13:01]
+READ_DATA_64: offset=153180, length=22260
+[18:13:01]
+READ_DATA_64: offset=175440, length=5140
+[18:13:01]
+READ_DATA_64: offset=193908, length=64
+[18:13:01]
+READ_DATA_64: offset=193972, length=504
+[18:13:01]
+READ_DATA_64: offset=1086836, length=11232
+[18:13:01]
+READ_DATA_64: offset=198004, length=172032
+[18:13:01]
+READ_DATA_64: offset=370036, length=172032
+[18:13:01]
+READ_DATA_64: offset=542068, length=172032
+[18:13:01]
+Uploading: 46% (716968 / 1549988 bytes)
+[18:13:01]
+READ_DATA_64: offset=714100, length=24576
+[18:13:01]
+READ_DATA_64: offset=738676, length=69632
+[18:13:01]
+READ_DATA_64: offset=808308, length=172032
+[18:13:01]
+READ_DATA_64: offset=980340, length=24576
+[18:13:01]
+READ_DATA_64: offset=1004916, length=77824
+[18:13:01]
+READ_DATA_64: offset=1098068, length=64
+[18:13:01]
+READ_DATA_64: offset=1098132, length=392
+[18:13:01]
+READ_DATA_64: offset=1392980, length=4088
+[18:13:01]
+READ_DATA_64: offset=1102164, length=172032
+[18:13:01]
+READ_DATA_64: offset=1274196, length=40960
+[18:13:01]
+READ_DATA_64: offset=1315156, length=36864
+[18:13:01]
+READ_DATA_64: offset=1352020, length=36864
+[18:13:01]
+READ_DATA_64: offset=1397068, length=64
+[18:13:01]
+READ_DATA_64: offset=1397132, length=392
+[18:13:01]
+READ_DATA_64: offset=1544524, length=5464
+[18:13:01]
+READ_DATA_64: offset=1397524, length=220
+[18:13:01]
+READ_DATA_64: offset=1397744, length=51204
+[18:13:01]
+Uploading: 93% (1434216 / 1549988 bytes)
+[18:13:01]
+READ_DATA_64: offset=1448948, length=29152
+[18:13:01]
+READ_DATA_64: offset=1478100, length=11360
+[18:13:01]
+READ_DATA_64: offset=1489460, length=51204
+[18:13:01]
+Upload complete: 1525932 bytes sent
+[18:13:01]
+Sending DONE...
+[18:13:01]
+Received DONE response
+[18:13:01]
+Sahara protocol complete - Device switching to Firehose mode
+[18:13:01]
+Sahara complete, entering Firehose mode
+[18:13:01]
+[Sahara] Handshake complete
+[18:13:01]
+[USB] Waiting for device to settle...
+[18:13:06]
+[USB] Clearing buffer...
+[18:13:06]
+[USB] Verifying Firehose mode...
+[18:13:06]
+[USB] Device not responding, attempting reconnect...
+[18:13:11]
+[ERROR] SAHARA_ERROR: Device not responding after Sahara. Please reconnect device manually and try again.

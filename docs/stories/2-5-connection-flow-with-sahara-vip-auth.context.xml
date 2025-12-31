@@ -1,0 +1,236 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>5</storyId>
+    <title>Connection Flow with Sahara &amp; VIP Auth</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/2-5-connection-flow-with-sahara-vip-auth.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>the full connection flow to work (USB → Sahara → Firehose → VIP Auth)</iWant>
+    <soThat>I can proceed to partition operations</soThat>
+    <tasks>
+- Task 1: Create useConnectionFlow hook (AC: 1, 2, 3, 6)
+  - 1.1 Create src/hooks/useConnectionFlow.ts
+  - 1.2 Define connection flow state machine: 'idle' | 'connecting' | 'sahara' | 'uploading' | 'authenticating' | 'reading-partitions' | 'connected' | 'error'
+  - 1.3 Orchestrate sequential calls: useWebUSB.connect() → useSahara.handshake() → upload firehose → useAuth.authenticate() → read partitions
+  - 1.4 Log each step to terminalStore with descriptive messages
+  - 1.5 Handle step-by-step progress tracking
+  - 1.6 Export connect(), disconnect(), retry() functions and status, error state
+
+- Task 2: Implement Sahara handshake wrapper (AC: 1)
+  - 2.1 Use useSahara hook from Story 1.5
+  - 2.2 Call sahara.handshake(usbDevice) after WebUSB connects
+  - 2.3 Log: "[Sahara] Initiating handshake..."
+  - 2.4 Log: "[Sahara] Handshake complete" on success
+  - 2.5 Throw error with details if handshake fails
+
+- Task 3: Implement Firehose upload (AC: 2)
+  - 3.1 Get loaded firehose files from useFirehoseLoader (Story 2.3)
+  - 3.2 Upload programmer.melf to device via Sahara protocol
+  - 3.3 Log: "[Firehose] Uploading programmer to device..."
+  - 3.4 Log: "[Firehose] Upload complete, switching to Firehose mode"
+  - 3.5 Initialize Firehose protocol after upload
+
+- Task 4: Implement VIP authentication (AC: 3)
+  - 4.1 Detect if device requires VIP auth (Oppo/OnePlus/Realme)
+  - 4.2 Use useAuth hook from Story 1.5
+  - 4.3 Call auth.authenticate(firehose, digest, signature) with loaded files
+  - 4.4 Log: "[VIP] Authenticating with OEM server..."
+  - 4.5 Log: "[VIP] Authentication successful" on success
+  - 4.6 If device doesn't need VIP, skip and log: "[VIP] Not required for this device"
+
+- Task 5: Read partition table (AC: 4)
+  - 5.1 Use useFirehose hook to call firehose.getPartitionTable()
+  - 5.2 Log: "[Partitions] Reading partition table..."
+  - 5.3 Parse partition data from device response
+  - 5.4 Store parsed partitions in partitionStore.setPartitions()
+  - 5.5 Log: "[Partitions] Found {count} partitions"
+
+- Task 6: Update DeviceCard with connection flow UI (AC: 5, 6, 7, 8)
+  - 6.1 Integrate useConnectionFlow into DeviceCard component
+  - 6.2 Show detailed status during connection steps (not just "connecting")
+  - 6.3 Display current step text: "Sahara handshake...", "Uploading firehose...", etc.
+  - 6.4 Show green dot + "Connected" when flow completes
+  - 6.5 Show "Retry" button on error state
+  - 6.6 Wire Retry button to useConnectionFlow.retry()
+
+- Task 7: Error handling and recovery (AC: 7, 8)
+  - 7.1 Catch errors at each step with specific error codes
+  - 7.2 Create error types: USB_ERROR, SAHARA_ERROR, FIREHOSE_ERROR, VIP_ERROR, PARTITION_ERROR
+  - 7.3 Log detailed error to terminal: "[ERROR] {step}: {message}"
+  - 7.4 Show toast notification with user-friendly error message
+  - 7.5 Store error in flow state for UI display
+  - 7.6 Implement retry logic that resets state and restarts flow
+
+- Task 8: Add i18n translations (AC: all)
+  - 8.1 Add translation keys to src/i18n/en.json
+  - 8.2 Add Vietnamese translations to src/i18n/vi.json
+
+- Task 9: Testing and verification (AC: 1-8)
+  - 9.1 Run npm run dev and verify no TypeScript errors
+  - 9.2 Test full connection flow with a real device (if available)
+  - 9.3 Mock test: Verify Sahara logging works
+  - 9.4 Mock test: Verify Firehose upload logging
+  - 9.5 Mock test: Verify VIP auth logging (for OEM devices)
+  - 9.6 Verify partition table populates in partitionStore
+  - 9.7 Test error scenarios and retry functionality
+  - 9.8 Verify translations in both languages
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: When device is connected via WebUSB, Sahara handshake completes and logs to terminal
+AC2: Firehose is uploaded to device after Sahara completes
+AC3: VIP authentication is performed for Oppo/OnePlus/Realme devices
+AC4: Partition table is read and stored in partitionStore
+AC5: Success is shown in DeviceCard and terminal log
+AC6: Each protocol step logs to terminal: "Sahara handshake...", "Loading firehose...", "VIP auth..."
+AC7: Errors are handled gracefully with retry option
+AC8: Connection flow can be retried after failure
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/architecture.md" title="Q-Flash-Web Architecture" section="Hook Wrapper Pattern">
+        Pattern for wrapping core protocol logic in React hooks using useRef for singleton instances, useCallback for memoized methods, and syncing state with Zustand stores.
+      </doc>
+      <doc path="docs/architecture.md" title="Q-Flash-Web Architecture" section="Flash Operation State Machine">
+        State machine pattern with states: idle, preparing, connecting, authenticating, flashing, completing, success, error. Reference for connection flow state machine design.
+      </doc>
+      <doc path="docs/epics.md" title="Epic Breakdown" section="Story 2.5">
+        Full story definition with acceptance criteria for connection flow orchestration: USB → Sahara → Firehose → VIP Auth → Read Partitions.
+      </doc>
+      <doc path="docs/stories/2-4-device-card-connection-status.md" title="Story 2.4" section="DeviceCard Implementation">
+        DeviceCard component with ConnectionStatusDot, status state pattern ('disconnected' | 'connecting' | 'connected' | 'error'), and retry button pattern.
+      </doc>
+      <doc path="docs/stories/2-3-auto-detect-firehose-by-chipset.md" title="Story 2.3" section="Firehose Loading">
+        useFirehoseLoader hook provides loaded firehose files (programmer.melf, digest.elf, signature.bin) cached by chipsetFolder.
+      </doc>
+      <doc path="docs/stories/1-5-core-logic-wrapper-hooks.md" title="Story 1.5" section="Protocol Hooks">
+        Implementation of useWebUSB, useSahara, useFirehose, useAuth hooks that wrap core protocol logic without modifying it.
+      </doc>
+    </docs>
+    
+    <code>
+      <artifact path="src/hooks/useWebUSB.ts" kind="hook" symbol="useWebUSB" lines="1-157" reason="Provides connect() method for USB connection, returns DeviceInfo, syncs with deviceStore">
+        Interface: UseWebUSBReturn { connect: () =&gt; Promise&lt;DeviceInfo&gt;, disconnect: (forceRelease?: boolean) =&gt; Promise&lt;void&gt;, getManager: () =&gt; WebUSBManager, isSupported: () =&gt; boolean, isConnected: () =&gt; boolean }
+      </artifact>
+      
+      <artifact path="src/hooks/useSahara.ts" kind="hook" symbol="useSahara" lines="1-160" reason="Provides uploadProgrammer() method for Sahara handshake and programmer upload">
+        Interface: UseSaharaReturn { getInstance: (usb: WebUSBManager) =&gt; SaharaProtocol, loadProgrammer: (usb: WebUSBManager, data: Uint8Array) =&gt; void, execute: (usb: WebUSBManager) =&gt; Promise&lt;SaharaResult&gt;, uploadProgrammer: (usb: WebUSBManager, programmerData: Uint8Array) =&gt; Promise&lt;SaharaResult&gt;, reset: () =&gt; void }
+      </artifact>
+      
+      <artifact path="src/hooks/useFirehose.ts" kind="hook" symbol="useFirehose" lines="1-300" reason="Provides configure() and readPartitionTable() methods for Firehose protocol operations">
+        Interface: UseFirehoseReturn { getInstance: (usb: WebUSBManager) =&gt; FirehoseProtocol, configure: (usb: WebUSBManager, config?: Partial&lt;FirehoseConfig&gt;) =&gt; Promise&lt;FirehoseResponse&gt;, readPartitionTable: (usb: WebUSBManager) =&gt; Promise&lt;{ success: boolean; partitions?: PartitionInfo[]; error?: string }&gt;, ... }
+      </artifact>
+      
+      <artifact path="src/hooks/useAuth.ts" kind="hook" symbol="useAuth" lines="1-179" reason="Provides authenticateWithCredentials() method for VIP authentication with digest and signature files">
+        Interface: UseAuthReturn { loadCredentials: (digestData: Uint8Array, signatureData: Uint8Array) =&gt; void, authenticate: (usb: WebUSBManager) =&gt; Promise&lt;VipAuthResult&gt;, authenticateWithCredentials: (usb: WebUSBManager, credentials: VipCredentials) =&gt; Promise&lt;VipAuthResult&gt;, hasCredentials: () =&gt; boolean, reset: () =&gt; void }
+      </artifact>
+      
+      <artifact path="src/hooks/useFirehoseLoader.ts" kind="hook" symbol="useFirehoseLoader" lines="1-150" reason="Provides loaded firehose files from Story 2.3, cached by chipsetFolder">
+        Provides: firehoseFiles object with { programmer: ArrayBuffer, digest: ArrayBuffer, signature: ArrayBuffer }, loadFirehose() method
+      </artifact>
+      
+      <artifact path="src/stores/deviceStore.ts" kind="store" symbol="useDeviceStore" reason="Manages device selection and connection state">
+        State: { selectedDevice: DeviceProfile | null, isConnected: boolean, connectionError: string | null, firehoseLoaded: boolean }
+        Actions: { setDevice, setConnected, setError }
+      </artifact>
+      
+      <artifact path="src/stores/partitionStore.ts" kind="store" symbol="usePartitionStore" reason="Stores partition table data after reading">
+        State: { partitions: PartitionInfo[], selectedPartitions: Set&lt;string&gt;, searchFilter: string, isLoading: boolean }
+        Actions: { setPartitions, toggleSelection, setSearchFilter }
+      </artifact>
+      
+      <artifact path="src/stores/terminalStore.ts" kind="store" symbol="useTerminalStore" reason="Logs all connection flow steps">
+        State: { logs: LogEntry[], maxLogs: number }
+        Actions: { log: (level: LogLevel, message: string) =&gt; void, clear: () =&gt; void }
+      </artifact>
+      
+      <artifact path="src/components/features/device/DeviceCard.tsx" kind="component" symbol="DeviceCard" reason="UI component to integrate useConnectionFlow hook, display connection status and retry button">
+        Component to be modified to use useConnectionFlow instead of simple useWebUSB.connect()
+      </artifact>
+    </code>
+    
+    <dependencies>
+      <node>
+        <package name="react" version="^19.0.0">Core React library for hooks (useState, useCallback, useRef, useEffect)</package>
+        <package name="zustand" version="^5.0.2">State management for deviceStore, partitionStore, terminalStore</package>
+        <package name="react-i18next" version="^15.2.0">Internationalization for connection flow status messages</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- CRITICAL: Core protocol files (src/core/*, src/auth/*) must NEVER be modified - only wrapped by hooks
+- useConnectionFlow must orchestrate hooks in exact sequence: USB → Sahara → Firehose → VIP Auth → Read Partitions
+- Each step must log to terminal with format: [HH:mm:ss] [Protocol] Message
+- State machine must handle errors at each step and allow retry from idle state
+- VIP authentication is ONLY for Oppo/OnePlus/Realme devices - detect by device name/manufacturer
+- Firehose files must be loaded from useFirehoseLoader before connection flow starts
+- All state changes must sync with Zustand stores (deviceStore, partitionStore, terminalStore)
+- Follow Hook Wrapper Pattern from architecture.md: useRef for singleton, useCallback for methods, cleanup on unmount
+- Error handling must provide specific error codes per step: USB_ERROR, SAHARA_ERROR, FIREHOSE_ERROR, VIP_ERROR, PARTITION_ERROR
+  </constraints>
+
+  <interfaces>
+    <interface name="useWebUSB.connect()" kind="function" signature="() =&gt; Promise&lt;DeviceInfo&gt;" path="src/hooks/useWebUSB.ts">
+      Connects to Qualcomm 9008 device via WebUSB, returns device info, syncs deviceStore.isConnected
+    </interface>
+    
+    <interface name="useSahara.uploadProgrammer()" kind="function" signature="(usb: WebUSBManager, programmerData: Uint8Array) =&gt; Promise&lt;SaharaResult&gt;" path="src/hooks/useSahara.ts">
+      Loads programmer binary and executes Sahara handshake, returns { success: boolean, state: SaharaState, error?: string }
+    </interface>
+    
+    <interface name="useFirehose.configure()" kind="function" signature="(usb: WebUSBManager, config?: Partial&lt;FirehoseConfig&gt;) =&gt; Promise&lt;FirehoseResponse&gt;" path="src/hooks/useFirehose.ts">
+      Configures Firehose protocol after Sahara upload completes
+    </interface>
+    
+    <interface name="useFirehose.readPartitionTable()" kind="function" signature="(usb: WebUSBManager) =&gt; Promise&lt;{ success: boolean; partitions?: PartitionInfo[]; error?: string }&gt;" path="src/hooks/useFirehose.ts">
+      Reads partition table from device, returns array of PartitionInfo objects
+    </interface>
+    
+    <interface name="useAuth.authenticateWithCredentials()" kind="function" signature="(usb: WebUSBManager, credentials: VipCredentials) =&gt; Promise&lt;VipAuthResult&gt;" path="src/hooks/useAuth.ts">
+      Loads digest/signature and executes VIP authentication, returns { success: boolean, error?: string }
+    </interface>
+    
+    <interface name="terminalStore.log()" kind="function" signature="(level: 'info' | 'success' | 'warning' | 'error', message: string) =&gt; void" path="src/stores/terminalStore.ts">
+      Logs message to terminal with timestamp and color coding
+    </interface>
+    
+    <interface name="partitionStore.setPartitions()" kind="function" signature="(partitions: PartitionInfo[]) =&gt; void" path="src/stores/partitionStore.ts">
+      Stores partition table data in Zustand store
+    </interface>
+    
+    <interface name="deviceStore.setConnected()" kind="function" signature="(connected: boolean) =&gt; void" path="src/stores/deviceStore.ts">
+      Updates device connection status in Zustand store
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Testing follows Vitest + React Testing Library pattern. Hooks are tested with @testing-library/react-hooks. Mock core protocol classes (WebUSBManager, SaharaProtocol, FirehoseProtocol, OppoVipAuth) to test orchestration logic without hardware. Test state machine transitions, error handling at each step, and retry functionality. Verify terminal logging and store synchronization.
+    </standards>
+    
+    <locations>
+- src/hooks/__tests__/useConnectionFlow.test.ts
+- src/components/features/device/__tests__/DeviceCard.test.tsx
+    </locations>
+    
+    <ideas>
+- AC1: Mock useWebUSB.connect() and useSahara.uploadProgrammer(), verify Sahara logs appear in terminalStore
+- AC2: Mock Sahara success, verify Firehose upload logs and configure() called
+- AC3: Test with Oppo device mock, verify VIP auth called; test with non-OEM device, verify VIP skipped
+- AC4: Mock readPartitionTable() success, verify partitionStore.setPartitions() called with partition array
+- AC5: Mock full flow success, verify deviceStore.isConnected = true and success log
+- AC6: Verify each step logs with correct format: [Protocol] Message
+- AC7: Mock error at each step, verify error state, error log, and retry button enabled
+- AC8: Trigger error, call retry(), verify state resets to idle and flow restarts
+    </ideas>
+  </tests>
+</story-context>

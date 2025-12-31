@@ -1,0 +1,42 @@
+[22:58:49]
+Found 20 partitions
+[22:58:49]
+LUN 5: 20 partitions
+[22:58:49]
+Found 145 partitions
+[22:58:50]
+[Partitions] Found 145 partitions
+[22:58:50]
+[Connection] Device ready for operations
+[22:58:57]
+Starting backup of 2 partition(s)...
+[22:58:57]
+Backing up partition: persist (undefined bytes)
+[22:58:57]
+Reading partition: persist
+[22:58:57]
+Reading partition "persist" (LUN 0): 8192 sectors, 32.00 MB
+[22:58:57]
+Firehose already configured, skipping reconfigure
+[22:58:57]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="persist.bin" physical_partition_number="0" label="PrimaryGPT" start_sector="8" num_partition_sectors="8192" partofsingleimage="true" readbackverify="false" sparse="false" /></data>
+[23:03:57]
+Failed to read persist: Send failed: Bulk OUT transfer timeout
+[23:03:58]
+Failed to backup persist: Send failed: Bulk OUT transfer timeout
+[23:03:58]
+Backing up partition: misc (undefined bytes)
+[23:03:58]
+Reading partition: misc
+[23:03:58]
+Reading partition "misc" (LUN 0): 256 sectors, 1.00 MB
+[23:03:58]
+Firehose already configured, skipping reconfigure
+[23:03:58]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="misc.bin" physical_partition_number="0" label="PrimaryGPT" start_sector="8200" num_partition_sectors="256" partofsingleimage="true" readbackverify="false" sparse="false" /></data>
+[23:08:58]
+Failed to read misc: Send failed: Bulk OUT transfer timeout
+[23:08:58]
+Failed to backup misc: Send failed: Bulk OUT transfer timeout
+[23:08:58]
+Backup completed: 0 success, 2 failed

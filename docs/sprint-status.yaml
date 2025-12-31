@@ -1,0 +1,131 @@
+# generated: 2025-12-29
+# project: Q-Flash-Web
+# project_key: Q-Flash-Web
+# tracking_system: file-system
+# story_location: "{project-root}/docs/stories"
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
+
+generated: 2025-12-29
+project: Q-Flash-Web
+project_key: Q-Flash-Web
+tracking_system: file-system
+story_location: "{project-root}/docs/stories"
+
+development_status:
+  # ====================
+  # Epic 1: Foundation - React Migration Setup
+  # ====================
+  epic-1: backlog
+  1-1-project-setup-react-installation: review
+  1-2-tailwind-css-v4-shadcn-ui-setup: review
+  1-3-zustand-state-management-setup: review
+  1-4-react-router-i18n-setup: review
+  1-5-core-logic-wrapper-hooks: review
+  1-6-app-shell-layout-components: review
+  epic-1-retrospective: optional
+
+  # ====================
+  # Epic 2: Device Management & Connection
+  # ====================
+  epic-2: done
+  2-1-device-configuration-update: done
+  2-2-device-selector-component: done
+  2-3-auto-detect-firehose-by-chipset: done
+  2-4-device-card-connection-status: done
+  2-5-connection-flow-with-sahara-vip-auth: done
+  epic-2-retrospective: optional
+
+  # ====================
+  # Epic 3: Onboarding & Guide Experience
+  # NOTE: Wizard removed per user request
+  # ====================
+  epic-3: done
+  3-1-first-visit-detection: backlog # skipped - wizard removed
+  3-2-first-time-user-wizard-modal: backlog # removed per user request
+  3-3-expanded-guide-page: done
+  3-4-downloads-page-enhancement: done
+  3-5-support-page-with-faq: done
+  epic-3-retrospective: optional
+
+  # ====================
+  # Epic 4: Partition Operations UI
+  # ====================
+  epic-4: backlog
+  4-1-partition-grid-component: done
+  4-2-partition-search-filter: review
+  4-3-backup-flow-with-progress: review
+  4-4-flash-flow-with-confirmation: review
+  4-5-terminal-log-panel: review
+  4-6-rom-file-loading: review
+  epic-4-retrospective: optional
+
+  # ====================
+  # Epic 5: Polish & Power User Features
+  # NOTE: Skipped non-essential features, Toast already implemented via sonner
+  # ====================
+  epic-5: done
+  5-1-keyboard-shortcuts-system: backlog # skipped - not essential
+  5-2-command-palette: backlog # skipped - not essential
+  5-3-toast-notifications: done # implemented via sonner in App.tsx
+  5-4-micro-animations: done # CSS animations already present
+  5-5-settings-page: backlog # skipped - language toggle in header is sufficient
+  epic-5-retrospective: optional
+
+  # ====================
+  # Epic 6: Mode Selection & Core (USB/ADB/Fastboot)
+  # ====================
+  epic-6: contexted
+  6-1-install-adb-fastboot-libraries: review
+  6-2-adb-protocol-wrapper: review
+  6-3-fastboot-protocol-wrapper: review
+  6-4-mode-selector-component: review
+  epic-6-retrospective: optional
+
+  # ====================
+  # Epic 7: ADB Mode Features
+  # ====================
+  epic-7: contexted
+  7-1-adb-store-hook: review
+  7-2-adb-device-connection-ui: review
+  7-3-adb-device-info-panel: review
+  7-4-adb-quick-actions: review
+  7-5-adb-page-layout: review
+  7-6-adb-scrcpy-integration: in-progress
+  epic-7-retrospective: optional
+
+  # ====================
+  # Epic 8: Fastboot Mode Features
+  # ====================
+  epic-8: contexted
+  8-1-fastboot-store-hook: review
+  8-2-fastboot-device-connection-ui: review
+  8-3-fastboot-device-variables-panel: review
+  8-4-bootloader-unlock-lock: review
+  8-5-fastboot-flash-partitions: review
+  8-6-fastboot-page-layout: drafted
+  epic-8-retrospective: optional
+

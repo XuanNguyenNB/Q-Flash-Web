@@ -1,6 +1,43 @@
 {
+    "tool": {
+        "title": "Công cụ Flash",
+        "description": "Flash, sao lưu và quản lý phân vùng",
+        "noDevice": "Chưa kết nối thiết bị",
+        "noDeviceHint": "Kết nối thiết bị để bắt đầu",
+        "waiting": "Đang đợi thiết bị...",
+        "waitingDesc": "Kết nối thiết bị ở chế độ EDL để tải bảng phân vùng.",
+        "edl": {
+            "title": "Công cụ Flash EDL",
+            "subtitle": "Chế độ này có thể được dùng để cứu brick, sao lưu dữ liệu hoặc sửa lỗi phân vùng."
+        },
+        "guide": {
+            "title": "Hướng dẫn kết nối",
+            "intro": "Để sử dụng chế độ EDL, thiết bị phải được nhận diện là \"Qualcomm HS-USB QDLoader 9008\" hoặc \"QUSB_BULK\". Nếu không nhận, hãy làm theo các bước sau:",
+            "step1": {
+                "title": "Vào chế độ EDL",
+                "desc": "Tắt nguồn -> Giữ Tăng âm + Giảm âm -> Cắm cáp USB."
+            },
+            "step2": {
+                "title": "Cài đặt Driver (Zadig)",
+                "desc": "Nếu hiện \"QUSB_BULK\", dùng Zadig để cài driver WinUSB."
+            },
+            "tip": {
+                "title": "Mẹo: Dùng Q-Flash Forge",
+                "desc": "Dùng công cụ Q-Flash Forge để tự động sửa driver và hướng dẫn Zadig."
+            },
+            "openForge": "Mở dự án Q-Flash Forge"
+        },
+        "zadig": {
+            "title": "Hướng dẫn cài Driver",
+            "step1": "Bước 1: Chọn 'Qualcomm HS-USB QDLoader 9008' từ danh sách",
+            "step2": "Bước 2: Chọn 'WinUSB' làm driver đích",
+            "step3": "Bước 3: Nhấn 'Install Driver' hoặc 'Replace Driver'"
+        }
+    },
     "header": {
         "title": "Q-Flash Universal Qualcomm Tool",
+        "showGuide": "Hiển thị hướng dẫn",
+        "showGuideTooltip": "Hiển thị hướng dẫn cài đặt",
         "status": {
             "idle": "Chưa kết nối",
             "connecting": "Đang kết nối...",
@@ -22,7 +59,33 @@
         "connectDevice": "Kết nối thiết bị",
         "rebootDevice": "Khởi động lại",
         "requirements": "Yêu cầu",
-        "requirementsList": "• Trình duyệt Chrome/Edge\n• Driver WinUSB qua Zadig\n• Thiết bị ở chế độ EDL (9008)\n• Các tệp programmer, digest, signature hợp lệ"
+        "requirementsList": "• Trình duyệt Chrome/Edge\n• Driver WinUSB qua Zadig\n• Thiết bị ở chế độ EDL (9008)\n• Các tệp programmer, digest, signature hợp lệ",
+        "quickActions": "Thao tác nhanh",
+        "connectFirst": "Kết nối thiết bị trước",
+        "collapse": "Thu gọn",
+        "expand": "Mở rộng"
+    },
+    "firehose": {
+        "manual": {
+            "title": "Tải Firehose thủ công",
+            "description": "Tải tệp firehose thủ công cho thiết bị không hỗ trợ hoặc khi tự động phát hiện thất bại.",
+            "programmer": "Programmer (.melf/.mbn)",
+            "digest": "Digest (.elf)",
+            "signature": "Signature (.bin)",
+            "select": "Chọn",
+            "replace": "Thay thế",
+            "clear": "Xóa tất cả",
+            "ready": "Đã tải tất cả - Sẵn sàng kết nối!",
+            "help": "Các tệp firehose là dành riêng cho thiết bị. Lấy chúng từ nhà sản xuất hoặc nguồn ROM đáng tin cậy.",
+            "loading": "Đang tải",
+            "loaded": "Đã tải",
+            "allLoaded": "Tất cả tệp firehose đã tải thành công!",
+            "loadError": "Không thể tải tệp",
+            "cleared": "Đã xóa tất cả tệp firehose thủ công",
+            "connect": "Kết nối thiết bị",
+            "connecting": "Đang kết nối...",
+            "connectError": "Kết nối thất bại"
+        }
     },
     "partition": {
         "title": "Bảng phân vùng",
@@ -37,6 +100,39 @@
             "size": "Kích thước",
             "read": "Đọc",
             "write": "Ghi"
+        },
+        "grid": {
+            "title": "Phân vùng",
+            "count": "{{count}} phân vùng",
+            "selectAll": "Chọn tất cả",
+            "deselectAll": "Bỏ chọn tất cả",
+            "empty": "Chưa tải phân vùng. Kết nối thiết bị để xem phân vùng.",
+            "emptyHint": "Kết nối thiết bị và đợi bảng phân vùng tải xong.",
+            "loading": "Đang đọc bảng phân vùng...",
+            "noResults": "Không tìm thấy phân vùng",
+            "noResultsHint": "Không có phân vùng nào khớp với \"{{filter}}\". Thử từ khóa khác."
+        },
+        "table": {
+            "select": "Chọn",
+            "name": "Tên",
+            "lun": "LUN",
+            "size": "Kích thước",
+            "flash": "Ghi",
+            "read": "Sao lưu",
+            "pickFile": "Chọn tệp",
+            "save": "Lưu"
+        },
+        "item": {
+            "select": "Chọn {{name}}",
+            "dangerous": "Phân vùng quan trọng - ghi cẩn thận",
+            "criticalTooltip": "⚠️ Phân vùng thiết yếu",
+            "criticalDesc": "Chứa dữ liệu hiệu chỉnh riêng biệt (vân tay, cảm biến...).\nKHÔNG ĐƯỢC flash/xóa nếu chưa sao lưu!"
+        },
+        "search": {
+            "placeholder": "Tìm kiếm phân vùng...",
+            "clear": "Xóa tìm kiếm",
+            "noResults": "Không tìm thấy phân vùng nào",
+            "count": "Hiển thị {{filtered}} / {{total}} phân vùng"
         }
     },
     "actions": {
@@ -48,11 +144,44 @@
         "stop": "Dừng"
     },
     "terminal": {
-        "title": "Nhật ký",
+        "title": "Bảng điều khiển",
         "copy": "Sao chép",
-        "copied": "Đã sao chép!"
+        "copied": "Đã sao chép!",
+        "clear": "Xóa",
+        "empty": "Chưa có nhật ký",
+        "expand": "Mở Console",
+        "filter": {
+            "all": "Tất cả",
+            "info": "Thông tin",
+            "success": "Thành công",
+            "warning": "Cảnh báo",
+            "error": "Lỗi"
+        },
+        "reset": "Xóa Logs",
+        "search_placeholder": "Tìm kiếm logs...",
+        "search": {
+            "placeholder": "Tìm kiếm log...",
+            "noResults": "Không tìm thấy log"
+        }
+    },
+    "scrcpy": {
+        "title": "ViewPhone - Chiếu màn hình",
+        "subtitle": "Để hiển thị nội dung màn hình lên",
+        "resolution_label": "ĐỘ PHÂN GIẢI",
+        "bitrate_label": "CHẤT LƯỢNG (BITRATE)",
+        "start_stream": "Bắt đầu",
+        "initializing": "Đang kết nối...",
+        "stop": "Dừng",
+        "start": "Bắt đầu",
+        "live": "TRỰC TIẾP",
+        "ready_to_mirror": "Chiếu màn hình",
+        "ready_desc": "Sẵn sàng kết nối",
+        "error_not_connected": "Chưa kết nối thiết bị",
+        "copy_success": "Đã sao chép vào bộ nhớ tạm",
+        "paste_success": "Đã dán vào thiết bị"
     },
     "backup": {
+        "button": "Sao lưu đã chọn",
         "title": "Tùy chọn sao lưu",
         "description": "Chọn định dạng sao lưu cho các phân vùng đã chọn:",
         "withXml": "Có XML (Đề xuất)",
@@ -60,7 +189,45 @@
         "withoutXml": "Không có XML",
         "withoutXmlDesc": "Chỉ lưu file ảnh phân vùng (cần khôi phục thủ công)",
         "cancel": "Hủy",
-        "startBackup": "Bắt đầu sao lưu"
+        "startBackup": "Bắt đầu sao lưu",
+        "confirm": {
+            "title": "Xác nhận sao lưu",
+            "message": "Bạn sắp sao lưu {{count}} phân vùng. Chọn vị trí để lưu các tệp sao lưu.",
+            "totalSize": "Tổng dung lượng: {{size}}",
+            "chooseLocation": "Chọn vị trí",
+            "selecting": "Đang chọn..."
+        },
+        "progress": {
+            "title": "Đang sao lưu",
+            "current": "Đang sao lưu: {{partition}}",
+            "bytes": "{{written}} / {{total}}",
+            "percentage": "{{percent}}%",
+            "eta": "Thời gian còn lại: {{time}}",
+            "cancel": "Hủy sao lưu",
+            "success_all": "✅ Đã backup {{count}} phân vùng thành công",
+            "success_mixed": "⚠️ Backup hoàn tất: {{success}} thành công, {{error}} thất bại",
+            "cancelled": "⚠️ Đã hủy thao tác backup",
+            "failed": "❌ Backup thất bại: {{count}} phân vùng lỗi"
+        },
+        "status": {
+            "pending": "Chờ xử lý",
+            "inProgress": "Đang xử lý",
+            "done": "Hoàn thành",
+            "error": "Lỗi"
+        },
+        "success": {
+            "title": "Sao lưu thành công",
+            "message": "Đã sao lưu {{count}} phân vùng thành công vào {{path}}"
+        },
+        "error": {
+            "title": "Sao lưu thất bại",
+            "message": "Không thể sao lưu phân vùng: {{error}}",
+            "permission": "Không có quyền ghi vào thư mục đã chọn"
+        },
+        "cancelled": {
+            "title": "Đã hủy sao lưu",
+            "message": "Thao tác sao lưu đã bị hủy"
+        }
     },
     "messages": {
         "deviceReady": "✅ Thiết bị đã sẵn sàng! Nhấn \"Đọc danh sách\" để xem các phân vùng.",
@@ -92,18 +259,57 @@
         "flashComplete": "Hoàn tất ghi: {{success}} thành công, {{failed}} thất bại"
     },
     "flash": {
+        "button": "Flash đã chọn",
         "confirmTitle": "⚠️ XÁC NHẬN GHI FLASH",
         "selectPartitions": "Chọn các phân vùng để ghi:",
         "selectAll": "Chọn tất cả",
         "selectNone": "Bỏ chọn tất cả",
-        "confirm": "Xác nhận ghi",
-        "cancel": "Hủy",
         "criticalWarning": "⚠️ ĐÃ PHÁT HIỆN PHÂN VÙNG QUAN TRỌNG!",
         "lun5Warning": "⚠️ LUN5 chứa dữ liệu hiệu chuẩn. Ghi flash có thể gây ra vấn đề phần cứng!",
         "badges": {
             "critical": "⚠️ QUAN TRỌNG",
             "lun5": "⚡ LUN5",
             "protected": "🛡️ BẢO VỆ"
+        },
+        "confirm": {
+            "title": "⚠️ Xác nhận Flash",
+            "message": "Bạn sắp flash {{count}} phân vùng. Thao tác này sẽ ghi đè dữ liệu hiện có trên thiết bị.",
+            "warning": "Thao tác này không thể hoàn tác. Hãy chắc chắn bạn đã chọn đúng phân vùng.",
+            "criticalPartition": "{{count}} phân vùng quan trọng - flash cẩn thận",
+            "totalSize": "Tổng dung lượng:",
+            "proceed": "Xác nhận Flash"
+        },
+        "progress": {
+            "title": "Đang Flash",
+            "current": "Đang flash: {{partition}}",
+            "bytes": "{{written}} / {{total}}",
+            "percentage": "{{percent}}%",
+            "eta": "Thời gian còn lại: {{time}}",
+            "cancel": "Hủy",
+            "success_all": "✅ Đã flash {{count}} phân vùng thành công",
+            "success_mixed": "⚠️ Flash hoàn tất: {{success}} thành công, {{error}} thất bại",
+            "cancelled": "⚠️ Đã hủy thao tác flash",
+            "failed": "❌ Flash thất bại: {{count}} phân vùng lỗi"
+        },
+        "status": {
+            "pending": "Chờ xử lý",
+            "inProgress": "Đang xử lý",
+            "in-progress": "Đang xử lý",
+            "done": "Hoàn thành",
+            "error": "Lỗi"
+        },
+        "success": {
+            "title": "Flash thành công",
+            "message": "Đã flash {{count}} phân vùng thành công"
+        },
+        "error": {
+            "title": "Flash thất bại",
+            "message": "Không thể flash phân vùng: {{error}}",
+            "noRom": "Chưa tải ROM. Vui lòng tải ROM trước."
+        },
+        "cancelled": {
+            "title": "Đã hủy Flash",
+            "message": "Thao tác flash đã bị hủy"
         }
     },
     "aiPanel": {
@@ -124,5 +330,1123 @@
         "title": "Chọn tệp thủ công",
         "description": "Tải preset thất bại. Vui lòng chọn tệp thủ công:",
         "confirm": "Sử dụng các tệp đã chọn"
+    },
+    "common": {
+        "confirm": "Xác nhận",
+        "cancel": "Hủy",
+        "yes": "Có",
+        "no": "Không",
+        "enabled": "Đã bật",
+        "disabled": "Đã tắt",
+        "processing": "Đang xử lý...",
+        "error": "Lỗi"
+    },
+    "nav": {
+        "home": "Công cụ",
+        "guide": "Hướng dẫn",
+        "downloads": "Tải xuống",
+        "support": "Hỗ trợ",
+        "donate": "Ủng hộ Tôi",
+        "settings": "Cài đặt"
+    },
+    "device": {
+        "connected": "Đã kết nối",
+        "disconnected": "Chưa kết nối",
+        "noDevice": "Chưa chọn thiết bị",
+        "selectDevice": "Chọn thiết bị để bắt đầu",
+        "connect": "Kết nối",
+        "disconnect": "Ngắt kết nối",
+        "card": {
+            "noDevice": "Chưa chọn thiết bị",
+            "selectDevice": "Chọn thiết bị để bắt đầu",
+            "chipset": "Chipset"
+        },
+        "status": {
+            "disconnected": "Chưa kết nối",
+            "connecting": "Đang kết nối...",
+            "connected": "Đã kết nối",
+            "error": "Lỗi kết nối"
+        },
+        "action": {
+            "connect": "Kết nối thiết bị",
+            "disconnect": "Ngắt kết nối",
+            "retry": "Thử lại"
+        },
+        "selector": {
+            "placeholder": "Chọn thiết bị...",
+            "search": "Tìm kiếm thiết bị...",
+            "noResults": "Không tìm thấy thiết bị",
+            "loading": "Đang tải thiết bị...",
+            "empty": "Chưa cấu hình thiết bị"
+        },
+        "deviceStatus": {
+            "tested": "Đã test",
+            "beta": "Beta",
+            "coming": "Sắp hỗ trợ"
+        }
+    },
+    "connection": {
+        "flow": {
+            "connecting": "Đang kết nối thiết bị...",
+            "sahara": "Bắt tay Sahara...",
+            "uploading": "Đang tải firehose...",
+            "authenticating": "Xác thực VIP...",
+            "reading": "Đang đọc phân vùng...",
+            "connected": "Thiết bị đã sẵn sàng"
+        },
+        "error": {
+            "usb": "Kết nối USB thất bại",
+            "sahara": "Bắt tay Sahara thất bại",
+            "firehose": "Tải firehose thất bại",
+            "vip": "Xác thực VIP thất bại",
+            "partition": "Đọc phân vùng thất bại"
+        },
+        "action": {
+            "retry": "Thử kết nối lại"
+        }
+    },
+    "settings": {
+        "language": "Ngôn ngữ"
+    },
+    "mode": {
+        "edl": "EDL",
+        "adb": "ADB",
+        "fastboot": "Fastboot",
+        "switchDisabled": "Ngắt kết nối thiết bị để chuyển chế độ"
+    },
+    "adb": {
+        "title": "Chế độ ADB",
+        "comingSoon": "Tính năng chế độ ADB sắp ra mắt. Cho phép bạn quản lý thiết bị qua giao thức ADB, bao gồm duyệt file, truy cập shell và nhiều hơn nữa.",
+        "features": {
+            "quickActions": "Thao tác nhanh",
+            "deviceInfo": "Thông tin thiết bị",
+            "deviceInfoDesc": "Xem thuộc tính và trạng thái thiết bị",
+            "deviceInfoLabels": {
+                "model": "Model",
+                "android": "Phiên bản Android",
+                "build": "Số Build",
+                "serial": "Số Serial",
+                "manufacturer": "Nhà sản xuất",
+                "device": "Mã thiết bị"
+            },
+            "shell": "Truy cập Shell",
+            "shellDesc": "Thực thi lệnh ADB shell",
+            "files": "Quản lý File",
+            "filesDesc": "Duyệt và truyền file",
+            "install": "Cài đặt APK",
+            "installDesc": "Cài đặt ứng dụng trực tiếp",
+            "appManager": "Quản lý Ứng dụng",
+            "appManagerDesc": "Quản lý các ứng dụng đã cài đặt",
+            "fileManager": "Quản lý File",
+            "terminal": "Terminal"
+        },
+        "info": {
+            "manufacturer": "Nhà sản xuất",
+            "model": "Model",
+            "wifi": "Wi-Fi",
+            "ip": "Địa chỉ IP",
+            "android": "Phiên bản Android",
+            "battery": "Mức Pin",
+            "storage": "Bộ nhớ",
+            "memory": "RAM"
+        },
+        "apps": {
+            "title": "Quản lý Ứng dụng",
+            "userApps": "Ứng dụng Người dùng",
+            "systemApps": "Ứng dụng Hệ thống",
+            "install": "Cài đặt APK",
+            "uninstall": "Gỡ cài đặt",
+            "packageName": "Tên gói",
+            "actions": "Hành động",
+            "search": "Tìm kiếm ứng dụng...",
+            "refresh": "Làm mới danh sách",
+            "confirmUninstall": "Bạn có chắc chắn muốn gỡ cài đặt {{package}}?",
+            "installSuccess": "Đã cài đặt thành công {{app}}",
+            "uninstallSuccess": "Đã gỡ cài đặt thành công {{package}}",
+            "installFailed": "Cài đặt thất bại {{app}}",
+            "uninstallFailed": "Gỡ cài đặt thất bại {{package}}",
+            "selected": "Đã chọn {{count}} ứng dụng",
+            "uninstallSelected": "Gỡ cài đặt đã chọn",
+            "backupApk": "Sao lưu APK trước khi gỡ",
+            "confirmMultiUninstall": "Bạn có chắc chắn muốn gỡ cài đặt {{count}} ứng dụng đã chọn?",
+            "backupFailed": "Sao lưu thất bại {{app}}",
+            "backupSuccess": "Đã lưu {{app}}",
+            "clearData": "Xóa dữ liệu",
+            "disable": "Vô hiệu hóa",
+            "enable": "Bật lại",
+            "saveApk": "Lưu APK",
+            "saveSelected": "Lưu đã chọn",
+            "confirmClearData": "Xóa dữ liệu của {{package}}?",
+            "clearedSuccess": "Đã xóa dữ liệu {{package}}",
+            "disableSuccess": "Đã vô hiệu hóa {{package}}",
+            "enableSuccess": "Đã bật lại {{package}}",
+            "saveSuccess": "Đã lưu {{count}} APK",
+            "copyPackage": "Sao chép tên gói",
+            "copySuccess": "Đã sao chép {{text}}",
+            "statusEnabled": "Đang hoạt động",
+            "statusDisabled": "Đã tắt",
+            "permissions": "Quyền ứng dụng",
+            "searchPermissions": "Tìm kiếm quyền...",
+            "noPermissions": "Không tìm thấy quyền nào",
+            "permissionGranted": "Đã cấp quyền {{permission}}",
+            "permissionRevoked": "Đã thu hồi quyền {{permission}}",
+            "permissionError": "Lỗi cập nhật quyền: {{error}}"
+        },
+        "files": {
+            "title": "Quản lý File",
+            "path": "Đường dẫn",
+            "noFiles": "Không tìm thấy tệp",
+            "emptyDir": "Thư mục trống",
+            "upload": "Tải lên",
+            "download": "Tải xuống",
+            "delete": "Xóa",
+            "newFolder": "Thư mục mới",
+            "refresh": "Làm mới",
+            "home": "Trang chủ",
+            "up": "Lên",
+            "confirmDelete": "Bạn có chắc chắn muốn xóa \"{{name}}\"?",
+            "uploadSuccess": "Đã tải lên thành công {{file}}",
+            "downloadSuccess": "Đã tải xuống thành công {{file}}",
+            "deleteSuccess": "Đã xóa thành công {{file}}",
+            "createDirSuccess": "Đã tạo thư mục {{dir}}",
+            "actionFailed": "Thao tác thất bại: {{error}}",
+            "size": "Kích thước",
+            "date": "Ngày",
+            "type": "Loại"
+        },
+        "connection": {
+            "title": "Kết nối",
+            "status": "Trạng thái"
+        },
+        "status": {
+            "disconnected": "Đã ngắt kết nối",
+            "connecting": "Đang kết nối...",
+            "connected": "Đã kết nối"
+        },
+        "button": {
+            "connect": "Kết nối ADB",
+            "disconnect": "Ngắt kết nối",
+            "connecting": "Đang kết nối..."
+        },
+        "toast": {
+            "connected": "Đã kết nối thiết bị ADB",
+            "disconnected": "Đã ngắt kết nối thiết bị ADB",
+            "connectionFailed": "Kết nối thất bại: {{message}}",
+            "disconnectFailed": "Ngắt kết nối thất bại: {{message}}",
+            "rebootEDLSuccess": "Đã gửi lệnh: Khởi động lại vào EDL",
+            "rebootEDLFailed": "Lỗi khởi động lại vào EDL",
+            "rebootBootloaderSuccess": "Đã gửi lệnh: Khởi động lại vào Bootloader",
+            "rebootBootloaderFailed": "Lỗi khởi động lại vào Bootloader",
+            "rebootFastbootDSuccess": "Đã gửi lệnh: Khởi động lại vào FastbootD",
+            "rebootFastbootDFailed": "Lỗi khởi động lại vào FastbootD",
+            "rebootRecoverySuccess": "Đã gửi lệnh: Khởi động lại vào Recovery",
+            "rebootRecoveryFailed": "Lỗi khởi động lại vào Recovery",
+            "rebootSystemSuccess": "Đã gửi lệnh: Khởi động lại vào System",
+            "rebootSystemFailed": "Lỗi khởi động lại vào System",
+            "shutdownSuccess": "Đã gửi lệnh: Tắt nguồn",
+            "shutdownFailed": "Lỗi tắt nguồn",
+            "actionFailed": "Thao tác thất bại: {{message}}"
+        },
+        "actions": {
+            "rebootEDL": "Reboot EDL",
+            "rebootBootloader": "Reboot Bootloader",
+            "rebootFastbootD": "Reboot FastbootD",
+            "rebootRecovery": "Reboot Recovery",
+            "rebootSystem": "Reboot System",
+            "powerOff": "Tắt nguồn",
+            "hint": "Sau khi khởi động lại, hãy chuyển sang tab chế độ phù hợp"
+        },
+        "shutdown": {
+            "title": "Tắt nguồn thiết bị?",
+            "description": "Bạn có chắc chắn muốn tắt nguồn thiết bị? Bạn sẽ cần bật lại thủ công."
+        },
+        "guide": {
+            "title": "Bật Gỡ lỗi USB",
+            "subtitle": "Làm theo hướng dẫn bên dưới để bật Gỡ lỗi USB",
+            "label": {
+                "brand": "Chọn hãng điện thoại"
+            },
+            "brand": {
+                "oppo_realme_oneplus": "Oppo / Realme / OnePlus (ColorOS/OxygenOS)",
+                "vivo_iqoo": "Vivo / iQOO (FuntouchOS/OriginOS)",
+                "honor": "Huawei / Honor (EMUI/MagicOS)",
+                "xiaomi_poco_redmi": "Xiaomi / POCO / Redmi (MIUI/HyperOS)",
+                "samsung": "Samsung (OneUI)"
+            },
+            "steps": {
+                "oppo": {
+                    "dev": {
+                        "1": "Mở ứng dụng Cài đặt trên điện thoại.",
+                        "2": "Cuộn xuống và chọn **Giới thiệu về thiết bị**.",
+                        "3": "Vuốt xuống nhấn vào mục **Phiên bản**.",
+                        "4": "Nhấn liên tục 8 lần vào mục **Số phiên bản**.",
+                        "5": "Nếu có yêu cầu, hãy nhập mật khẩu của máy để xác nhận."
+                    },
+                    "oem": {
+                        "1": "Quay lại màn hình Cài đặt.",
+                        "2": "Cuộn xuống và chọn **Cài đặt bổ sung** (hoặc Hệ thống và cập nhật).",
+                        "3": "Chọn **Tùy chọn nhà phát triển**.",
+                        "4": "Tìm và bật công tắc cho mục **Mở khóa OEM** > Nhấn **Bật** để xác nhận mật khẩu.",
+                        "5": "Tìm và bật công tắc cho mục **Gỡ lỗi USB**.",
+                        "6": "Hệ thống sẽ đưa ra cảnh báo. Hãy nhấn **OK** để xác nhận."
+                    },
+                    "std": {
+                        "1": "Quay lại màn hình Cài đặt.",
+                        "2": "Cuộn xuống và chọn **Cài đặt bổ sung** (hoặc Hệ thống và cập nhật).",
+                        "3": "Chọn **Tùy chọn nhà phát triển**.",
+                        "4": "Tìm và bật công tắc cho mục **Gỡ lỗi USB**.",
+                        "5": "Hệ thống sẽ đưa ra cảnh báo. Hãy nhấn **OK** để xác nhận."
+                    }
+                },
+                "vivo": {
+                    "dev": {
+                        "1": "Vào **Cài đặt** > **Giới thiệu điện thoại** > **Thông tin phần mềm**.",
+                        "2": "Chạm vào **Số bản dựng** 7 lần.",
+                        "3": "(Phiên bản cũ: Cài đặt > Quản lý hệ thống > Giới thiệu điện thoại)"
+                    },
+                    "oem": {
+                        "1": "Quay lại **Cài đặt** > **Hệ thống** > **Tùy chọn nhà phát triển**.",
+                        "2": "Bật **Mở khóa OEM** > Bật.",
+                        "3": "Bật **Gỡ lỗi USB** > OK."
+                    },
+                    "std": {
+                        "1": "Quay lại **Cài đặt** > **Hệ thống** > **Tùy chọn nhà phát triển**.",
+                        "2": "Bật **Gỡ lỗi USB** > OK."
+                    }
+                },
+                "honor": {
+                    "dev": {
+                        "1": "Vào **Cài đặt** > **Giới thiệu điện thoại**.",
+                        "2": "Chạm vào **Số bản dựng** 7 lần."
+                    },
+                    "oem": {
+                        "1": "Quay lại **Cài đặt** > **Hệ thống & cập nhật** > **Tùy chọn nhà phát triển**.",
+                        "2": "Bật **Mở khóa OEM** > Bật.",
+                        "3": "Bật **Gỡ lỗi USB** > OK."
+                    },
+                    "std": {
+                        "1": "Quay lại **Cài đặt** > **Hệ thống & cập nhật** > **Tùy chọn nhà phát triển**.",
+                        "2": "Bật **Gỡ lỗi USB** > OK."
+                    }
+                },
+                "xiaomi": {
+                    "dev": {
+                        "1": "Vào **Cài đặt** > **Giới thiệu điện thoại**.",
+                        "2": "Chạm vào **Phiên bản MIUI** (hoặc **Phiên bản OS**) 7 lần."
+                    },
+                    "oem": {
+                        "1": "Quay lại **Cài đặt** > **Cài đặt bổ sung** > **Tùy chọn nhà phát triển**.",
+                        "2": "Bật **Mở khóa OEM** > Bật.",
+                        "3": "Bật **Gỡ lỗi USB** > Đợi đếm ngược > OK.",
+                        "4": "(Xiaomi yêu cầu lắp SIM để Mở khóa OEM)"
+                    },
+                    "std": {
+                        "1": "Quay lại **Cài đặt** > **Cài đặt bổ sung** > **Tùy chọn nhà phát triển**.",
+                        "2": "Bật **Gỡ lỗi USB** > Đợi đếm ngược > OK.",
+                        "3": "Bật **Gỡ lỗi USB (Cài đặt bảo mật)** nếu cần toàn quyền kiểm soát."
+                    }
+                },
+                "samsung": {
+                    "dev": {
+                        "1": "Vào **Cài đặt** > **Thông tin điện thoại** > **Thông tin phần mềm**.",
+                        "2": "Chạm vào **Số hiệu bản tạo** 7 lần."
+                    },
+                    "oem": {
+                        "1": "Quay lại **Cài đặt** > **Cài chọn nhà phát triển** (ở dưới cùng).",
+                        "2": "Bật **Mở khóa OEM** > Bật.",
+                        "3": "Bật **Gỡ lỗi USB** > OK."
+                    },
+                    "std": {
+                        "1": "Quay lại **Cài đặt** > **Cài chọn nhà phát triển**.",
+                        "2": "Bật **Gỡ lỗi USB** > OK."
+                    }
+                }
+            },
+            "step1Title": "Bật Tùy chọn nhà phát triển",
+            "step1": {
+                "1": "Mở Cài đặt > Giới thiệu về thiết bị",
+                "2": "Chọn mục 'Phiên bản'",
+                "3": "Nhấn liên tục 7-8 lần vào 'Số phiên bản'",
+                "4": "Nhập mật khẩu khóa màn hình nếu được yêu cầu"
+            },
+            "step2Title": "Bật Gỡ lỗi USB",
+            "step2": {
+                "1": "Quay lại Cài đặt > Cài đặt bổ sung (hoặc Hệ thống)",
+                "2": "Chọn 'Tùy chọn nhà phát triển'",
+                "3": "Tìm và bật công tắc 'Gỡ lỗi USB'",
+                "4": "Nhấn OK để xác nhận cảnh báo"
+            },
+            "includeOem": "Bao gồm mở khóa OEM",
+            "step2TitleOem": "Bật Mở khóa OEM & Gỡ lỗi USB",
+            "step2Oem": {
+                "1": "Quay lại màn hình Cài đặt.",
+                "2": "Cuộn xuống và chọn Hệ thống và cập nhật.",
+                "3": "Chọn Tùy chọn nhà phát triển.",
+                "4": "Tìm và bật công tắc cho mục Mở khóa OEM.",
+                "5": "Hệ thống yêu cầu bạn nhập mật khẩu. Hãy nhấn Bật để xác nhận.",
+                "6": "Tìm và bật công tắc cho mục Gỡ lỗi USB.",
+                "7": "Hệ thống sẽ đưa ra cảnh báo. Hãy nhấn OK để xác nhận."
+            },
+            "step3Title": "Cho phép kết nối máy tính",
+            "step3": {
+                "desc": "Cắm cáp USB vào máy tính. Một hộp thoại sẽ hiện lên màn hình điện thoại.",
+                "check": "Tích vào **\"Luôn cho phép từ máy tính này\"**",
+                "allow": "Nhấn **Cho phép** hoặc **OK**"
+            },
+            "troubleshoot": "Nếu không thấy hộp thoại hãy thử:\n- Rút cáp cắm lại\n- Tắt/bật lại Gỡ lỗi USB\n- Chuyển chế độ USB (Chỉ sạc / Truyền tệp)",
+            "header": {
+                "build": "Đường dẫn Số bản dựng",
+                "dev": "Đường dẫn Tùy chọn nhà phát triển"
+            },
+            "path": {
+                "oppo": {
+                    "build": "Cài đặt > Giới thiệu về thiết bị > Phiên bản",
+                    "dev": "Cài đặt > Cài đặt bổ sung"
+                },
+                "vivo": {
+                    "build": "Cài đặt > Giới thiệu điện thoại > Thông tin phần mềm",
+                    "dev": "Cài đặt > Hệ thống"
+                },
+                "honor": {
+                    "build": "Cài đặt > Giới thiệu điện thoại",
+                    "dev": "Cài đặt > Hệ thống & cập nhật"
+                },
+                "xiaomi": {
+                    "build": "Cài đặt > Giới thiệu điện thoại",
+                    "dev": "Cài đặt > Cài đặt bổ sung"
+                },
+                "samsung": {
+                    "build": "Cài đặt > Thông tin điện thoại > Thông tin phần mềm",
+                    "dev": "Cài đặt > Cài chọn nhà phát triển"
+                }
+            }
+        },
+        "terminal": {
+            "title": "ADB Shell",
+            "hint": "Nhập lệnh ADB shell tại đây",
+            "ready": "Sẵn sàng nhập lệnh",
+            "description": "Nhập lệnh shell bên dưới. Kết quả sẽ hiện ở Log Panel bên phải.",
+            "placeholder": "ls -la",
+            "error": "Lệnh thất bại hoặc chưa kết nối"
+        },
+        "scrcpy": {
+            "title": "Chiếu màn hình (scrcpy)",
+            "ready": "Sẵn sàng chiếu màn hình thiết bị",
+            "connectFirst": "Kết nối thiết bị trước",
+            "notConnected": "Thiết bị chưa kết nối",
+            "noAdbInstance": "Không có kết nối ADB",
+            "download": "Tải scrcpy",
+            "docs": "Xem tài liệu",
+            "hint": "Sau khi tải, chạy scrcpy.exe với USB đã kết nối",
+            "feature": {
+                "mirror": "Chiếu màn hình",
+                "mirrorDesc": "Xem màn hình điện thoại trên PC",
+                "control": "Điều khiển đầy đủ",
+                "controlDesc": "Dùng chuột và bàn phím",
+                "noRoot": "Không cần Root",
+                "noRootDesc": "Hoạt động ngay lập tức",
+                "latency": "Độ trễ thấp",
+                "latencyDesc": "Hiển thị 30-120 FPS",
+                "audio": "Chuyển tiếp âm thanh",
+                "audioDesc": "Nghe âm thanh từ điện thoại"
+            },
+            "settings": {
+                "codec": "Video Codec",
+                "maxSize": "Kích thước tối đa",
+                "bitrate": "Bitrate"
+            }
+        }
+    },
+    "fastboot": {
+        "title": "Chế độ Fastboot",
+        "description": "Flash phân vùng, quản lý bootloader và thực hiện các thao tác cấp thấp",
+        "comingSoon": "Tính năng chế độ Fastboot sắp ra mắt. Cho phép bạn flash phân vùng, mở khóa bootloader và quản lý thiết bị ở mức bootloader.",
+        "fastbootdHeaderDesc": "Thiết bị đang ở chế độ FastbootD (Userspace). Có thể truy cập các phân vùng logical.",
+        "features": {
+            "variables": "Biến thiết bị",
+            "variablesDesc": "Xem biến bootloader",
+            "unlock": "Trạng thái Bootloader",
+            "unlockDesc": "Mở khóa/khóa bootloader",
+            "flash": "Flash phân vùng",
+            "flashDesc": "Flash ảnh phân vùng",
+            "boot": "Boot Image",
+            "bootDesc": "Boot ảnh tùy chỉnh",
+            "reboot": "Tùy chọn khởi động lại",
+            "rebootDesc": "Khởi động lại vào system, recovery hoặc bootloader",
+            "security": "Thông tin bảo mật",
+            "securityDesc": "Xem trạng thái bảo mật và thông tin chống rollback"
+        },
+        "connection": {
+            "connecting": "Đang kết nối...",
+            "connected": "Đã kết nối",
+            "disconnected": "Chưa kết nối"
+        },
+        "button": {
+            "connect": "Kết nối Fastboot",
+            "connecting": "Đang kết nối...",
+            "disconnect": "Ngắt kết nối"
+        },
+        "label": {
+            "status": "Trạng thái"
+        },
+        "toast": {
+            "connected": "Đã kết nối thiết bị Fastboot",
+            "disconnected": "Đã ngắt kết nối thiết bị Fastboot",
+            "connectionFailed": "Kết nối thất bại. Đảm bảo thiết bị ở chế độ Fastboot."
+        },
+        "bootloader": {
+            "unlocked": "Bootloader ĐÃ MỞ KHÓA",
+            "locked": "Bootloader ĐÃ KHÓA",
+            "description": "Quản lý trạng thái khóa bootloader",
+            "unlock": "Mở khóa Bootloader",
+            "lock": "Khóa Bootloader",
+            "unlockTitle": "Mở khóa Bootloader?",
+            "lockTitle": "Khóa Bootloader?",
+            "unlockSuccess": "Đã gửi lệnh mở khóa! Kiểm tra màn hình thiết bị để xác nhận.",
+            "lockSuccess": "Đã gửi lệnh khóa! Kiểm tra màn hình thiết bị để xác nhận.",
+            "unlockFailed": "Gửi lệnh mở khóa thất bại",
+            "lockFailed": "Gửi lệnh khóa thất bại",
+            "confirmUnlock": "Có, Mở khóa Bootloader",
+            "confirmLock": "Có, Khóa Bootloader",
+            "dataWarning": "CẢNH BÁO: Việc này sẽ XÓA TẤT CẢ DỮ LIỆU trên thiết bị của bạn!",
+            "warning": "Thay đổi trạng thái bootloader sẽ khôi phục cài đặt gốc và xóa tất cả dữ liệu. Vui lòng sao lưu dữ liệu quan trọng trước.",
+            "warning1": "Tất cả ứng dụng, ảnh và tập tin sẽ bị xóa",
+            "warning2": "Thiết bị sẽ được khôi phục cài đặt gốc",
+            "warning3": "Bạn phải xác nhận hành động trên màn hình thiết bị",
+            "warning4": "Các tính năng bảo mật của thiết bị có thể bị vô hiệu hóa",
+            "lockWarning": "Khóa bootloader sẽ khôi phục các tính năng bảo mật. Đảm bảo bạn đã cài đặt firmware gốc (stock ROM) trước khi khóa để tránh brick máy.",
+            "unlockInstructionTitle": "Yêu cầu xác nhận trên thiết bị",
+            "unlockInstruction1": "Dùng phím giảm âm để chọn dòng cuối cùng 'Unlock the bootloader' (Màu xanh dương)",
+            "unlockInstruction2": "Bấm PHÍM NGUỒN 1 lần để xác nhận",
+            "unlockInstructionInfo": "Bạn phải thực hiện ngay trên màn hình điện thoại.",
+            "userspaceWarning": "Thao tác trên bootloader không khả dụng trong chế độ FastbootD. Vui lòng khởi động lại vào chế độ Bootloader."
+        },
+        "flash": {
+            "title": "Flash Phân vùng",
+            "description": "Nạp file ảnh vào phân vùng thiết bị.",
+            "lockedDesc": "Mở khóa bootloader trước để flash phân vùng",
+            "locked": "Đã khóa",
+            "boot": "Flash Boot",
+            "recovery": "Flash Recovery",
+            "vbmeta": "Flash Vbmeta",
+            "confirmTitle": "Xác nhận Flash",
+            "file": "Tập tin",
+            "size": "Kích thước",
+            "target": "Phân vùng đích",
+            "warning": "Việc này sẽ ghi đè lên phân vùng hiện tại. Đảm bảo file ảnh chính xác cho thiết bị của bạn.",
+            "button": "Flash Ngay",
+            "selectFile": "Chọn File",
+            "selectPartition": "Chọn phân vùng...",
+            "searchPartition": "Tìm kiếm...",
+            "customPartition": "Hoặc nhập tên phân vùng",
+            "devicePartitions": "Phân vùng Thiết bị",
+            "commonPartitions": "Phổ biến",
+            "partitionsLoaded": "Tìm thấy {{count}} phân vùng",
+            "partitionCount": "Đã phát hiện {{count}} phân vùng từ thiết bị",
+            "success": "Flash thành công",
+            "failed": "Flash thất bại",
+            "progressTitle": "Đang flash {{partition}}...",
+            "progressDesc": "Vui lòng không ngắt kết nối thiết bị trong quá trình này."
+        },
+        "erase": {
+            "title": "Xóa Phân vùng",
+            "select": "Chọn phân vùng...",
+            "search": "Tìm phân vùng...",
+            "custom": "Hoặc nhập tên phân vùng",
+            "button": "Xóa",
+            "confirmTitle": "Xác nhận Xóa",
+            "confirmDesc": "Bạn có chắc muốn xóa phân vùng",
+            "confirmDataWarning": "Hành động này không thể hoàn tác và có thể gây mất dữ liệu.",
+            "confirmButton": "Có, Xóa",
+            "success": "Xóa phân vùng thành công",
+            "failed": "Xóa phân vùng thất bại"
+        },
+        "reboot": {
+            "system": "Hệ thống",
+            "systemDesc": "Khởi động bình thường",
+            "systemSuccess": "Đang khởi động lại hệ thống...",
+            "systemFailed": "Khởi động lại thất bại",
+            "recovery": "Recovery",
+            "recoveryDesc": "Chế độ Recovery",
+            "recoverySuccess": "Đang khởi động vào Recovery...",
+            "recoveryFailed": "Khởi động vào Recovery thất bại",
+            "bootloader": "Bootloader",
+            "bootloaderDesc": "Khởi động lại vào Fastboot",
+            "bootloaderSuccess": "Đang khởi động lại Bootloader...",
+            "bootloaderFailed": "Khởi động lại Bootloader thất bại",
+            "fastbootd": "FastbootD",
+            "fastbootdDesc": "Fastboot Userspace",
+            "fastbootdSuccess": "Đang khởi động vào FastbootD...",
+            "fastbootdFailed": "Khởi động vào FastbootD thất bại"
+        },
+        "terminal": {
+            "title": "Fastboot Shell",
+            "description": "Chạy lệnh fastboot trực tiếp",
+            "ready": "Gõ 'help' để xem các lệnh có sẵn",
+            "disconnected": "Kết nối thiết bị để bắt đầu",
+            "placeholder": "reboot, getvar, erase...",
+            "flashHint": "Dùng bảng Flash phía trên để flash file .img"
+        },
+        "variables": {
+            "title": "Biến thiết bị",
+            "mode": "Chế độ kết nối",
+            "bootloader": "Bootloader",
+            "unlocked": "Đã mở khóa",
+            "locked": "Đã khóa",
+            "product": "Sản phẩm (Product)",
+            "variant": "Biến thể (Variant)",
+            "serial": "Số Serial",
+            "secure": "Secure Boot",
+            "slot": "Slot hiện tại",
+            "ofSlots": "trên {{count}}",
+            "battery": "Mức pin",
+            "offModeCharge": "Sạc khi tắt nguồn",
+            "empty": {
+                "title": "Chưa kết nối thiết bị",
+                "description": "Kết nối thiết bị ở chế độ Fastboot để xem thông tin"
+            }
+        },
+        "empty": {
+            "title": "Chưa kết nối thiết bị",
+            "description": "Kết nối thiết bị ở chế độ Fastboot để truy cập các thao tác bootloader. Nhấn Giảm âm lượng + Nguồn để vào chế độ Fastboot trên hầu hết thiết bị."
+        }
+    },
+    "page": {
+        "guide": {
+            "title": "Hướng dẫn sử dụng",
+            "description": "Tìm hiểu cách sử dụng Q-Flash Web Tool để flash thiết bị Qualcomm của bạn."
+        },
+        "devices": {
+            "title": "Thiết bị hỗ trợ",
+            "description": "Duyệt danh sách các thiết bị Qualcomm được hỗ trợ theo chipset."
+        },
+        "support": {
+            "title": "Trợ giúp & Hỗ trợ",
+            "description": "Nhận trợ giúp về các vấn đề thường gặp và liên hệ đội ngũ hỗ trợ."
+        }
+    },
+    "wizard": {
+        "title": "Trình hướng dẫn cài đặt",
+        "stepIndicator": "Bước {{current}} / {{total}}",
+        "navigation": {
+            "back": "Quay lại",
+            "next": "Tiếp theo",
+            "skip": "Bỏ qua",
+            "finish": "Hoàn tất"
+        },
+        "welcome": {
+            "title": "Chào mừng đến với Q-Flash!",
+            "description": "Trình hướng dẫn này sẽ giúp bạn flash thiết bị Qualcomm một cách an toàn và dễ dàng.",
+            "getStarted": "Bắt đầu"
+        },
+        "prerequisites": {
+            "title": "Trước khi bắt đầu",
+            "description": "Đảm bảo bạn đã chuẩn bị đầy đủ:",
+            "items": {
+                "edlMode": {
+                    "title": "Thiết bị ở chế độ EDL",
+                    "description": "Thiết bị phải ở chế độ Emergency Download (EDL)"
+                },
+                "usbCable": {
+                    "title": "Đã kết nối cáp USB",
+                    "description": "Sử dụng cáp USB chất lượng tốt để kết nối ổn định"
+                },
+                "driver": {
+                    "title": "Đã cài driver WinUSB",
+                    "description": "Cài đặt driver WinUSB bằng công cụ Zadig"
+                }
+            },
+            "needHelp": "Cần trợ giúp?",
+            "viewGuide": "Xem hướng dẫn chi tiết",
+            "downloadDriver": "Tải driver WinUSB"
+        },
+        "deviceSelection": {
+            "title": "Chọn thiết bị của bạn",
+            "description": "Chọn model thiết bị từ danh sách bên dưới:",
+            "selected": "Đã chọn thiết bị",
+            "hint": "Chọn thiết bị để tiếp tục"
+        },
+        "connect": {
+            "title": "Kết nối thiết bị",
+            "description": "Nhấn nút bên dưới để kết nối với thiết bị:",
+            "connectButton": "Kết nối thiết bị",
+            "connecting": "Đang kết nối...",
+            "connectingHint": "Vui lòng đợi trong khi thiết lập kết nối",
+            "connected": "Kết nối thành công!",
+            "connectedHint": "Thiết bị đã sẵn sàng để flash",
+            "error": "Kết nối thất bại",
+            "errorGeneric": "Không thể kết nối với thiết bị",
+            "retry": "Thử lại",
+            "helpText": "Đảm bảo thiết bị ở chế độ EDL và đã kết nối qua USB"
+        },
+        "ready": {
+            "title": "Đã sẵn sàng!",
+            "description": "Thiết bị đã kết nối và sẵn sàng để flash",
+            "nextSteps": "Bạn có thể làm gì bây giờ:",
+            "step1": "Sao lưu các phân vùng quan trọng trước khi flash",
+            "step2": "Flash firmware hoặc phân vùng mới",
+            "step3": "Khởi động lại thiết bị khi hoàn tất",
+            "dontShowAgain": "Không hiển thị lại trình hướng dẫn này",
+            "finish": "Bắt đầu sử dụng Q-Flash"
+        }
+    },
+    "guide": {
+        "title": "Hướng dẫn đầy đủ về Q-Flash",
+        "description": "Mọi thứ bạn cần biết để flash thiết bị Qualcomm một cách an toàn và hiệu quả",
+        "quickStart": {
+            "title": "Bắt đầu nhanh",
+            "intro": "Làm theo 5 bước đơn giản sau để flash thiết bị Qualcomm của bạn:",
+            "step1": {
+                "title": "Cài đặt Driver WinUSB",
+                "description": "Tải và cài đặt driver WinUSB bằng công cụ Zadig. Điều này cho phép trình duyệt giao tiếp với thiết bị."
+            },
+            "step2": {
+                "title": "Vào chế độ EDL",
+                "description": "Đưa thiết bị vào chế độ Emergency Download (EDL). Thiết bị sẽ hiển thị là 'Qualcomm HS-USB QDLoader 9008' trong Device Manager."
+            },
+            "step3": {
+                "title": "Kết nối thiết bị",
+                "description": "Chọn model thiết bị từ danh sách và nhấn 'Kết nối thiết bị'. Đợi quá trình kết nối hoàn tất."
+            },
+            "step4": {
+                "title": "Tải ROM hoặc chọn phân vùng",
+                "description": "Tải thư mục ROM đầy đủ hoặc chọn thủ công các file phân vùng để flash. Bạn cũng có thể sao lưu phân vùng trước khi flash."
+            },
+            "step5": {
+                "title": "Flash hoặc Sao lưu",
+                "description": "Chọn các phân vùng bạn muốn flash hoặc sao lưu, sau đó nhấn nút tương ứng. Theo dõi tiến trình trong terminal."
+            },
+            "tip": "💡 Mẹo: Luôn sao lưu các phân vùng quan trọng trước khi flash để tránh mất dữ liệu!"
+        },
+        "prerequisites": {
+            "title": "Yêu cầu",
+            "intro": "Trước khi bắt đầu, hãy đảm bảo bạn có đầy đủ:",
+            "windows": {
+                "title": "PC Windows (7/8/10/11)",
+                "description": "Q-Flash Web Tool yêu cầu PC Windows với trình duyệt Chrome hoặc Edge (phiên bản 89+)"
+            },
+            "usbCable": {
+                "title": "Cáp USB truyền dữ liệu",
+                "description": "Sử dụng cáp USB chất lượng tốt hỗ trợ truyền dữ liệu, không chỉ sạc"
+            },
+            "driver": {
+                "title": "Đã cài Driver WinUSB",
+                "description": "Cài đặt driver WinUSB bằng công cụ Zadig để kích hoạt giao tiếp WebUSB"
+            },
+            "edlMode": {
+                "title": "Thiết bị ở chế độ EDL",
+                "description": "Thiết bị phải ở chế độ Emergency Download (EDL), hiển thị là 'QDLoader 9008' trong Device Manager"
+            },
+            "cableWarning": {
+                "title": "⚠️ Quan trọng: Sử dụng cáp dữ liệu",
+                "description": "Cáp chỉ sạc sẽ KHÔNG hoạt động. Đảm bảo cáp của bạn hỗ trợ truyền dữ liệu. Nếu thiết bị không được phát hiện, thử cáp khác hoặc cổng USB khác."
+            },
+            "downloadDriver": "Tải Q-FLASH-FORGE / Driver →"
+        },
+        "installingDrivers": {
+            "title": "Cài đặt Driver",
+            "automatic": {
+                "title": "Cài đặt tự động (Q-FLASH-FORGE)",
+                "intro": "Sử dụng công cụ All-in-One để cài driver WinUSB và ADB:",
+                "step1": "Tải Q-FLASH-FORGE mới nhất từ GitHub Releases",
+                "step2": "Chạy công cụ với quyền Administrator (nhấp chuột phải → Run as admin)",
+                "step3": "Chọn tính năng 'Install Drivers / Auto Setup' để tự động cài đặt"
+            },
+            "manual": {
+                "title": "Cài đặt thủ công với Zadig",
+                "intro": "Nếu cài đặt tự động thất bại, sử dụng Zadig để cài driver thủ công:",
+                "step1": "Tải công cụ Zadig từ zadig.akeo.ie",
+                "step2": "Đưa thiết bị vào chế độ EDL trước (nó sẽ xuất hiện trong Device Manager)",
+                "step3": "Chạy Zadig, chọn 'Qualcomm HS-USB QDLoader 9008' từ danh sách thiết bị",
+                "step4": "Chọn 'WinUSB' làm driver đích và nhấn 'Install Driver' hoặc 'Replace Driver'",
+                "imageAlt": "Giao diện công cụ Zadig hiển thị chọn thiết bị QDLoader 9008",
+                "screenshot1": "Bước 1: Chọn thiết bị",
+                "screenshot2": "Bước 2: Chọn WinUSB",
+                "screenshot3": "Bước 3: Cài đặt Driver"
+            },
+            "troubleshootingTip": "💡 Khắc phục sự cố: Nếu thiết bị không hiển thị trong Zadig, thử cổng USB khác (ưu tiên USB 2.0) hoặc kiểm tra xem thiết bị đã ở chế độ EDL đúng chưa."
+        },
+        "enteringEDL": {
+            "title": "Vào chế độ EDL",
+            "intro": "Có nhiều phương pháp để vào chế độ EDL. Chọn phương pháp phù hợp với thiết bị của bạn:",
+            "method1": {
+                "title": "Phương pháp 1: Test Point (Đáng tin cậy nhất)",
+                "description": "Chạm các điểm test cụ thể trên bo mạch thiết bị khi kết nối USB. Phương pháp này yêu cầu mở thiết bị.",
+                "warning": "⚠️ Cảnh báo: Yêu cầu mở máy. Chỉ dùng khi hard-brick hoặc nạp nhầm ROM khác. Có thể mất bảo hành."
+            },
+            "method2": {
+                "title": "Phương pháp 2: Lệnh ADB",
+                "description": "Nếu đã bật USB debugging và mở khóa bootloader, sử dụng lệnh ADB:",
+                "note": "Lưu ý: Yêu cầu bật USB debugging và mở khóa bootloader"
+            },
+            "method3": {
+                "title": "Phương pháp 3: Lệnh Fastboot",
+                "description": "Vào chế độ fastboot trước, sau đó dùng lệnh fastboot:"
+            },
+            "method4": {
+                "title": "Phương pháp 4: Tổ hợp phím (Oppo/Realme/OnePlus)",
+                "step1": "Cách A (Chuẩn): Tắt nguồn, giữ Tăng + Giảm âm lượng rồi cắm cáp USB.",
+                "step2": "Cách B (Bootloop/Brick): Giữ Tăng + Giảm âm lượng + Nguồn (10-15s) đến khi nhận cổng 9008.",
+                "step3": "Lưu ý: Màn hình sẽ đen tuyền. Kiểm tra Device Manager để xác nhận kết nối."
+            },
+            "verification": {
+                "title": "Xác minh",
+                "description": "Thiết bị sẽ hiển thị là 'Qualcomm HS-USB QDLoader 9008' trong Device Manager của Windows"
+            }
+        },
+        "usingTool": {
+            "title": "Sử dụng công cụ Q-Flash",
+            "selectingDevice": {
+                "title": "Chọn thiết bị",
+                "step1": "Mở danh sách chọn thiết bị trong thanh bên",
+                "step2": "Tìm kiếm model thiết bị hoặc duyệt theo chipset",
+                "step3": "Thiết bị được nhóm theo họ chipset để dễ điều hướng"
+            },
+            "connecting": {
+                "title": "Kết nối với thiết bị",
+                "description": "Nhấn nút 'Kết nối thiết bị'. Công cụ sẽ tự động: thiết lập kết nối USB, thực hiện bắt tay Sahara, tải Firehose, xác thực VIP (cho Oppo/OnePlus/Realme), và đọc bảng phân vùng. Chỉ báo màu xanh hiển thị kết nối thành công."
+            },
+            "viewingPartitions": {
+                "title": "Xem phân vùng",
+                "item1": "Bảng phân vùng hiển thị tất cả phân vùng với tên và kích thước",
+                "item2": "Biểu tượng cảnh báo (⚠️) chỉ phân vùng quan trọng - ghi cẩn thận",
+                "item3": "Dùng ô tìm kiếm để nhanh chóng tìm phân vùng cụ thể"
+            },
+            "backup": {
+                "title": "Thao tác sao lưu",
+                "step1": "Chọn các phân vùng muốn sao lưu (đánh dấu ô)",
+                "step2": "Nhấn nút 'Sao lưu'",
+                "step3": "Chọn vị trí lưu và định dạng sao lưu (có/không XML)",
+                "step4": "Theo dõi tiến trình trong bảng terminal"
+            },
+            "flash": {
+                "title": "Thao tác ghi flash",
+                "step1": "Tải thư mục ROM hoặc chọn thủ công file ảnh phân vùng",
+                "step2": "Chọn phân vùng để ghi (bỏ chọn phân vùng muốn bỏ qua)",
+                "step3": "Xem hộp thoại xác nhận - chú ý cảnh báo phân vùng quan trọng",
+                "step4": "Theo dõi tiến trình và đợi thông báo hoàn tất"
+            }
+        },
+        "romProcessing": {
+            "title": "Xử lý ROM",
+            "structure": {
+                "title": "Cấu trúc ROM",
+                "item1": "File rawprogram.xml - định nghĩa bố cục phân vùng và trình tự flash",
+                "item2": "File ảnh phân vùng (.img) - dữ liệu phân vùng thực tế",
+                "item3": "Ảnh sparse vs raw - công cụ tự động xử lý cả hai định dạng"
+            },
+            "loading": {
+                "title": "Tải thư mục ROM",
+                "step1": "Nhấn nút 'Load ROM' trong công cụ",
+                "step2": "Chọn thư mục chứa file ROM (rawprogram*.xml + file .img)",
+                "step3": "Công cụ tự động phát hiện và phân tích file rawprogram",
+                "step4": "Bảng phân vùng cập nhật hiển thị phân vùng ROM sẵn sàng flash"
+            },
+            "selective": {
+                "title": "Flash có chọn lọc",
+                "description": "Bạn không cần flash tất cả phân vùng. Các trường hợp phổ biến:",
+                "tip1": "Chỉ flash system/vendor/product để cập nhật OS mà giữ nguyên dữ liệu",
+                "tip2": "Giữ userdata không chọn để bảo toàn dữ liệu người dùng và ứng dụng"
+            },
+            "warning": "⚠️ Luôn sao lưu các phân vùng quan trọng trước khi flash! Flash sai có thể brick thiết bị."
+        },
+        "troubleshooting": {
+            "title": "Khắc phục sự cố",
+            "error1": {
+                "title": "Không phát hiện thiết bị",
+                "solution1": "Kiểm tra cáp USB - dùng cáp dữ liệu, không phải cáp chỉ sạc",
+                "solution2": "Thử cổng USB khác - ưu tiên USB 2.0",
+                "solution3": "Cài lại driver WinUSB bằng Zadig",
+                "solution4": "Xác minh EDL (hiển thị QDLoader 9008 hoặc QUSB_BULK_CID...)"
+            },
+            "error2": {
+                "title": "Kết nối thất bại",
+                "solution1": "Ngắt kết nối và kết nối lại thiết bị",
+                "solution2": "Khởi động lại trình duyệt và thử lại",
+                "solution3": "Kiểm tra quyền thiết bị trong trình duyệt (cho phép truy cập WebUSB)"
+            },
+            "error3": {
+                "title": "Xác thực VIP thất bại",
+                "solution1": "Đảm bảo thiết bị là Oppo/OnePlus/Realme (yêu cầu xác thực VIP)",
+                "solution2": "Thử kết nối lại thiết bị",
+                "solution3": "Xác minh file firehose khớp chính xác với chipset của bạn"
+            },
+            "error4": {
+                "title": "Thao tác flash thất bại",
+                "solution1": "Xác minh file ROM đầy đủ và không bị lỗi",
+                "solution2": "Kiểm tra đủ dung lượng lưu trữ trên PC",
+                "solution3": "Thử flash từng phân vùng một để xác định vấn đề"
+            },
+            "error5": {
+                "title": "Thiết bị bị treo sau khi flash",
+                "solution1": "Vào chế độ EDL lại và flash ROM gốc hoàn chỉnh",
+                "solution2": "Không bỏ qua các phân vùng quan trọng như abl, xbl, boot",
+                "solution3": "Liên hệ hỗ trợ với model thiết bị và chi tiết lỗi"
+            },
+            "stillHavingIssues": {
+                "title": "Vẫn gặp vấn đề?",
+                "link": "Truy cập trang Hỗ trợ để được giúp đỡ thêm →"
+            }
+        },
+        "faq": {
+            "title": "Câu hỏi thường gặp",
+            "q1": {
+                "question": "Q-Flash có an toàn không?",
+                "answer": "Có, Q-Flash sử dụng giao thức EDL chính thức của Qualcomm, giống như công cụ của nhà sản xuất. Tuy nhiên, luôn sao lưu dữ liệu quan trọng trước khi flash."
+            },
+            "q2": {
+                "question": "Flash có làm mất bảo hành không?",
+                "answer": "Tùy thuộc vào chính sách nhà sản xuất. Thông thường, mở khóa bootloader hoặc flash firmware tùy chỉnh có thể làm mất bảo hành. Kiểm tra với nhà sản xuất thiết bị."
+            },
+            "q3": {
+                "question": "Tôi có thể cứu thiết bị brick bằng Q-Flash không?",
+                "answer": "Có, nếu thiết bị có thể vào chế độ EDL và bạn có ROM gốc đúng, Q-Flash có thể khôi phục thiết bị."
+            },
+            "q4": {
+                "question": "Sự khác biệt giữa backup và flash là gì?",
+                "answer": "Backup lưu dữ liệu phân vùng từ thiết bị lên PC. Flash ghi dữ liệu phân vùng từ PC xuống thiết bị. Luôn backup trước khi flash."
+            },
+            "q5": {
+                "question": "Tôi có thể dùng trên Mac hoặc Linux không?",
+                "answer": "Hiện tại Q-Flash Web Tool yêu cầu Windows do yêu cầu driver WinUSB. Hỗ trợ Mac/Linux có thể được thêm trong tương lai."
+            },
+            "q6": {
+                "question": "Tại sao thiết bị của tôi cần xác thực VIP?",
+                "answer": "Thiết bị Oppo, OnePlus và Realme yêu cầu xác thực VIP vì lý do bảo mật. Đây là yêu cầu của nhà sản xuất, không phải giới hạn của Q-Flash."
+            },
+            "q7": {
+                "question": "Flash mất bao lâu?",
+                "answer": "Tùy thuộc kích thước phân vùng và tốc độ USB. Thường 5-15 phút cho flash ROM đầy đủ. Phân vùng riêng lẻ có thể mất vài giây đến vài phút."
+            },
+            "q8": {
+                "question": "Tôi có thể flash ROM tùy chỉnh không?",
+                "answer": "Có, miễn ROM tương thích với chipset thiết bị và bạn có file ảnh phân vùng và file rawprogram đúng."
+            }
+        }
+    },
+    "rom": {
+        "loadButton": "Tải ROM",
+        "clearButton": "Xóa ROM",
+        "loading": "Đang quét thư mục ROM...",
+        "loaded": "Đã tải ROM thành công",
+        "cleared": "Đã xóa dữ liệu ROM",
+        "changeFolder": "Đổi thư mục",
+        "partitionCount": "{{count}} phân vùng",
+        "partitionCount_one": "{{count}} phân vùng",
+        "totalSize": "Tổng: {{size}}",
+        "missingFiles": "{{count}} file bị thiếu",
+        "missingFiles_one": "{{count}} file bị thiếu",
+        "noRomLoaded": "Chưa tải ROM",
+        "selectFolder": "Chọn thư mục chứa file rawprogram*.xml",
+        "scanningFiles": "Đang quét file...",
+        "parsingXml": "Đang phân tích rawprogram XML...",
+        "rescan": "Quét lại thư mục",
+        "fileType": {
+            "sparse": "Sparse",
+            "raw": "Raw"
+        },
+        "sourceIndicator": "ROM",
+        "error": {
+            "notSupported": "Trình duyệt không hỗ trợ File System Access API",
+            "noXmlFound": "Không tìm thấy file rawprogram*.xml trong thư mục này",
+            "invalidXml": "Định dạng XML không hợp lệ",
+            "parseError": "Lỗi phân tích ROM: {{error}}",
+            "permissionDenied": "Không có quyền truy cập thư mục"
+        }
+    },
+    "downloads": {
+        "title": "Tải xuống",
+        "description": "Tải các công cụ hỗ trợ và ROM gốc cho thiết bị của bạn.",
+        "companionTools": {
+            "title": "Công cụ hỗ trợ",
+            "description": "Các công cụ cần thiết để flash thiết bị Qualcomm",
+            "qFlashForge": {
+                "description": "Công cụ xử lý ROM - Chuyển đổi OZIP sang định dạng flash chuẩn",
+                "version": "Mới nhất"
+            },
+            "platformTools": {
+                "description": "Android SDK Platform-Tools (ADB & Fastboot)",
+                "version": "Mới nhất"
+            },
+            "zadig": {
+                "description": "Công cụ cài đặt driver USB (phương pháp thay thế)",
+                "version": "v2.8"
+            }
+        },
+        "stockRoms": {
+            "title": "ROM gốc",
+            "description": "ROM gốc chính hãng cho thiết bị Qualcomm (Dùng để cứu máy)",
+            "unbrick": "Cứu máy",
+            "size": "Kích thước"
+        },
+        "common": {
+            "download": "Tải xuống",
+            "visitGithub": "Ghé thăm GitHub",
+            "version": "Phiên bản"
+        }
+    },
+    "support": {
+        "title": "Trợ giúp & Hỗ trợ",
+        "description": "Nhận trợ giúp với các vấn đề thường gặp, xem FAQ hoặc liên hệ đội ngũ hỗ trợ.",
+        "contact": {
+            "title": "Liên hệ",
+            "telegram": {
+                "description": "Nhận trợ giúp nhanh từ cộng đồng và nhà phát triển"
+            },
+            "facebook": {
+                "description": "Tham gia nhóm Facebook để thảo luận và cập nhật"
+            },
+            "joinChannel": "Tham gia Telegram",
+            "joinGroup": "Tham gia nhóm"
+        },
+        "troubleshooting": {
+            "title": "Lỗi thường gặp & Giải pháp",
+            "description": "Tìm giải pháp cho các vấn đề thường gặp khi sử dụng Q-Flash.",
+            "error1": {
+                "title": "Không tìm thấy thiết bị",
+                "description": "Công cụ không thể phát hiện thiết bị ở chế độ EDL.",
+                "solution1": "Kiểm tra cáp USB - sử dụng cáp dữ liệu, không phải cáp chỉ sạc",
+                "solution2": "Thử cổng USB khác - ưu tiên USB 2.0",
+                "solution3": "Cài lại driver WinUSB bằng công cụ Zadig",
+                "solution4": "Xác minh thiết bị hiển thị là 'QDLoader 9008' hoặc 'QUSB_BULK_CID' trong Device Manager"
+            },
+            "error2": {
+                "title": "Hết thời gian truyền dữ liệu (Bulk transfer timeout)",
+                "description": "Giao tiếp USB bị timeout trong quá trình truyền dữ liệu.",
+                "solution1": "Sử dụng cáp USB ngắn hơn hoặc kết nối trực tiếp với PC (không qua hub)",
+                "solution2": "Thử cổng USB 2.0 thay vì USB 3.0",
+                "solution3": "Giảm kích thước truyền bằng cách flash ít phân vùng hơn mỗi lần"
+            },
+            "error3": {
+                "title": "Xác thực VIP thất bại",
+                "description": "Thiết bị từ chối xác thực VIP (các thiết bị Oppo/OnePlus/Realme).",
+                "solution1": "Xác minh file firehose khớp chính xác với chipset và model thiết bị",
+                "solution2": "Thử kết nối lại thiết bị và bắt đầu lại từ đầu",
+                "solution3": "Liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục với file firehose đúng"
+            },
+            "error4": {
+                "title": "Đạt giới hạn phiên kết nối (Session limit)",
+                "description": "Thiết bị đã đạt số phiên kết nối tối đa cho phép.",
+                "solution1": "Rút cáp USB và đợi 30 giây trước khi kết nối lại",
+                "solution2": "Khởi động lại trình duyệt hoàn toàn",
+                "solution3": "Nếu vẫn lỗi, khởi động lại thiết bị và vào lại chế độ EDL"
+            },
+            "moreHelp": "Cần hướng dẫn chi tiết hơn?",
+            "viewGuide": "Xem hướng dẫn đầy đủ →"
+        },
+        "faq": {
+            "title": "Câu hỏi thường gặp",
+            "q1": {
+                "question": "Chế độ EDL là gì và tại sao tôi cần nó?",
+                "answer": "EDL (Emergency Download) là chế độ khởi động đặc biệt trên thiết bị Qualcomm cho phép truy cập cấp thấp để flash firmware. Nó được yêu cầu vì vượt qua các hạn chế Android bình thường và cho phép truy cập phân vùng trực tiếp."
+            },
+            "q2": {
+                "question": "Q-Flash có an toàn cho thiết bị không?",
+                "answer": "Có, Q-Flash sử dụng giao thức EDL chính thức của Qualcomm - cùng giao thức được các công cụ nhà sản xuất sử dụng. Tuy nhiên, luôn sao lưu phân vùng quan trọng trước khi flash và đảm bảo bạn sử dụng ROM đúng cho model thiết bị."
+            },
+            "q3": {
+                "question": "Q-Flash có thể cứu thiết bị brick không?",
+                "answer": "Trong hầu hết các trường hợp, có. Nếu thiết bị có thể vào chế độ EDL (phương pháp test point hoạt động ngay cả với thiết bị hard-brick), Q-Flash có thể khôi phục bằng cách flash firmware gốc. Đảm bảo bạn có ROM gốc đúng cho variant thiết bị cụ thể."
+            },
+            "q4": {
+                "question": "Tại sao thiết bị của tôi cần xác thực VIP?",
+                "answer": "Các thiết bị Oppo, OnePlus và Realme yêu cầu xác thực VIP (Verified Image Programming) như biện pháp bảo mật. Điều này đảm bảo chỉ firmware được ủy quyền mới có thể flash. Q-Flash xử lý tự động với các file firehose phù hợp."
+            },
+            "q5": {
+                "question": "Những trình duyệt nào được hỗ trợ?",
+                "answer": "Q-Flash yêu cầu trình duyệt nền Chromium (Chrome, Edge, Brave) phiên bản 89 trở lên với hỗ trợ WebUSB. Firefox và Safari không được hỗ trợ do thiếu WebUSB API."
+            },
+            "q6": {
+                "question": "Flash mất bao lâu?",
+                "answer": "Thời gian phụ thuộc vào kích thước phân vùng và tốc độ USB. Các phân vùng riêng lẻ có thể mất vài giây đến vài phút. Flash ROM đầy đủ thường mất 5-15 phút. Các phân vùng lớn như 'super' có thể mất nhiều thời gian hơn."
+            }
+        }
+    },
+    "landing": {
+        "badge": "Sử dụng WebUSB • Không cần cài đặt",
+        "title": "Q-Flash Web",
+        "subtitle": "Công cụ Flash Android Toàn diện",
+        "description": "Flash firmware, quản lý bootloader, debug ứng dụng và điều khiển thiết bị Android - tất cả từ trình duyệt.",
+        "donate": "Ủng hộ Tôi",
+        "startEDL": "Bắt đầu Chế độ EDL",
+        "viewGuide": "Xem Hướng dẫn",
+        "readFullGuide": "Xem Hướng dẫn Đầy đủ",
+        "features": {
+            "title": "Tại sao chọn Q-Flash Web?",
+            "subtitle": "Được xây dựng với công nghệ web hiện đại cho trải nghiệm flash mượt mà."
+        },
+        "modes": {
+            "edl": {
+                "name": "Chế độ EDL",
+                "description": "Chế độ tải khẩn cấp cho thiết bị Qualcomm. Cứu brick, khôi phục và flash firmware ở cấp thấp nhất.",
+                "feature1": "Cứu thiết bị bị brick",
+                "feature2": "Đọc/Ghi phân vùng",
+                "feature3": "Khôi phục thiết bị hoàn toàn",
+                "feature4": "Xác thực OEM VIP"
+            },
+            "adb": {
+                "name": "Chế độ ADB",
+                "description": "Android Debug Bridge cho thiết bị đã kết nối. Cài ứng dụng, quản lý file, chiếu màn hình và điều khiển thiết bị.",
+                "feature1": "Chiếu màn hình (Scrcpy)",
+                "feature2": "Quản lý file",
+                "feature3": "Quản lý ứng dụng",
+                "feature4": "Terminal shell"
+            },
+            "fastboot": {
+                "name": "Chế độ Fastboot",
+                "description": "Chế độ bootloader để flash image, quản lý phân vùng và thao tác khóa/mở khóa bootloader.",
+                "feature1": "Flash boot/recovery images",
+                "feature2": "Mở khóa/Khóa bootloader",
+                "feature3": "Quản lý slot A/B",
+                "feature4": "Hỗ trợ FastbootD"
+            }
+        },
+        "highlight": {
+            "browser": {
+                "title": "Hoạt động trên Trình duyệt",
+                "desc": "Không cần cài đặt. Hoạt động trực tiếp trên Chrome, Edge và các trình duyệt hỗ trợ WebUSB."
+            },
+            "secure": {
+                "title": "An toàn & Riêng tư",
+                "desc": "Mọi thao tác chạy cục bộ. Dữ liệu của bạn không bao giờ rời khỏi thiết bị."
+            },
+            "multidevice": {
+                "title": "Hỗ trợ Đa thiết bị",
+                "desc": "Hỗ trợ Qualcomm, MediaTek và các hãng Android lớn."
+            },
+            "logs": {
+                "title": "Log Thời gian thực",
+                "desc": "Xuất terminal chi tiết cho mọi thao tác. Debug với sự tự tin."
+            }
+        },
+        "quickstart": {
+            "title": "Bắt đầu Nhanh",
+            "subtitle": "Bắt đầu chỉ với 3 bước đơn giản",
+            "step1": {
+                "title": "Chọn Chế độ",
+                "desc": "Chọn EDL, ADB hoặc Fastboot tùy theo trạng thái thiết bị."
+            },
+            "step2": {
+                "title": "Kết nối Thiết bị",
+                "desc": "Kết nối thiết bị Android qua USB và cấp quyền truy cập."
+            },
+            "step3": {
+                "title": "Bắt đầu Flash",
+                "desc": "Chọn phân vùng, tải firmware và bắt đầu thao tác."
+            }
+        },
+        "footer": "Q-Flash Web - Công cụ Flash Android",
+        "footerCredit": "Tạo bởi Mitomtreem"
+    },
+    "donate": {
+        "badge": "Ủng hộ người phát triển",
+        "title": "Donate Me",
+        "description": "Nếu Q-Flash Web hữu ích với bạn, hãy cân nhắc ủng hộ để phát triển. Mọi đóng góp đều giúp dự án này tiếp tục phát triển!",
+        "accountNumber": "STK:",
+        "name": "Tên:",
+        "copy": "Sao chép số tài khoản",
+        "copied": "Đã sao chép!",
+        "thankYou": "Cảm ơn bạn đã ủng hộ!",
+        "thankYouDesc": "Mọi đóng góp của bạn giúp tôi tiếp tục phát triển và duy trì công cụ này miễn phí cho cộng đồng."
     }
 }

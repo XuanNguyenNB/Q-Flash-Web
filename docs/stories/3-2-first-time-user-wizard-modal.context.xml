@@ -1,0 +1,262 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/3-2" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.2</storyId>
+    <title>First-Time User Wizard Modal</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-2-first-time-user-wizard-modal.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>new user</asA>
+    <iWant>a step-by-step wizard guiding me through setup</iWant>
+    <soThat>I can successfully flash my device on first attempt</soThat>
+    <tasks>
+      - Task 1: Create wizard step components (WelcomeStep, PrerequisitesStep, DeviceSelectionStep, ConnectStep, ReadyStep)
+      - Task 2: Implement wizard navigation logic (useWizardNavigation hook)
+      - Task 3: Replace WizardModal placeholder with full implementation
+      - Task 4: Implement WelcomeStep content
+      - Task 5: Implement PrerequisitesStep content
+      - Task 6: Implement DeviceSelectionStep (integrate DeviceSelector from Story 2.2)
+      - Task 7: Implement ConnectStep (integrate useWebUSB from Story 1.5)
+      - Task 8: Implement ReadyStep with "Don't show again" checkbox
+      - Task 9: Add i18n translations for all wizard steps
+      - Task 10: Add wizard styling and animations
+      - Task 11: Testing and verification
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">When first visit is detected, wizard modal opens with 5 steps: Welcome, Prerequisites, Device Selection, Connect, Ready</criterion>
+    <criterion id="AC2">Each step has Next/Back/Skip buttons with proper navigation</criterion>
+    <criterion id="AC3">Final step has "Don't show again" checkbox that updates settingsStore</criterion>
+    <criterion id="AC4">Wizard is fully translated in Vietnamese and English</criterion>
+    <criterion id="AC5">Dismissing wizard (X button or Skip) updates settingsStore.showWizard to false</criterion>
+    <criterion id="AC6">Device Selection step integrates DeviceSelector component from Story 2.2</criterion>
+    <criterion id="AC7">Connect step shows connection status and triggers connection flow</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Epic 3: Onboarding &amp; Guide Experience - Story 3.2</section>
+        <snippet>5-step wizard: Welcome, Prerequisites, Device Selection, Connect, Ready. Each step has Next/Back/Skip buttons. Final step has "Don't show again" checkbox. Wizard is fully translated (Vietnamese + English).</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/3-1-first-visit-detection.md</path>
+        <title>Story 3.1: First-Visit Detection</title>
+        <section>Dev Notes - Learnings from Previous Story</section>
+        <snippet>WizardModal placeholder already created at src/components/features/wizard/WizardModal.tsx. settingsStore.showWizard boolean flag implemented and persisted. Dialog component from shadcn/ui installed and working. Translation pattern: wizard.* namespace established.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/2-2-device-selector-component.md</path>
+        <title>Story 2.2: DeviceSelector Component</title>
+        <section>Component Implementation</section>
+        <snippet>DeviceSelector component exists at src/components/features/device/DeviceSelector.tsx. Provides searchable dropdown with chipset grouping. Updates deviceStore.selectedDevice on selection.</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/1-5-core-logic-wrapper-hooks.md</path>
+        <title>Story 1.5: Core Logic Wrapper Hooks</title>
+        <section>useWebUSB Hook</section>
+        <snippet>useWebUSB hook exists at src/hooks/useWebUSB.ts. Provides connect(), disconnect(), getManager() methods. Syncs state with deviceStore. Logs operations to terminalStore.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Component Structure</section>
+        <snippet>Components organized by feature in src/components/features/. UI primitives in src/components/ui/. Hooks in src/hooks/. State management with Zustand stores in src/stores/.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>src/components/features/wizard/WizardModal.tsx</path>
+        <kind>component</kind>
+        <symbol>WizardModal</symbol>
+        <lines>1-92</lines>
+        <reason>Existing placeholder wizard modal to be replaced with full 5-step wizard implementation. Currently uses Dialog from shadcn/ui and integrates with settingsStore.showWizard.</reason>
+      </artifact>
+      <artifact>
+        <path>src/components/features/device/DeviceSelector.tsx</path>
+        <kind>component</kind>
+        <symbol>DeviceSelector</symbol>
+        <lines>all</lines>
+        <reason>Existing DeviceSelector component from Story 2.2 to be integrated into Device Selection step (Step 3) of wizard.</reason>
+      </artifact>
+      <artifact>
+        <path>src/hooks/useWebUSB.ts</path>
+        <kind>hook</kind>
+        <symbol>useWebUSB</symbol>
+        <lines>all</lines>
+        <reason>Existing useWebUSB hook from Story 1.5 to be used in Connect step (Step 4) for device connection flow.</reason>
+      </artifact>
+      <artifact>
+        <path>src/stores/settingsStore.ts</path>
+        <kind>store</kind>
+        <symbol>useSettingsStore</symbol>
+        <lines>1-72</lines>
+        <reason>Settings store with showWizard boolean (line 22) and setShowWizard action (line 27). Used to control wizard visibility and persist "don't show again" preference.</reason>
+      </artifact>
+      <artifact>
+        <path>src/stores/deviceStore.ts</path>
+        <kind>store</kind>
+        <symbol>useDeviceStore</symbol>
+        <lines>all</lines>
+        <reason>Device store with selectedDevice and isConnected state. Used in Device Selection and Connect steps for validation and status display.</reason>
+      </artifact>
+      <artifact>
+        <path>src/components/ui/dialog.tsx</path>
+        <kind>ui-component</kind>
+        <symbol>Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter</symbol>
+        <lines>all</lines>
+        <reason>shadcn/ui Dialog components already used in placeholder WizardModal. Continue using for full wizard implementation.</reason>
+      </artifact>
+      <artifact>
+        <path>src/components/ui/button.tsx</path>
+        <kind>ui-component</kind>
+        <symbol>Button</symbol>
+        <lines>all</lines>
+        <reason>shadcn/ui Button component for wizard navigation buttons (Next, Back, Skip, Finish).</reason>
+      </artifact>
+      <artifact>
+        <path>src/i18n/translations/en.json</path>
+        <kind>translations</kind>
+        <symbol>wizard.*</symbol>
+        <lines>all</lines>
+        <reason>English translation keys for wizard. Need to add keys for all 5 steps and navigation buttons.</reason>
+      </artifact>
+      <artifact>
+        <path>src/i18n/translations/vi.json</path>
+        <kind>translations</kind>
+        <symbol>wizard.*</symbol>
+        <lines>all</lines>
+        <reason>Vietnamese translation keys for wizard. Need to add keys for all 5 steps and navigation buttons.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <node>
+        <package name="react" version="^19.2.3" />
+        <package name="react-dom" version="^19.2.3" />
+        <package name="react-i18next" version="^16.5.0" />
+        <package name="i18next" version="^25.7.3" />
+        <package name="zustand" version="^5.0.9" />
+        <package name="@radix-ui/react-dialog" version="^1.1.15" />
+        <package name="lucide-react" version="^0.562.0" />
+        <package name="tailwindcss" version="^4.1.18" />
+        <package name="class-variance-authority" version="^0.7.1" />
+        <package name="clsx" version="^2.1.1" />
+        <package name="tailwind-merge" version="^3.4.0" />
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>MUST replace existing WizardModal placeholder (src/components/features/wizard/WizardModal.tsx) - do not create new file</constraint>
+    <constraint>MUST create 5 separate step components in src/components/features/wizard/steps/ directory</constraint>
+    <constraint>MUST create useWizardNavigation hook for navigation state management</constraint>
+    <constraint>MUST integrate existing DeviceSelector component in Device Selection step - do not recreate</constraint>
+    <constraint>MUST integrate existing useWebUSB hook in Connect step - do not recreate</constraint>
+    <constraint>MUST use settingsStore.showWizard for wizard visibility control</constraint>
+    <constraint>MUST use settingsStore.setShowWizard(false) when user dismisses wizard or checks "Don't show again"</constraint>
+    <constraint>MUST validate each step before allowing Next navigation (e.g., device selected, connection established)</constraint>
+    <constraint>MUST use shadcn/ui Dialog component for modal structure</constraint>
+    <constraint>MUST use lucide-react icons (Zap, CheckCircle, XCircle, Loader2, etc.)</constraint>
+    <constraint>MUST follow translation pattern: wizard.{step}.{key} for all text</constraint>
+    <constraint>MUST add smooth transitions between steps (fade in/out)</constraint>
+    <constraint>MUST ensure responsive design (mobile-friendly)</constraint>
+    <constraint>MUST follow Linear Violet theme colors from UX specification</constraint>
+    <constraint>DO NOT modify core logic files in src/core/, src/auth/, src/services/</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>useSettingsStore</name>
+      <kind>zustand-store</kind>
+      <signature>
+        interface SettingsState {
+          showWizard: boolean;
+          setShowWizard: (show: boolean) => void;
+          language: 'en' | 'vi';
+          setLanguage: (lang: 'en' | 'vi') => void;
+        }
+      </signature>
+      <path>src/stores/settingsStore.ts</path>
+    </interface>
+    <interface>
+      <name>useDeviceStore</name>
+      <kind>zustand-store</kind>
+      <signature>
+        interface DeviceState {
+          selectedDevice: Device | null;
+          isConnected: boolean;
+          setDevice: (device: Device | null) => void;
+          setConnected: (connected: boolean) => void;
+        }
+      </signature>
+      <path>src/stores/deviceStore.ts</path>
+    </interface>
+    <interface>
+      <name>useWebUSB</name>
+      <kind>react-hook</kind>
+      <signature>
+        function useWebUSB(): {
+          connect: () => Promise&lt;void&gt;;
+          disconnect: () => Promise&lt;void&gt;;
+          getManager: () => WebUSBManager | null;
+        }
+      </signature>
+      <path>src/hooks/useWebUSB.ts</path>
+    </interface>
+    <interface>
+      <name>DeviceSelector</name>
+      <kind>react-component</kind>
+      <signature>
+        function DeviceSelector(): JSX.Element
+      </signature>
+      <path>src/components/features/device/DeviceSelector.tsx</path>
+    </interface>
+    <interface>
+      <name>useWizardNavigation (NEW)</name>
+      <kind>react-hook</kind>
+      <signature>
+        function useWizardNavigation(): {
+          currentStep: number;
+          totalSteps: number;
+          canGoNext: boolean;
+          canGoBack: boolean;
+          nextStep: () => void;
+          prevStep: () => void;
+          skipWizard: () => void;
+          completeWizard: () => void;
+        }
+      </signature>
+      <path>src/components/features/wizard/useWizardNavigation.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing follows React Testing Library patterns. Component tests verify rendering, user interactions, and state changes. Integration tests verify multi-component workflows. Tests located in src/__tests__/ or co-located with components. Use vitest as test runner. Mock Zustand stores for isolated component testing.
+    </standards>
+    <locations>
+      - src/__tests__/
+      - src/components/**/*.test.tsx
+      - src/hooks/**/*.test.ts
+    </locations>
+    <ideas>
+      <idea ac="AC1">Test wizard opens with 5 steps when showWizard is true. Verify step titles and content render correctly.</idea>
+      <idea ac="AC2">Test Next button advances step. Test Back button goes to previous step. Test Skip button closes wizard.</idea>
+      <idea ac="AC3">Test "Don't show again" checkbox on final step. Verify setShowWizard(false) is called when checked and Finish clicked.</idea>
+      <idea ac="AC4">Test wizard content in both English and Vietnamese. Mock i18n and verify translation keys are used.</idea>
+      <idea ac="AC5">Test X button closes wizard and calls setShowWizard(false). Test Skip button closes wizard.</idea>
+      <idea ac="AC6">Test Device Selection step renders DeviceSelector component. Verify Next is disabled until device selected.</idea>
+      <idea ac="AC7">Test Connect step shows connection status. Mock useWebUSB and verify connect() is called. Test retry on error.</idea>
+      <idea ac="all">Integration test: Complete wizard flow from Welcome to Ready. Verify all steps, navigation, and final completion.</idea>
+    </ideas>
+  </tests>
+</story-context>

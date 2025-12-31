@@ -1,0 +1,162 @@
+[17:50:20]
+Loading firehose files for Find X7 Ultra (Snapdragon 8 Gen 3)...
+[17:50:20]
+Downloading programmer.melf...
+[17:50:20]
+Downloaded programmer.melf (1513.7 KB)
+[17:50:20]
+Downloading digest.elf...
+[17:50:20]
+Downloaded digest.elf (32.4 KB)
+[17:50:20]
+Downloading signature.bin...
+[17:50:20]
+Downloaded signature.bin (4.0 KB)
+[17:50:20]
+Firehose loaded successfully for Snapdragon 8 Gen 3
+[17:50:40]
+[USB] Connecting to device...
+[17:50:40]
+Connecting to device...
+[17:50:41]
+Device connected successfully
+[17:50:41]
+Device: Vendor 5c6, Product 9008
+[17:50:41]
+[USB] Device connected
+[17:50:41]
+[Sahara] Initiating handshake...
+[17:50:41]
+Starting programmer upload sequence...
+[17:50:41]
+Loading programmer binary (1513.7 KB)...
+[17:50:41]
+Programmer loaded: 1549988 bytes
+[17:50:41]
+Programmer loaded into memory
+[17:50:41]
+Sahara handshake starting...
+[17:50:41]
+Waiting for Sahara HELLO...
+[17:50:41]
+Received HELLO: version=3, mode=0
+[17:50:41]
+Sending HELLO response...
+[17:50:41]
+Starting programmer upload...
+[17:50:41]
+READ_DATA_64: offset=0, length=64
+[17:50:42]
+Uploading: 0% (64 / 1549988 bytes)
+[17:50:42]
+READ_DATA_64: offset=52, length=64
+[17:50:42]
+Uploading: 0% (128 / 1549988 bytes)
+[17:50:42]
+READ_DATA_64: offset=132, length=1536
+[17:50:42]
+READ_DATA_64: offset=1668, length=640
+[17:50:42]
+READ_DATA_64: offset=2308, length=64
+[17:50:42]
+READ_DATA_64: offset=2360, length=384
+[17:50:42]
+READ_DATA_64: offset=182532, length=11376
+[17:50:42]
+READ_DATA_64: offset=5636, length=147544
+[17:50:42]
+READ_DATA_64: offset=153180, length=22260
+[17:50:42]
+READ_DATA_64: offset=175440, length=5140
+[17:50:42]
+READ_DATA_64: offset=193908, length=64
+[17:50:42]
+READ_DATA_64: offset=193972, length=504
+[17:50:42]
+READ_DATA_64: offset=1086836, length=11232
+[17:50:42]
+READ_DATA_64: offset=198004, length=172032
+[17:50:42]
+READ_DATA_64: offset=370036, length=172032
+[17:50:42]
+READ_DATA_64: offset=542068, length=172032
+[17:50:42]
+Uploading: 46% (716968 / 1549988 bytes)
+[17:50:42]
+READ_DATA_64: offset=714100, length=24576
+[17:50:42]
+READ_DATA_64: offset=738676, length=69632
+[17:50:42]
+READ_DATA_64: offset=808308, length=172032
+[17:50:42]
+READ_DATA_64: offset=980340, length=24576
+[17:50:42]
+READ_DATA_64: offset=1004916, length=77824
+[17:50:42]
+READ_DATA_64: offset=1098068, length=64
+[17:50:42]
+READ_DATA_64: offset=1098132, length=392
+[17:50:42]
+READ_DATA_64: offset=1392980, length=4088
+[17:50:42]
+READ_DATA_64: offset=1102164, length=172032
+[17:50:42]
+READ_DATA_64: offset=1274196, length=40960
+[17:50:42]
+READ_DATA_64: offset=1315156, length=36864
+[17:50:42]
+READ_DATA_64: offset=1352020, length=36864
+[17:50:42]
+READ_DATA_64: offset=1397068, length=64
+[17:50:42]
+READ_DATA_64: offset=1397132, length=392
+[17:50:42]
+READ_DATA_64: offset=1544524, length=5464
+[17:50:42]
+READ_DATA_64: offset=1397524, length=220
+[17:50:42]
+READ_DATA_64: offset=1397744, length=51204
+[17:50:42]
+Uploading: 93% (1434216 / 1549988 bytes)
+[17:50:42]
+READ_DATA_64: offset=1448948, length=29152
+[17:50:42]
+READ_DATA_64: offset=1478100, length=11360
+[17:50:42]
+READ_DATA_64: offset=1489460, length=51204
+[17:50:42]
+Upload complete: 1525932 bytes sent
+[17:50:42]
+Sending DONE...
+[17:50:42]
+Received DONE response
+[17:50:42]
+Sahara protocol complete - Device switching to Firehose mode
+[17:50:42]
+Sahara complete, entering Firehose mode
+[17:50:42]
+[Sahara] Handshake complete
+[17:50:42]
+[USB] Waiting for device to settle...
+[17:50:44]
+[USB] Clearing buffer...
+[17:50:44]
+[USB] Resetting interface...
+[17:50:45]
+[USB] Interface reset complete
+[17:50:45]
+[Firehose] Configuring protocol...
+[17:50:45]
+Configuring Firehose session...
+[17:50:45]
+Configuring Firehose: ufs, MaxPayload=1048576
+[17:50:45]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[17:50:45]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: VIP img authentication failed with smc_status = 0xfffffffe, rsp_0 = 0x40000b" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Verifying signature failed with 7" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Authentication of signed hash failed 0" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="NAK" rawmode="false" feature_flags="0x1" /></data>
+[17:50:45]
+Configure failed, trying with smaller payload...
+[17:50:45]
+Firehose configuration failed: NAK received
+[17:50:45]
+[ERROR] FIREHOSE_ERROR: NAK received

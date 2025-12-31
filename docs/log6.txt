@@ -1,0 +1,430 @@
+[22:41:22]
+Loading firehose files for Find X7 Ultra (Snapdragon 8 Gen 3)...
+[22:41:22]
+Downloading programmer.melf...
+[22:41:22]
+Downloaded programmer.melf (1513.7 KB)
+[22:41:22]
+Downloading digest.elf...
+[22:41:22]
+Downloaded digest.elf (32.4 KB)
+[22:41:22]
+Downloading signature.bin...
+[22:41:22]
+Downloaded signature.bin (4.0 KB)
+[22:41:22]
+Firehose loaded successfully for Snapdragon 8 Gen 3
+[22:41:25]
+[USB] Connecting to device...
+[22:41:25]
+Connecting to device...
+[22:41:34]
+Device connected successfully
+[22:41:34]
+Device: Vendor 5c6, Product 9008
+[22:41:34]
+[USB] Device connected
+[22:41:34]
+[Sahara] Initiating handshake...
+[22:41:34]
+Starting programmer upload sequence...
+[22:41:34]
+Loading programmer binary (1513.7 KB)...
+[22:41:34]
+Programmer loaded: 1549988 bytes
+[22:41:34]
+Programmer loaded into memory
+[22:41:34]
+Sahara handshake starting...
+[22:41:34]
+Waiting for Sahara HELLO...
+[22:41:34]
+Received HELLO: version=3, mode=0
+[22:41:34]
+Sending HELLO response...
+[22:41:34]
+Starting programmer upload...
+[22:41:34]
+READ_DATA_64: offset=0, length=64
+[22:41:34]
+Uploading: 0% (64 / 1549988 bytes)
+[22:41:34]
+READ_DATA_64: offset=52, length=64
+[22:41:34]
+Uploading: 0% (128 / 1549988 bytes)
+[22:41:34]
+READ_DATA_64: offset=132, length=1536
+[22:41:34]
+READ_DATA_64: offset=1668, length=640
+[22:41:34]
+READ_DATA_64: offset=2308, length=64
+[22:41:34]
+READ_DATA_64: offset=2360, length=384
+[22:41:34]
+READ_DATA_64: offset=182532, length=11376
+[22:41:34]
+READ_DATA_64: offset=5636, length=147544
+[22:41:34]
+READ_DATA_64: offset=153180, length=22260
+[22:41:34]
+READ_DATA_64: offset=175440, length=5140
+[22:41:34]
+READ_DATA_64: offset=193908, length=64
+[22:41:34]
+READ_DATA_64: offset=193972, length=504
+[22:41:34]
+READ_DATA_64: offset=1086836, length=11232
+[22:41:34]
+READ_DATA_64: offset=198004, length=172032
+[22:41:34]
+READ_DATA_64: offset=370036, length=172032
+[22:41:34]
+READ_DATA_64: offset=542068, length=172032
+[22:41:34]
+Uploading: 46% (716968 / 1549988 bytes)
+[22:41:34]
+READ_DATA_64: offset=714100, length=24576
+[22:41:34]
+READ_DATA_64: offset=738676, length=69632
+[22:41:34]
+READ_DATA_64: offset=808308, length=172032
+[22:41:34]
+READ_DATA_64: offset=980340, length=24576
+[22:41:34]
+READ_DATA_64: offset=1004916, length=77824
+[22:41:34]
+READ_DATA_64: offset=1098068, length=64
+[22:41:34]
+READ_DATA_64: offset=1098132, length=392
+[22:41:34]
+READ_DATA_64: offset=1392980, length=4088
+[22:41:34]
+READ_DATA_64: offset=1102164, length=172032
+[22:41:34]
+READ_DATA_64: offset=1274196, length=40960
+[22:41:34]
+READ_DATA_64: offset=1315156, length=36864
+[22:41:34]
+READ_DATA_64: offset=1352020, length=36864
+[22:41:34]
+READ_DATA_64: offset=1397068, length=64
+[22:41:34]
+READ_DATA_64: offset=1397132, length=392
+[22:41:34]
+READ_DATA_64: offset=1544524, length=5464
+[22:41:34]
+READ_DATA_64: offset=1397524, length=220
+[22:41:34]
+READ_DATA_64: offset=1397744, length=51204
+[22:41:34]
+Uploading: 93% (1434216 / 1549988 bytes)
+[22:41:34]
+READ_DATA_64: offset=1448948, length=29152
+[22:41:34]
+READ_DATA_64: offset=1478100, length=11360
+[22:41:34]
+READ_DATA_64: offset=1489460, length=51204
+[22:41:34]
+Upload complete: 1525932 bytes sent
+[22:41:34]
+Sending DONE...
+[22:41:34]
+Received DONE response
+[22:41:34]
+Sahara protocol complete - Device switching to Firehose mode
+[22:41:34]
+Sahara complete, entering Firehose mode
+[22:41:34]
+[Sahara] Handshake complete
+[22:41:34]
+[USB] Waiting for device to settle...
+[22:41:39]
+[USB] Clearing buffer...
+[22:41:39]
+[USB] Ready for Firehose protocol
+[22:41:39]
+[VIP] Device: Find X7 Ultra, Brand: oppo, AuthMethod: oppo_vip, NeedsVIP: true
+[22:41:39]
+[VIP] Authenticating with OEM server...
+[22:41:39]
+Starting VIP authentication sequence...
+[22:41:39]
+Loading VIP credentials... (digest: 32.4 KB, signature: 4.0 KB)
+[22:41:39]
+VIP credentials loaded
+[22:41:39]
+VIP authentication starting...
+[22:41:39]
+Starting VIP handshake...
+[22:41:39]
+Draining device buffer...
+[22:41:39]
+Device version: SM8650_V1.0.21
+[22:41:39]
+Device: VIP is enabled
+[22:41:40]
+Drained 628 bytes from device
+[22:41:40]
+Step 1/4: Sending Digest file...
+[22:41:40]
+Sending digest: 33144 bytes
+[22:41:40]
+Digest sent (33144 bytes)
+[22:41:40]
+Reading response for digest...
+[22:41:40]
+RX: (no response)
+[22:41:40]
+Step 2/4: Sending Verify...
+[22:41:40]
+TX: <?xml version="1.0"?><data><verify value="ping" EnableVip="1"/></data>
+[22:41:40]
+Reading response for verify...
+[22:41:41]
+RX (0 bytes): (no response)
+[22:41:41]
+Step 3/4: Sending Signature file...
+[22:41:41]
+Sending signature: 4096 bytes
+[22:41:41]
+Signature sent
+[22:41:41]
+Reading response for signature...
+[22:41:41]
+RX (0 bytes): (no response)
+[22:41:41]
+Step 4/4: Sending SHA256Init...
+[22:41:41]
+TX: <?xml version="1.0"?><data><sha256init Verbose="1"/></data>
+[22:41:41]
+Reading response for sha256init...
+[22:41:41]
+RX (0 bytes): (no response)
+[22:41:41]
+VIP Handshake complete!
+[22:41:41]
+VIP authentication successful
+[22:41:41]
+[VIP] Authentication successful
+[22:41:41]
+[Firehose] Configuring protocol...
+[22:41:41]
+Configuring Firehose session...
+[22:41:41]
+Configuring Firehose: ufs, MaxPayload=1048576
+[22:41:41]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[22:41:41]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[22:41:41]
+Firehose configured successfully
+[22:41:41]
+Firehose configured successfully
+[22:41:41]
+[Firehose] Protocol configured, ready for operations
+[22:41:41]
+[Partitions] Reading partition table...
+[22:41:41]
+Reading partition table...
+[22:41:41]
+Reading LUN 0...
+[22:41:41]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" filename="gpt_main0.bin" physical_partition_number="0" label="PrimaryGPT" start_sector="0" num_partition_sectors="6" /></data>
+[22:41:41]
+Response chunk 1: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Calling handler for read" /></data>...
+[22:41:42]
+Response chunk 2: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:PrimaryGPT, w:1, r:1, e:1, c:...
+[22:41:42]
+Response chunk 3: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[22:41:42]
+Response chunk 4: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[22:41:42]
+Got rawmode=true ACK - binary data follows
+[22:41:42]
+Final response:
+[22:41:42]
+Read 24576 bytes from GPT
+[22:41:42]
+GPT: 32 entries, entry size 128
+[22:41:42]
+Found 14 partitions
+[22:41:42]
+LUN 0: 14 partitions
+[22:41:42]
+Reading LUN 1...
+[22:41:42]
+Reconfiguring before LUN 1...
+[22:41:42]
+Configuring Firehose: ufs, MaxPayload=1048576
+[22:41:42]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[22:41:42]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Mode = " /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[22:41:42]
+Firehose configured successfully
+[22:41:42]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" filename="gpt_main1.bin" physical_partition_number="1" label="PrimaryGPT" start_sector="0" num_partition_sectors="6" /></data>
+[22:41:42]
+Response chunk 1: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:PrimaryGPT, w:1, r:1, e:1, c:...
+[22:41:42]
+Response chunk 2: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[22:41:42]
+Response chunk 3: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[22:41:42]
+Got rawmode=true ACK - binary data follows
+[22:41:42]
+Final response:
+[22:41:42]
+Read 24576 bytes from GPT
+[22:41:42]
+GPT: 32 entries, entry size 128
+[22:41:42]
+Found 6 partitions
+[22:41:42]
+LUN 1: 6 partitions
+[22:41:42]
+Reading LUN 2...
+[22:41:42]
+Reconfiguring before LUN 2...
+[22:41:42]
+Configuring Firehose: ufs, MaxPayload=1048576
+[22:41:42]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[22:41:42]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Mode = " /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[22:41:42]
+Firehose configured successfully
+[22:41:43]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" filename="gpt_main2.bin" physical_partition_number="2" label="PrimaryGPT" start_sector="0" num_partition_sectors="6" /></data>
+[22:41:43]
+Response chunk 1: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:PrimaryGPT, w:1, r:1, e:1, c:...
+[22:41:43]
+Response chunk 2: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[22:41:43]
+Response chunk 3: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[22:41:43]
+Got rawmode=true ACK - binary data follows
+[22:41:43]
+Final response:
+[22:41:43]
+Read 24576 bytes from GPT
+[22:41:43]
+GPT: 32 entries, entry size 128
+[22:41:43]
+Found 6 partitions
+[22:41:43]
+LUN 2: 6 partitions
+[22:41:43]
+Reading LUN 3...
+[22:41:43]
+Reconfiguring before LUN 3...
+[22:41:43]
+Configuring Firehose: ufs, MaxPayload=1048576
+[22:41:43]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[22:41:43]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Mode = " /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[22:41:43]
+Firehose configured successfully
+[22:41:43]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" filename="gpt_main3.bin" physical_partition_number="3" label="PrimaryGPT" start_sector="0" num_partition_sectors="6" /></data>
+[22:41:43]
+Response chunk 1: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:PrimaryGPT, w:1, r:1, e:1, c:...
+[22:41:43]
+Response chunk 2: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[22:41:43]
+Response chunk 3: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[22:41:43]
+Got rawmode=true ACK - binary data follows
+[22:41:43]
+Final response:
+[22:41:43]
+Read 24576 bytes from GPT
+[22:41:43]
+GPT: 32 entries, entry size 128
+[22:41:43]
+Found 8 partitions
+[22:41:43]
+LUN 3: 8 partitions
+[22:41:43]
+Reading LUN 4...
+[22:41:44]
+Reconfiguring before LUN 4...
+[22:41:44]
+Configuring Firehose: ufs, MaxPayload=1048576
+[22:41:44]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[22:41:44]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Mode = " /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[22:41:44]
+Firehose configured successfully
+[22:41:44]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" filename="gpt_main4.bin" physical_partition_number="4" label="PrimaryGPT" start_sector="0" num_partition_sectors="6" /></data>
+[22:41:44]
+Response chunk 1: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:PrimaryGPT, w:1, r:1, e:1, c:...
+[22:41:44]
+Response chunk 2: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[22:41:44]
+Response chunk 3: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[22:41:44]
+Got rawmode=true ACK - binary data follows
+[22:41:44]
+Final response:
+[22:41:44]
+Read 24576 bytes from GPT
+[22:41:44]
+GPT: 96 entries, entry size 128
+[22:41:44]
+Found 91 partitions
+[22:41:44]
+LUN 4: 91 partitions
+[22:41:44]
+Reading LUN 5...
+[22:41:44]
+Reconfiguring before LUN 5...
+[22:41:44]
+Configuring Firehose: ufs, MaxPayload=1048576
+[22:41:44]
+TX: <?xml version="1.0" ?><data><configure MemoryName="ufs" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeFromTargetInBytes="8192" ZLPAwareHost="0" /></data>
+[22:41:44]
+RX: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Mode = " /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="ERROR: Mode= Invalid value" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: EnableFlash not found" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: Storage type set to value UFS" /></data><?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" MemoryName="UFS" MinVersionSupported="1" Version="1" MaxPayloadSizeToTargetInBytes="1048576" MaxPayloadSizeToTargetInBytesSupported="1048576" MaxXMLSizeInBytes="4096" DateTime="Nov 7 2023 - 20:58:32" /></data>
+[22:41:44]
+Firehose configured successfully
+[22:41:44]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" filename="gpt_main5.bin" physical_partition_number="5" label="PrimaryGPT" start_sector="0" num_partition_sectors="6" /></data>
+[22:41:44]
+Response chunk 1: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: entry:PrimaryGPT, w:1, r:1, e:1, c:...
+[22:41:45]
+Response chunk 2: <?xml version="1.0" encoding="UTF-8" ?> <data> <log value="INFO: devprg_svip_check_permission ok" />...
+[22:41:45]
+Response chunk 3: <?xml version="1.0" encoding="UTF-8" ?> <data> <response value="ACK" rawmode="true" feature_flags="0...
+[22:41:45]
+Got rawmode=true ACK - binary data follows
+[22:41:45]
+Final response:
+[22:41:45]
+Read 24576 bytes from GPT
+[22:41:45]
+GPT: 32 entries, entry size 128
+[22:41:45]
+Found 20 partitions
+[22:41:45]
+LUN 5: 20 partitions
+[22:41:45]
+Found 145 partitions
+[22:41:45]
+[Partitions] Found 145 partitions
+[22:41:45]
+[Connection] Device ready for operations
+[22:41:49]
+Starting backup of 1 partition(s)...
+[22:41:49]
+Backing up partition: persist (undefined bytes)
+[22:41:49]
+Reading partition: persist
+[22:41:49]
+Reading partition "persist" (LUN 0): 8192 sectors, 32.00 MB
+[22:41:49]
+Firehose already configured, skipping reconfigure
+[22:41:49]
+TX: <?xml version="1.0" ?><data><read SECTOR_SIZE_IN_BYTES="4096" file_sector_offset="0" filename="persist.bin" physical_partition_number="0" label="PrimaryGPT" start_sector="8" num_partition_sectors="8192" partofsingleimage="true" readbackverify="false" sparse="false" /></data>

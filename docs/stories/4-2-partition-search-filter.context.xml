@@ -1,0 +1,275 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>2</storyId>
+    <title>Partition Search & Filter</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-2-partition-search-filter.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to search and filter partitions</iWant>
+    <soThat>I can quickly find specific partitions</soThat>
+    <tasks>
+      - Task 1: Create PartitionSearch component (AC: 1, 2, 4, 5, 7, 8)
+        - 1.1 Create src/components/features/partition/PartitionSearch.tsx
+        - 1.2 Add shadcn/ui Input component with search icon (lucide-react Search)
+        - 1.3 Add clear button (X icon) that appears when search has text
+        - 1.4 Implement controlled input with value from partitionStore.searchFilter
+        - 1.5 Add onChange handler to update store with debounced value
+        - 1.6 Display filtered count: "Showing X of Y partitions"
+        - 1.7 Show "No results" empty state when filtered partitions = 0
+        - 1.8 Style with Linear Violet theme colors
+      
+      - Task 2: Implement debounce utility (AC: 3)
+        - 2.1 Create src/hooks/useDebouncedValue.ts hook
+        - 2.2 Implement debounce with 200ms delay
+        - 2.3 Use useEffect + setTimeout pattern
+        - 2.4 Cleanup timeout on unmount or value change
+        - 2.5 Export TypeScript-typed hook
+      
+      - Task 3: Enhance partitionStore with search (AC: 2, 6)
+        - 3.1 Add searchFilter: string to partitionStore state (ALREADY EXISTS)
+        - 3.2 Add setSearchFilter(filter: string) action (ALREADY EXISTS)
+        - 3.3 Add clearSearchFilter() action
+        - 3.4 Add computed selector filteredPartitions that filters by searchFilter
+        - 3.5 Ensure case-insensitive matching
+        - 3.6 Optionally persist searchFilter to localStorage
+      
+      - Task 4: Update PartitionGrid to use filtered partitions (AC: 2, 8)
+        - 4.1 Import and use filteredPartitions selector instead of raw partitions (ALREADY IMPLEMENTED)
+        - 4.2 Update partition count display to show filtered count (ALREADY IMPLEMENTED)
+        - 4.3 Pass filtered count to PartitionSearch component
+        - 4.4 Ensure "Select All" / "Deselect All" work with filtered partitions
+      
+      - Task 5: Integrate PartitionSearch into PartitionGrid (AC: 1)
+        - 5.1 Import PartitionSearch component
+        - 5.2 Add PartitionSearch above the grid, in the grid header section
+        - 5.3 Position search box to the right of "Partitions" title
+        - 5.4 Ensure responsive layout: search box stacks on mobile
+      
+      - Task 6: Add i18n translations (AC: all)
+        - 6.1 Add English translations to src/i18n/translations/en.json
+        - 6.2 Add Vietnamese translations to src/i18n/translations/vi.json
+      
+      - Task 7: Testing and verification (AC: 1-8)
+        - 7.1 Run npm run dev and verify no TypeScript errors
+        - 7.2-7.8 Test all acceptance criteria
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: When partitions are displayed, a search box appears above the grid
+    AC2: Typing in search box filters partitions by name (case-insensitive)
+    AC3: Search is debounced (200ms) to prevent excessive re-renders
+    AC4: "No results" message shown when no partitions match search
+    AC5: Clear button (X) resets search and shows all partitions
+    AC6: Search filter state is stored in partitionStore
+    AC7: Search works with Vietnamese and English characters
+    AC8: Partition count updates to show filtered count
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Q-Flash-Web Epic Breakdown</title>
+        <section>Story 4.2: Partition Search & Filter</section>
+        <snippet>User wants to search and filter partitions to quickly find specific partitions in devices with 100+ partitions. Search should be debounced (200ms), case-insensitive, with clear button and "no results" state.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Q-Flash-Web Architecture</title>
+        <section>Component Pattern</section>
+        <snippet>All feature components follow standard structure: hooks at top, derived state, handlers, then render. Use cn() utility for className composition. Components should be TypeScript-typed with proper interfaces.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Q-Flash-Web Architecture</title>
+        <section>Zustand Store Pattern</section>
+        <snippet>Stores use create() from zustand with state and actions. Use persist middleware for localStorage. Computed selectors can be implemented as functions that call get().</snippet>
+      </doc>
+      <doc>
+        <path>docs/stories/4-1-partition-grid-component.md</path>
+        <title>Story 4.1: PartitionGrid Component</title>
+        <section>Dev Notes</section>
+        <snippet>PartitionGrid displays partitions in table layout. partitionStore already has searchFilter state and setSearchFilter action. PartitionGrid already filters partitions using useMemo based on searchFilter.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Q-Flash-Web Product Requirements</title>
+        <section>F6: Partition Operations</section>
+        <snippet>Partition operations require efficient UI for devices with 100+ partitions. Search and filter are essential for usability.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/stores/partitionStore.ts</path>
+        <kind>store</kind>
+        <symbol>usePartitionStore</symbol>
+        <lines>1-78</lines>
+        <reason>Partition store already has searchFilter state and setSearchFilter action. Need to add clearSearchFilter action and filteredPartitions computed selector.</reason>
+      </artifact>
+      <artifact>
+        <path>src/components/features/partition/PartitionGrid.tsx</path>
+        <kind>component</kind>
+        <symbol>PartitionGrid</symbol>
+        <lines>1-225</lines>
+        <reason>PartitionGrid already implements filtering using useMemo (lines 28-35). Need to integrate PartitionSearch component into header section and pass filtered count.</reason>
+      </artifact>
+      <artifact>
+        <path>src/lib/partition-utils.ts</path>
+        <kind>utility</kind>
+        <symbol>formatPartitionSize, isDangerousPartition</symbol>
+        <lines>N/A</lines>
+        <reason>Utility functions for partition operations. Used by PartitionGrid for size formatting and danger detection.</reason>
+      </artifact>
+      <artifact>
+        <path>src/i18n/translations/en.json</path>
+        <kind>i18n</kind>
+        <symbol>partition translations</symbol>
+        <lines>N/A</lines>
+        <reason>Need to add partition.search.* translation keys for search component.</reason>
+      </artifact>
+      <artifact>
+        <path>src/i18n/translations/vi.json</path>
+        <kind>i18n</kind>
+        <symbol>partition translations</symbol>
+        <lines>N/A</lines>
+        <reason>Need to add Vietnamese translations for partition.search.* keys.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>react</package>
+        <version>^19.2.3</version>
+        <purpose>Core React library for hooks (useState, useEffect, useMemo)</purpose>
+      </node>
+      <node>
+        <package>zustand</package>
+        <version>^5.0.9</version>
+        <purpose>State management for partitionStore</purpose>
+      </node>
+      <node>
+        <package>react-i18next</package>
+        <version>^16.5.0</version>
+        <purpose>Internationalization for translations</purpose>
+      </node>
+      <node>
+        <package>lucide-react</package>
+        <version>^0.562.0</version>
+        <purpose>Icons (Search, X) for search component</purpose>
+      </node>
+      <node>
+        <package>tailwindcss</package>
+        <version>^4.1.18</version>
+        <purpose>Styling utilities</purpose>
+      </node>
+      <node>
+        <package>class-variance-authority</package>
+        <version>^0.7.1</version>
+        <purpose>cn() utility for className composition</purpose>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Follow Component Pattern from architecture.md: hooks at top, derived state, handlers, render
+    - Use TypeScript with proper interfaces for all components and hooks
+    - Follow i18n naming convention: partition.search.{key}
+    - Use shadcn/ui Input component (need to install if not exists)
+    - Debounce must be 200ms to balance responsiveness with performance
+    - Case-insensitive search using .toLowerCase() for both filter and partition name
+    - Clear button should only appear when searchFilter has text
+    - Empty state message when filteredPartitions.length === 0
+    - partitionStore already has searchFilter state - DO NOT recreate
+    - PartitionGrid already implements filtering - only need to add PartitionSearch component
+    - Follow Linear Violet theme colors from UX spec
+    - Ensure responsive layout: search box stacks on mobile
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>PartitionSearchProps</name>
+      <kind>React component props</kind>
+      <signature>
+        interface PartitionSearchProps {
+          totalCount: number;
+          filteredCount: number;
+        }
+      </signature>
+      <path>src/components/features/partition/PartitionSearch.tsx</path>
+    </interface>
+    <interface>
+      <name>useDebouncedValue</name>
+      <kind>React hook</kind>
+      <signature>
+        function useDebouncedValue&lt;T&gt;(value: T, delay: number = 200): T
+      </signature>
+      <path>src/hooks/useDebouncedValue.ts</path>
+    </interface>
+    <interface>
+      <name>PartitionState (enhanced)</name>
+      <kind>Zustand store interface</kind>
+      <signature>
+        interface PartitionState {
+          searchFilter: string; // ALREADY EXISTS
+          setSearchFilter: (filter: string) => void; // ALREADY EXISTS
+          clearSearchFilter: () => void; // TO ADD
+          filteredPartitions: () => PartitionInfo[]; // TO ADD (computed selector)
+        }
+      </signature>
+      <path>src/stores/partitionStore.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Project uses TypeScript for type safety. Testing should verify:
+      1. Component renders correctly with different props
+      2. Debounce delays filtering by 200ms
+      3. Case-insensitive search works with English and Vietnamese
+      4. Clear button resets search
+      5. Empty state shows when no results
+      6. Filtered count updates correctly
+      7. Integration with PartitionGrid works
+    </standards>
+    <locations>
+      - Manual testing via npm run dev
+      - Future: tests/ directory for automated tests
+    </locations>
+    <ideas>
+      <test ac="AC1">
+        - Load page with partitions → verify search box appears above grid
+      </test>
+      <test ac="AC2">
+        - Type "boot" in search → verify only boot-related partitions shown
+        - Type "BOOT" → verify same results (case-insensitive)
+      </test>
+      <test ac="AC3">
+        - Type quickly "abcdef" → verify filtering happens after 200ms pause
+        - Use browser dev tools to measure timing
+      </test>
+      <test ac="AC4">
+        - Search for "xyz123" → verify "No results" message appears
+      </test>
+      <test ac="AC5">
+        - Search for "boot" → click X button → verify all partitions reappear
+      </test>
+      <test ac="AC6">
+        - Search for "boot" → refresh page → verify search persists (if implemented)
+      </test>
+      <test ac="AC7">
+        - Type "phân vùng" → verify Vietnamese search works
+        - Type "partition" → verify English search works
+      </test>
+      <test ac="AC8">
+        - Search for "boot" → verify count shows "X of Y partitions"
+        - Clear search → verify count shows all partitions
+      </test>
+    </ideas>
+  </tests>
+</story-context>

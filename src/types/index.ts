@@ -137,13 +137,17 @@ export interface FirehoseResponse {
 
 export interface PartitionInfo {
     name: string;
+    lun: number; // Logical Unit Number
     startSector: bigint;
     endSector: bigint;
     sizeInSectors: bigint;
+    size: number; // Size in bytes (for convenience)
     sizeFormatted: string;
     typeGuid: string;
     uniqueGuid: string;
     attributes: bigint;
+    // Computed property for backup operations
+    numSectors?: bigint; // Alias for sizeInSectors
 }
 
 export interface GPTHeader {

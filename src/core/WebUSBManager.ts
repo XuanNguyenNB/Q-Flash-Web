@@ -17,7 +17,8 @@ const DEFAULT_EP_OUT = 1;
 const DEFAULT_EP_IN = 1;  // Same endpoint number, direction is implicit in the function call
 
 // Transfer timeout in milliseconds
-const TRANSFER_TIMEOUT_MS = 10000;
+// Increased to 300 seconds to handle large transfers (256MB chunks)
+const TRANSFER_TIMEOUT_MS = 300000;
 
 export class WebUSBManager {
     private device: USBDevice | null = null;
@@ -33,9 +34,12 @@ export class WebUSBManager {
 
     /**
      * Check if a device is currently connected
+     * NOTE: We only check if device exists, not device.opened
+     * because device.opened can sometimes return false even when
+     * the device is still connected and functional.
      */
     get isConnected(): boolean {
-        return this.device !== null && this.device.opened;
+        return this.device !== null;
     }
 
     /**
@@ -113,32 +117,55 @@ export class WebUSBManager {
     async reconnect(): Promise<boolean> {
         if (!WebUSBManager.isSupported()) return false;
 
-        try {
-            // Wait a moment for OS to register the new device state
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        // Try multiple times as device may take time to re-enumerate
+        const MAX_RETRIES = 5;
+        const RETRY_DELAY = 1000; // 1 second between retries
 
-            // Find device among already permitted devices
-            const devices = await navigator.usb.getDevices();
-            // Match first Qualcomm 9008 device
-            const device = devices.find(d => d.vendorId === QUALCOMM_VID && d.productId === EDL_PID);
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                // Wait for OS to register the new device state
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
 
-            if (!device) return false;
+                // Find device among already permitted devices
+                const devices = await navigator.usb.getDevices();
+                // Match first Qualcomm 9008 device
+                const device = devices.find(d => d.vendorId === QUALCOMM_VID && d.productId === EDL_PID);
 
-            // Close old handle if it's strictly the same object (rare)
-            // But usually we just overwrite
-            this.device = device;
+                if (!device) {
+                    console.log(`Reconnect attempt ${attempt}/${MAX_RETRIES}: Device not found`);
+                    continue; // Try again
+                }
 
-            await this.device.open();
-            if (this.device.configuration === null) {
-                await this.device.selectConfiguration(1);
+                // Close old handle if it exists
+                if (this.device && this.device.opened) {
+                    try {
+                        await this.device.close();
+                    } catch {
+                        // Ignore errors when closing old handle
+                    }
+                }
+
+                this.device = device;
+
+                await this.device.open();
+                if (this.device.configuration === null) {
+                    await this.device.selectConfiguration(1);
+                }
+                await this.findAndClaimInterface();
+                this.detectEndpoints();
+
+                console.log(`Reconnect successful on attempt ${attempt}`);
+                return true;
+            } catch (e) {
+                console.error(`Reconnect attempt ${attempt}/${MAX_RETRIES} failed:`, e);
+                if (attempt === MAX_RETRIES) {
+                    return false;
+                }
+                // Continue to next attempt
             }
-            await this.findAndClaimInterface();
-            this.detectEndpoints();
-            return true;
-        } catch (e) {
-            console.error('Reconnect failed:', e);
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -168,8 +195,13 @@ export class WebUSBManager {
      * Send data to the device (Bulk OUT transfer)
      */
     async transferOut(data: Uint8Array): Promise<TransferResult> {
-        if (!this.device || !this.device.opened) {
+        if (!this.device) {
             return { success: false, error: 'Device not connected' };
+        }
+
+        // Check if device is opened
+        if (!this.device.opened) {
+            return { success: false, error: 'Device not opened - connection lost' };
         }
 
         try {
@@ -196,8 +228,13 @@ export class WebUSBManager {
      * Receive data from the device (Bulk IN transfer)
      */
     async transferIn(length: number): Promise<TransferResult> {
-        if (!this.device || !this.device.opened) {
+        if (!this.device) {
             return { success: false, error: 'Device not connected' };
+        }
+
+        // Check if device is opened
+        if (!this.device.opened) {
+            return { success: false, error: 'Device not opened - connection lost' };
         }
 
         try {
@@ -231,7 +268,7 @@ export class WebUSBManager {
      * Quick receive with short timeout (for draining buffers)
      */
     async transferInQuick(length: number, timeoutMs: number = 500): Promise<TransferResult> {
-        if (!this.device || !this.device.opened) {
+        if (!this.device) {
             return { success: false, error: 'Device not connected' };
         }
 

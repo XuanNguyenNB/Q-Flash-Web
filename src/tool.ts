@@ -189,6 +189,9 @@ export function initTool(): void {
   // Set up event listeners
   setupEventListeners();
 
+  // Set up batch action handlers (including Flash from XML)
+  setupBatchHandlers();
+
   // Initialize AI Chat panel
   initAiChat();
 
@@ -987,9 +990,6 @@ function renderPartitionTable(partitions: import('./types').PartitionInfo[], sea
     });
   }
 
-  // Set up batch action handlers (only once)
-  setupBatchHandlers();
-
   // Build HTML table with checkboxes - Select All in header
   const allSelected = partitions.length > 0 && selectedPartitions.size === partitions.length;
   let html = `
@@ -1076,6 +1076,9 @@ function renderPartitionTable(partitions: import('./types').PartitionInfo[], sea
   html += '</tbody></table>';
   container.innerHTML = html;
 
+  // Set up batch action handlers AFTER HTML is inserted
+  setupBatchHandlers();
+
   // Add click handlers for download buttons
   container.querySelectorAll('.btn-download').forEach(btn => {
     btn.addEventListener('click', async (e) => {
@@ -1117,10 +1120,16 @@ function setupBatchHandlers(): void {
   const selectAllCheckbox = document.getElementById('select-all-partitions') as HTMLInputElement;
   const backupSelectedBtn = document.getElementById('btn-backup-selected');
 
-  // Select All handler
-  if (selectAllCheckbox && !(selectAllCheckbox as any).__hasHandler) {
-    (selectAllCheckbox as any).__hasHandler = true;
-    selectAllCheckbox.addEventListener('change', () => {
+  // Select All handler - Always reattach to handle table re-renders
+  if (selectAllCheckbox) {
+    // Remove old handler first
+    const oldHandler = (selectAllCheckbox as any).__changeHandler;
+    if (oldHandler) {
+      selectAllCheckbox.removeEventListener('change', oldHandler);
+    }
+
+    // Create and attach new handler
+    const changeHandler = () => {
       const partitions = (window as any).__partitions as import('./types').PartitionInfo[];
       const selectedPartitions = (window as any).__selectedPartitions as Set<number>;
 
@@ -1132,16 +1141,20 @@ function setupBatchHandlers(): void {
         selectedPartitions.clear();
       }
 
-      // Update all checkboxes
+      // Update all individual partition checkboxes
       document.querySelectorAll('.partition-checkbox').forEach((cb) => {
         const checkbox = cb as HTMLInputElement;
         const index = parseInt(checkbox.dataset.index || '0', 10);
-        checkbox.checked = selectedPartitions.has(index);
-        updateRowHighlight(index, checkbox.checked);
+        const shouldCheck = selectedPartitions.has(index);
+        checkbox.checked = shouldCheck;
+        updateRowHighlight(index, shouldCheck);
       });
 
       updateSelectedCount();
-    });
+    };
+
+    (selectAllCheckbox as any).__changeHandler = changeHandler;
+    selectAllCheckbox.addEventListener('change', changeHandler);
   }
 
   // Backup Selected handler
@@ -1219,7 +1232,9 @@ const CRITICAL_PARTITIONS = ['boot', 'boot_a', 'boot_b', 'recovery', 'recovery_a
 // Protected partitions - should be unchecked by default
 const PROTECTED_PARTITIONS = ['persist', 'userdata', 'frp', 'devinfo', 'keystore'];
 
-// LUN5 partitions (usually calibration data)
+// LUN5 (calibration data) protection - ALWAYS skipped like native tool
+// From native log: "[Protect LUN5] Skipping 5 partition(s) in LUN5"
+const LUN5_PROTECTED = true;  // Set to false to allow LUN5 flashing (DANGEROUS!)
 const LUN5_WARNING = 'LUN5 contains calibration data. Flashing may cause hardware issues!';
 
 interface FlashEntry {
@@ -1573,6 +1588,19 @@ async function handleFlashSelected(): Promise<void> {
 
       const lun = (partition as any).lun ?? 0;
 
+      // SPOOF MODE: Some partitions are protected and need BackupGPT spoof
+      const PROTECTED_PARTITIONS = ['super', 'splash_odm', 'vm-bootsys_a', 'vm-bootsys_b'];
+      const isProtected = PROTECTED_PARTITIONS.includes(partition.name.toLowerCase());
+
+      let spoofLabel: string | undefined;
+      let spoofFilename: string | undefined;
+
+      if (isProtected) {
+        terminal.info(`[Spoof Mode] ${partition.name} is protected, using BackupGPT spoof`);
+        spoofLabel = 'BackupGPT';
+        spoofFilename = `gpt_backup${lun}.bin`;
+      }
+
       // Skip configure for subsequent writes (already configured)
       const result = await firehose.writePartition(
         lun,
@@ -1585,7 +1613,12 @@ async function handleFlashSelected(): Promise<void> {
             terminal.debug(`${partition.name}: 100%`);
           }
         },
-        !isFirstWrite  // skipConfigure = true for all except first
+        !isFirstWrite,  // skipConfigure = true for all except first
+        file.name,  // Pass actual filename so device can match partition info
+        false,  // partofsingleimage = false for normal partition writes
+        false,  // sparse = false (could be enhanced to detect from file)
+        spoofLabel,    // For protected partitions: "BackupGPT"
+        spoofFilename  // For protected partitions: "gpt_backup0.bin"
       );
 
       isFirstWrite = false;
@@ -1633,6 +1666,8 @@ interface ProgramEntry {
   numSectors: number;
   lun: number;
   sectorSize: number;
+  partofsingleimage: boolean;  // true for GPT/raw writes, false for partition writes
+  sparse: boolean;  // true for sparse images (like super.img), false for raw images
 }
 
 /**
@@ -1659,6 +1694,9 @@ function parseRawprogramXml(xmlContent: string): ProgramEntry[] {
     }
 
     try {
+      const partofsingleimage = prog.getAttribute('partofsingleimage') === 'true';
+      const sparse = prog.getAttribute('sparse') === 'true';  // Parse sparse attribute from XML
+
       entries.push({
         label: prog.getAttribute('label') || '',
         filename: filename,
@@ -1666,6 +1704,8 @@ function parseRawprogramXml(xmlContent: string): ProgramEntry[] {
         numSectors: parseInt(numSectorsStr, 10),
         lun: parseInt(prog.getAttribute('physical_partition_number') || '0', 10),
         sectorSize: parseInt(prog.getAttribute('SECTOR_SIZE_IN_BYTES') || '4096', 10),
+        partofsingleimage: partofsingleimage,
+        sparse: sparse,  // Add sparse to entry
       });
     } catch {
       // Skip entries with unparseable values
@@ -1684,6 +1724,10 @@ async function handleFlashFromXml(): Promise<void> {
     terminal.error('Firehose not initialized. Run unlock flow first.');
     return;
   }
+
+  // Firehose is already configured from reading partition table - no need to reconfigure
+  terminal.separator();
+  terminal.success('✅ Firehose ready for flashing');
 
   // Step 1: Select ROM folder
   terminal.separator();
@@ -1867,66 +1911,224 @@ async function handleFlashFromXml(): Promise<void> {
   // Get selected files to flash
   const selectedFilesToFlash = selectedEntries.map(([idx]) => filesToFlash[idx]);
 
-  // Step 7: Execute flash
+  // LUN5 Protection: Filter out LUN5 partitions (like native tool)
+  // Native tool: "[Protect LUN5] Skipping 5 partition(s) in LUN5"
+  let lun5SkipCount = 0;
+  const filteredFilesToFlash = LUN5_PROTECTED
+    ? selectedFilesToFlash.filter(({ entry }) => {
+      if (entry.lun === 5) {
+        lun5SkipCount++;
+        return false;
+      }
+      return true;
+    })
+    : selectedFilesToFlash;
+
+  if (lun5SkipCount > 0) {
+    terminal.warning(`[Protect LUN5] Skipping ${lun5SkipCount} partition(s) in LUN5`);
+  }
+
+  // Step 7: Separate GPT partitions from regular partitions
+  // CRITICAL: GPT must be flashed FIRST, then device reset, then regular partitions
+  const gptPartitions = filteredFilesToFlash.filter(({ entry }) =>
+    entry.label === 'PrimaryGPT' || entry.label === 'BackupGPT'
+  );
+  const regularPartitions = filteredFilesToFlash.filter(({ entry }) =>
+    entry.label !== 'PrimaryGPT' && entry.label !== 'BackupGPT'
+  );
+
   terminal.separator();
-  terminal.info(`🔥 Starting XML batch flash (${selectedFilesToFlash.length} partition(s))...`);
+  if (gptPartitions.length > 0) {
+    terminal.info(`📋 Flash plan: ${gptPartitions.length} GPT table(s) first, then ${regularPartitions.length} partition(s)`);
+  } else {
+    terminal.info(`🔥 Starting XML batch flash (${filteredFilesToFlash.length} partition(s))...`);
+  }
 
   let successCount = 0;
   let failCount = 0;
   let isFirstWrite = true;
 
-  for (const { entry, file } of selectedFilesToFlash) {
-    terminal.info(`Flashing "${entry.label}"...`);
+  // Step 7a: Try to flash GPT tables
+  // NOTE: We already reset device at function start to clear partition cache
+  if (gptPartitions.length > 0) {
+    terminal.separator();
+    terminal.info(`📋 Phase 1: Flashing ${gptPartitions.length} GPT table(s)...`);
 
-    try {
-      let result: { success: boolean; bytesWritten: number; error?: string };
+    for (const { entry, file } of gptPartitions) {
+      terminal.info(`Flashing "${entry.label}" (LUN${entry.lun})...`);
 
-      // Use streaming for large files (>500MB) to avoid memory issues
-      if (file.size > 500 * 1024 * 1024) {
-        terminal.debug(`Using streaming for large file (${formatBytes(file.size)})`);
-        result = await firehose.writePartitionFromFile(
-          entry.lun,
-          entry.startSector,
-          BigInt(entry.numSectors),
-          entry.label,
-          file,
-          (percent) => {
-            if (percent % 10 === 0) terminal.debug(`${entry.label}: ${percent}%`);
-          }
-        );
-      } else {
-        // Load smaller files into memory
+      try {
         const arrayBuffer = await file.arrayBuffer();
         const data = new Uint8Array(arrayBuffer);
 
-        result = await firehose.writePartition(
+        // For GPT flash, we MUST match the num_sectors from XML, not file size
+        // Device validates the write size against what's declared in XML
+        const numSectorsToWrite = entry.numSectors;
+
+        // If file is smaller than declared sectors, we need to pad it
+        const expectedBytes = numSectorsToWrite * 4096;
+        let dataToWrite = data;
+
+        if (data.byteLength < expectedBytes) {
+          terminal.warning(`⚠️ File ${entry.filename} is ${formatBytes(data.byteLength)} but XML declares ${formatBytes(expectedBytes)}. Padding...`);
+          // Pad with zeros to match XML declaration
+          const paddedData = new Uint8Array(expectedBytes);
+          paddedData.set(data);
+          dataToWrite = paddedData;
+        }
+
+        const result = await firehose.writePartition(
           entry.lun,
           entry.startSector,
-          BigInt(entry.numSectors),
+          BigInt(numSectorsToWrite),  // Use XML value, not file size
           entry.label,
-          data,
+          dataToWrite,  // Use padded data if needed
           (percent) => {
             if (percent === 100) terminal.debug(`${entry.label}: 100%`);
           },
-          !isFirstWrite
+          !isFirstWrite,
+          entry.filename,  // Pass actual filename from XML (e.g., gpt_main0.bin, not PrimaryGPT.bin)
+          true,  // FORCE partofsingleimage=true for GPT tables (XML may have false but device requires true)
+          entry.sparse  // Pass sparse flag from XML (critical for sparse image handling)
         );
+
+        isFirstWrite = false;
+
+        if (result.success) {
+          terminal.success(`✅ ${entry.label} (LUN${entry.lun}) flashed (${formatBytes(result.bytesWritten)})`);
+          successCount++;
+        } else {
+          terminal.warning(`⚠️ ${entry.label} flash failed: ${result.error}`);
+          terminal.warning('Continuing with regular partitions...');
+          // Don't increment failCount - treat as non-fatal
+        }
+      } catch (error) {
+        terminal.warning(`⚠️ ${entry.label} error: ${error instanceof Error ? error.message : error}`);
+        terminal.warning('Continuing with regular partitions...');
+        // Don't increment failCount - treat as non-fatal
       }
+    }
 
-      isFirstWrite = false;
+    // Step 6.5: CRITICAL - Reconfigure to reload GPT from disk
+    // After writing new GPT tables, trigger device to reload them
+    terminal.separator();
+    terminal.info('🔄 Triggering partition table reload...');
+    try {
+      // Wait for device to process GPT writes
+      terminal.info('Waiting 2s for device to process GPT tables...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      if (result.success) {
-        terminal.success(`✅ ${entry.label} flashed (${formatBytes(result.bytesWritten)})`);
-        successCount++;
+      // Reconfigure to force GPT reload from disk
+      const configResult = await firehose.configure();
+      if (!configResult.success) {
+        terminal.warning('⚠️ Failed to reload partition tables');
       } else {
-        terminal.error(`❌ ${entry.label} failed: ${result.error}`);
-        failCount++;
+        terminal.success('✅ Partition tables reloaded, device ready for data partitions');
       }
     } catch (error) {
-      terminal.error(`❌ ${entry.label} error: ${error instanceof Error ? error.message : error}`);
-      failCount++;
+      terminal.warning(`⚠️ GPT reload warning: ${error instanceof Error ? error.message : error}`);
+      terminal.info('Continuing anyway...');
     }
   }
 
+  // Step 7b: Flash regular partitions
+  if (regularPartitions.length > 0) {
+    terminal.separator();
+    terminal.info(`🔥 Phase 2: Flashing ${regularPartitions.length} partition(s)...`);
+
+    for (const { entry, file } of regularPartitions) {
+      // Log partition info like native tool
+      terminal.info(`[Flash] Writing ${entry.label} (LUN${entry.lun}, ${formatBytes(file.size)})...`);
+
+      try {
+        let result: { success: boolean; bytesWritten: number; error?: string };
+
+        // Native tool strategy: Use 64MB chunked writes for files >64MB
+        // This is how super.img (14.28 GB) is successfully flashed
+        const CHUNK_THRESHOLD = 512 * 1024 * 1024; // 512MB threshold (use chunked for files larger than this)
+
+        // SPOOF MODE: Some partitions like 'super' and 'splash_odm' are protected.
+        // Device rejects writes with the real label. Native tool bypasses this by
+        // spoofing the label/filename to "BackupGPT"/"gpt_backup0.bin" while still
+        // writing to the correct sector address.
+        const PROTECTED_PARTITIONS = ['super', 'splash_odm', 'vm-bootsys_a', 'vm-bootsys_b'];
+        const isProtected = PROTECTED_PARTITIONS.includes(entry.label.toLowerCase());
+
+        let spoofLabel: string | undefined;
+        let spoofFilename: string | undefined;
+
+        if (isProtected) {
+          terminal.info(`[Spoof Mode] ${entry.label} is protected, using BackupGPT spoof`);
+          spoofLabel = 'BackupGPT';
+          spoofFilename = `gpt_backup${entry.lun}.bin`;
+        }
+
+        if (file.size > CHUNK_THRESHOLD) {
+          terminal.info(`[Strategy] Chunked write enabled (${formatBytes(file.size)})`);
+
+          // Use chunked write like native tool
+          result = await firehose.writePartitionChunked(
+            entry.lun,
+            entry.startSector,
+            BigInt(entry.numSectors),
+            entry.label,
+            file,
+            (percent) => {
+              // Only log major milestones
+              if (percent % 25 === 0) terminal.debug(`${entry.label}: ${percent}%`);
+            },
+            (chunkIndex, totalChunks, chunkMB) => {
+              // Log each chunk progress like native tool
+              terminal.info(`  Writing chunk ${chunkIndex}/${totalChunks} (${chunkMB} MB)...`);
+            },
+            entry.filename,  // Pass filename from XML (e.g., "super.img")
+            true,  // partofsingleimage=true for regular partitions after GPT flash
+            spoofLabel,      // For protected partitions: "BackupGPT"
+            spoofFilename    // For protected partitions: "gpt_backup0.bin"
+          );
+        } else {
+          // Load smaller files into memory (faster for small files)
+          const arrayBuffer = await file.arrayBuffer();
+          const data = new Uint8Array(arrayBuffer);
+
+          // SPOOF MODE for small protected files (uses same spoof variables from above)
+          // Note: spoof detection was done before the if/else, so spoofLabel/spoofFilename are available
+
+          result = await firehose.writePartition(
+            entry.lun,
+            entry.startSector,
+            BigInt(entry.numSectors),
+            entry.label,
+            data,
+            (percent) => {
+              if (percent === 100) terminal.debug(`${entry.label}: 100%`);
+            },
+            !isFirstWrite,
+            entry.filename,
+            true,  // FORCE partofsingleimage=true after GPT reload
+            entry.sparse,
+            spoofLabel,      // For protected partitions: "BackupGPT"
+            spoofFilename    // For protected partitions: "gpt_backup0.bin"
+          );
+        }
+
+        isFirstWrite = false;
+
+        if (result.success) {
+          terminal.success(`[Success] ${entry.label} written successfully`);
+          successCount++;
+        } else {
+          terminal.error(`❌ ${entry.label} failed: ${result.error}`);
+          failCount++;
+        }
+      } catch (error) {
+        terminal.error(`❌ ${entry.label} error: ${error instanceof Error ? error.message : error}`);
+        failCount++;
+      }
+    }
+  }
+
+  // Final summary
   terminal.separator();
   if (failCount === 0) {
     terminal.success(`✅ All ${successCount} partition(s) flashed successfully!`);
@@ -1969,7 +2171,18 @@ async function handleFlashFromXml(): Promise<void> {
   if (patchFiles.length === 0) {
     terminal.warning('No patch files found - device may not boot properly!');
   } else {
-    terminal.info(`Found ${patchFiles.length} patch file(s): ${patchFiles.map(p => p.name).join(', ')}`);
+    // Filter out patch5.xml if LUN5 protection is enabled (like native tool)
+    const filteredPatchFiles = LUN5_PROTECTED
+      ? patchFiles.filter(p => {
+        if (p.name.toLowerCase() === 'patch5.xml') {
+          terminal.warning('[Protect LUN5] Skipping patch5.xml');
+          return false;
+        }
+        return true;
+      })
+      : patchFiles;
+
+    terminal.info(`Applying ${filteredPatchFiles.length} patch file(s): ${filteredPatchFiles.map(p => p.name.replace('.xml', '')).join(', ')}.xml`);
 
     // Reconfigure before applying patches (like native tool does)
     await firehose.configure();
@@ -1977,7 +2190,7 @@ async function handleFlashFromXml(): Promise<void> {
     let patchSuccess = 0;
     let patchFail = 0;
 
-    for (const patchFile of patchFiles) {
+    for (const patchFile of filteredPatchFiles) {
       // Reconfigure before each patch file to reset device state
       await firehose.configure();
 
@@ -2028,21 +2241,41 @@ async function handleFlashFromXml(): Promise<void> {
     if (patchFail > 0) {
       terminal.warning(`Patches applied: ${patchSuccess} success, ${patchFail} failed`);
     } else {
-      terminal.success(`All ${patchSuccess} patch file(s) applied successfully`);
+      terminal.success(`Patch application completed: ${patchSuccess}/${filteredPatchFiles.length} successful`);
     }
+    terminal.info(`Patch files applied: ${patchSuccess} file(s)`);
   }
 
-  // Step 9: Set bootable drive
-  terminal.info('Setting bootable drive...');
+  // Step 9: Set bootable drive (like native tool)
+  terminal.info('Sending setbootablestoragedrive (value=1)...');
   const bootResult = await firehose.setBootableDrive(1);
-  if (!bootResult.success) {
+  if (bootResult.success) {
+    terminal.success('setbootablestoragedrive command sent successfully');
+  } else {
     terminal.warning(`Failed to set bootable drive: ${bootResult.error}`);
   }
 
-  // Step 10: Optional reboot
+  // Step 10: Auto reboot (like native tool)
+  // Native tool: "Auto reboot is enabled, rebooting device..."
   terminal.separator();
-  terminal.success('🎉 Flash complete! Device is ready.');
-  terminal.info('Click "Reboot" button to restart device, or disconnect USB.');
+  terminal.success('Flash completed successfully!');
+  terminal.info('Auto reboot is enabled, rebooting device...');
+  terminal.info('Sending reboot command...');
+
+  try {
+    const rebootResult = await firehose.power('reset');
+    if (rebootResult.success) {
+      terminal.success('Device is rebooting...');
+      terminal.success('Device reboot command sent successfully!');
+      terminal.success('🎉 All operations completed successfully!');
+    } else {
+      terminal.warning(`Reboot command failed: ${rebootResult.error}`);
+      terminal.info('Please manually reboot the device.');
+    }
+  } catch (error) {
+    terminal.warning(`Reboot error: ${error instanceof Error ? error.message : error}`);
+    terminal.info('Please manually reboot the device or disconnect USB.');
+  }
 }
 
 interface XmlFileInfo {
@@ -2382,12 +2615,30 @@ async function handleBatchBackup(): Promise<void> {
   // Backup each partition
   let successCount = 0;
   let failCount = 0;
+  const skippedAlignment: string[] = [];
+  const skippedProtected: string[] = [];
+
+  // Protected bootloader partitions that device forbids reading
+  const protectedPartitions = ['ssd', 'xbl_a', 'xbl_b', 'uefi_a', 'uefi_b'];
 
   for (const { index, partition } of partitionsToBackup) {
     const lun = (partition as any).lun ?? 0;
     const numSectors = partition.sizeInSectors;
     const sizeBytes = Number(numSectors) * 4096;
     const filename = `${partition.name}.img`;
+
+    // Skip alignment padding partitions
+    if (partition.name.startsWith('ALIGN_TO_')) {
+      skippedAlignment.push(partition.name);
+      terminal.info(`⏭️ Skipped: ${partition.name} (alignment padding)`);
+      continue;
+    }
+    // Skip protected bootloader partitions
+    if (protectedPartitions.includes(partition.name)) {
+      skippedProtected.push(partition.name);
+      terminal.info(`⏭️ Skipped: ${partition.name} (protected bootloader)`);
+      continue;
+    }
 
     terminal.info(`📥 Reading: ${partition.name} (${partition.sizeFormatted})...`);
 
@@ -2482,6 +2733,21 @@ async function handleBatchBackup(): Promise<void> {
 
   terminal.separator();
   terminal.success(`✅ Batch backup complete: ${successCount} succeeded, ${failCount} failed`);
+
+  // Show summary of skipped partitions if user selected any
+  const totalSkipped = skippedAlignment.length + skippedProtected.length;
+  if (totalSkipped > 0) {
+    terminal.info('');
+    terminal.info(`ℹ️ ${totalSkipped} partition(s) were skipped (not errors):`);
+    if (skippedProtected.length > 0) {
+      terminal.info(`   • Protected bootloader (${skippedProtected.length}): ${skippedProtected.join(', ')}`);
+      terminal.info(`     → Device security prevents reading. No unique data - can use from official ROM`);
+    }
+    if (skippedAlignment.length > 0) {
+      terminal.info(`   • Alignment padding (${skippedAlignment.length}): ${skippedAlignment.join(', ')}`);
+      terminal.info(`     → Empty padding areas, not needed for backup`);
+    }
+  }
 }
 
 /**
@@ -2542,6 +2808,13 @@ async function handleBackupPartition(index: number): Promise<void> {
   terminal.separator();
   terminal.info(`📥 Backing up partition: ${partition.name}`);
   terminal.info(`LUN: ${lun}, Start: ${partition.startSector}, Size: ${partition.sizeFormatted}`);
+
+  // Check if partition is in protected area (GPT header region)
+  if (partition.startSector < 8n) {
+    terminal.warning(`⚠️ Skipping ${partition.name}: Located in protected GPT area (sector ${partition.startSector})`);
+    terminal.info('This is normal - GPT header regions cannot be backed up via external network.');
+    return;
+  }
 
   // Warn for large partitions
   if (sizeBytes > 100 * 1024 * 1024) {

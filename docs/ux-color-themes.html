@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q-Flash-Web - Color Theme Options</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0b;
+      color: #fafafa;
+      min-height: 100vh;
+      padding: 40px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #888 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .header p {
+      color: #888;
+      font-size: 16px;
+    }
+    
+    .themes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 1200px) {
+      .themes-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .theme-card {
+      background: #111113;
+      border: 1px solid #222225;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .theme-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    
+    .theme-header {
+      padding: 24px;
+      border-bottom: 1px solid #222225;
+    }
+    
+    .theme-number {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.5;
+      margin-bottom: 8px;
+    }
+    
+    .theme-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .theme-personality {
+      font-size: 14px;
+      color: #888;
+    }
+    
+    .theme-content {
+      padding: 24px;
+    }
+    
+    /* Color Palette Section */
+    .palette-section {
+      margin-bottom: 24px;
+    }
+    
+    .palette-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    
+    .color-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .color-swatch {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 4px;
+      font-size: 8px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .color-swatch.large {
+      width: 80px;
+      height: 56px;
+      font-size: 10px;
+    }
+    
+    /* Component Preview Section */
+    .components-section {
+      margin-bottom: 24px;
+    }
+    
+    .component-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .btn-primary {
+      color: #fff;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid #333;
+      color: #fff;
+    }
+    
+    .btn-secondary:hover {
+      border-color: #555;
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .btn-ghost {
+      background: transparent;
+      color: #888;
+    }
+    
+    .btn-ghost:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+    
+    /* Input Preview */
+    .input-preview {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .input {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      border: 1px solid #333;
+      background: #0a0a0b;
+      color: #fff;
+      width: 160px;
+    }
+    
+    .input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    
+    .input::placeholder {
+      color: #555;
+    }
+    
+    /* Card Preview */
+    .card-preview {
+      background: #0d0d0f;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .card-desc {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    
+    .progress-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: #222;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      width: 65%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    
+    /* Status Badges */
+    .badges-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .badge-success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+    }
+    
+    .badge-warning {
+      background: rgba(234, 179, 8, 0.15);
+      color: #eab308;
+    }
+    
+    .badge-error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+    
+    /* Alert Preview */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    
+    /* Best For Section */
+    .best-for {
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    
+    .best-for-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    
+    .best-for-text {
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.5;
+    }
+    
+    /* ============ THEME 1: CYBER BLUE ============ */
+    .theme-1 {
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --secondary: #60a5fa;
+      --accent: #0ea5e9;
+    }
+    
+    .theme-1 .theme-name { color: #3b82f6; }
+    .theme-1 .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .theme-1 .btn-primary:hover { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
+    .theme-1 .progress-fill { background: linear-gradient(90deg, #3b82f6, #0ea5e9); }
+    .theme-1 .input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
+    .theme-1 .alert { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .theme-1 .alert-icon { background: #3b82f6; color: #fff; }
+    
+    /* ============ THEME 2: LINEAR VIOLET ============ */
+    .theme-2 {
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --primary-glow: rgba(139, 92, 246, 0.25);
+      --secondary: #a78bfa;
+      --accent: #c084fc;
+    }
+    
+    .theme-2 .theme-name { color: #8b5cf6; }
+    .theme-2 .btn-primary { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+    .theme-2 .btn-primary:hover { background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%); }
+    .theme-2 .progress-fill { background: linear-gradient(90deg, #8b5cf6, #c084fc); }
+    .theme-2 .input:focus { border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25); }
+    .theme-2 .alert { background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: #a78bfa; }
+    .theme-2 .alert-icon { background: #8b5cf6; color: #fff; }
+    
+    /* ============ THEME 3: QUALCOMM RED ============ */
+    .theme-3 {
+      --primary: #ef4444;
+      --primary-hover: #dc2626;
+      --primary-glow: rgba(239, 68, 68, 0.25);
+      --secondary: #f87171;
+      --accent: #fb923c;
+    }
+    
+    .theme-3 .theme-name { color: #ef4444; }
+    .theme-3 .btn-primary { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+    .theme-3 .btn-primary:hover { background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); }
+    .theme-3 .progress-fill { background: linear-gradient(90deg, #ef4444, #fb923c); }
+    .theme-3 .input:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25); }
+    .theme-3 .alert { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; }
+    .theme-3 .alert-icon { background: #ef4444; color: #fff; }
+    
+    /* ============ THEME 4: MINT TERMINAL ============ */
+    .theme-4 {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --secondary: #34d399;
+      --accent: #06b6d4;
+    }
+    
+    .theme-4 .theme-name { color: #10b981; }
+    .theme-4 .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .theme-4 .btn-primary:hover { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); }
+    .theme-4 .progress-fill { background: linear-gradient(90deg, #10b981, #06b6d4); }
+    .theme-4 .input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); }
+    .theme-4 .alert { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #34d399; }
+    .theme-4 .alert-icon { background: #10b981; color: #fff; }
+    
+    /* Vote Section */
+    .vote-section {
+      max-width: 800px;
+      margin: 48px auto 0;
+      text-align: center;
+      padding: 32px;
+      background: #111113;
+      border: 1px solid #222225;
+      border-radius: 16px;
+    }
+    
+    .vote-section h2 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    
+    .vote-section p {
+      color: #888;
+      margin-bottom: 24px;
+    }
+    
+    .vote-options {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .vote-btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .vote-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .vote-1 { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border-color: #3b82f6; }
+    .vote-2 { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border-color: #8b5cf6; }
+    .vote-3 { background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: #ef4444; }
+    .vote-4 { background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: #10b981; }
+    
+    /* Mini App Preview */
+    .mini-app {
+      background: #0a0a0b;
+      border: 1px solid #222;
+      border-radius: 12px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    
+    .mini-app-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #222;
+    }
+    
+    .mini-app-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    
+    .mini-app-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .mini-app-body {
+      padding: 16px;
+    }
+    
+    .step-indicators {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .step {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      background: #1a1a1c;
+      color: #666;
+    }
+    
+    .step.active {
+      color: #fff;
+    }
+    
+    .step.completed {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+    }
+    
+    .theme-1 .step.active { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    .theme-2 .step.active { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+    .theme-3 .step.active { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .theme-4 .step.active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    
+    .theme-1 .mini-app-logo { background: #3b82f6; }
+    .theme-2 .mini-app-logo { background: #8b5cf6; }
+    .theme-3 .mini-app-logo { background: #ef4444; }
+    .theme-4 .mini-app-logo { background: #10b981; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎨 Q-Flash-Web Color Themes</h1>
+    <p>4 theme options designed for a professional flash tool experience</p>
+  </div>
+  
+  <div class="themes-grid">
+    <!-- THEME 1: CYBER BLUE -->
+    <div class="theme-card theme-1">
+      <div class="theme-header">
+        <div class="theme-number">Theme 1</div>
+        <div class="theme-name">Cyber Blue</div>
+        <div class="theme-personality">Tech • Professional • Trustworthy</div>
+      </div>
+      <div class="theme-content">
+        <!-- Color Palette -->
+        <div class="palette-section">
+          <div class="palette-label">Primary Colors</div>
+          <div class="color-row">
+            <div class="color-swatch large" style="background: #3b82f6;">#3b82f6</div>
+            <div class="color-swatch large" style="background: #2563eb;">#2563eb</div>
+            <div class="color-swatch large" style="background: #0ea5e9;">#0ea5e9</div>
+          </div>
+        </div>
+        
+        <div class="palette-section">
+          <div class="palette-label">Semantic Colors</div>
+          <div class="color-row">
+            <div class="color-swatch" style="background: #22c55e;">Success</div>
+            <div class="color-swatch" style="background: #eab308;">Warning</div>
+            <div class="color-swatch" style="background: #ef4444;">Error</div>
+            <div class="color-swatch" style="background: #3b82f6;">Info</div>
+          </div>
+        </div>
+        
+        <div class="palette-section">
+          <div class="palette-label">Backgrounds</div>
+          <div class="color-row">
+            <div class="color-swatch" style="background: #0a0a0b; border-color: #333;">Base</div>
+            <div class="color-swatch" style="background: #111113; border-color: #333;">Card</div>
+            <div class="color-swatch" style="background: #1a1a1c; border-color: #333;">Hover</div>
+            <div class="color-swatch" style="background: #222225; border-color: #333;">Border</div>
+          </div>
+        </div>
+        
+        <!-- Components Preview -->
+        <div class="components-section">
+          <div class="palette-label">Components</div>
+          <div class="component-row">
+            <button class="btn btn-primary">Flash Device</button>
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-ghost">Settings</button>
+          </div>
+          
+          <div class="input-preview">
+            <input type="text" class="input" placeholder="Search partitions..." />
+          </div>
+          
+          <div class="badges-row">
+            <span class="badge badge-success">✓ Connected</span>
+            <span class="badge badge-warning">⚠ Low Storage</span>
+            <span class="badge badge-error">✕ Failed</span>
+          </div>
+          
+          <div class="card-preview">
+            <div class="card-title">Flashing super.img</div>
+            <div class="card-desc">3.2 GB / 4.9 GB • 65% complete</div>
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+          </div>
+          
+          <div class="alert">
+            <div class="alert-icon">i</div>
+            Device ready for flashing operations
+          </div>
+        </div>
+        
+        <!-- Mini App Preview -->
+        <div class="mini-app">
+          <div class="mini-app-header">
+            <div class="mini-app-logo">⚡</div>
+            <div class="mini-app-title">Q-Flash-Web</div>
+          </div>
+          <div class="mini-app-body">
+            <div class="step-indicators">
+              <div class="step completed">1. Device</div>
+              <div class="step active">2. Load ROM</div>
+              <div class="step">3. Flash</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="best-for">
+          <div class="best-for-title">Best For</div>
+          <div class="best-for-text">Classic tech tool aesthetic. Blue conveys trust and reliability—ideal for a tool that handles critical device operations. Similar to Intel, IBM, Docker branding.</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- THEME 2: LINEAR VIOLET -->
+    <div class="theme-card theme-2">
+      <div class="theme-header">
+        <div class="theme-number">Theme 2</div>
+        <div class="theme-name">Linear Violet</div>
+        <div class="theme-personality">Modern • Premium • Developer-focused</div>
+      </div>
+      <div class="theme-content">
+        <!-- Color Palette -->
+        <div class="palette-section">
+          <div class="palette-label">Primary Colors</div>
+          <div class="color-row">
+            <div class="color-swatch large" style="background: #8b5cf6;">#8b5cf6</div>
+            <div class="color-swatch large" style="background: #7c3aed;">#7c3aed</div>
+            <div class="color-swatch large" style="background: #c084fc;">#c084fc</div>
+          </div>
+        </div>
+        
+        <div class="palette-section">
+          <div class="palette-label">Semantic Colors</div>
+          <div class="color-row">
+            <div class="color-swatch" style="background: #22c55e;">Success</div>
+            <div class="color-swatch" style="background: #eab308;">Warning</div>
+            <div class="color-swatch" style="background: #ef4444;">Error</div>
+            <div class="color-swatch" style="background: #8b5cf6;">Info</div>
+          </div>
+        </div>
+        
+        <div class="palette-section">
+          <div class="palette-label">Backgrounds</div>
+          <div class="color-row">
+            <div class="color-swatch" style="background: #0a0a0b; border-color: #333;">Base</div>
+            <div class="color-swatch" style="background: #111113; border-color: #333;">Card</div>
+            <div class="color-swatch" style="background: #1a1a1c; border-color: #333;">Hover</div>
+            <div class="color-swatch" style="background: #222225; border-color: #333;">Border</div>
+          </div>
+        </div>
+        
+        <!-- Components Preview -->
+        <div class="components-section">
+          <div class="palette-label">Components</div>
+          <div class="component-row">
+            <button class="btn btn-primary">Flash Device</button>
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-ghost">Settings</button>
+          </div>
+          
+          <div class="input-preview">
+            <input type="text" class="input" placeholder="Search partitions..." />
+          </div>
+          
+          <div class="badges-row">
+            <span class="badge badge-success">✓ Connected</span>
+            <span class="badge badge-warning">⚠ Low Storage</span>
+            <span class="badge badge-error">✕ Failed</span>
+          </div>
+          
+          <div class="card-preview">
+            <div class="card-title">Flashing super.img</div>
+            <div class="card-desc">3.2 GB / 4.9 GB • 65% complete</div>
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+          </div>
+          
+          <div class="alert">
+            <div class="alert-icon">i</div>
+            Device ready for flashing operations
+          </div>
+        </div>
+        
+        <!-- Mini App Preview -->
+        <div class="mini-app">
+          <div class="mini-app-header">
+            <div class="mini-app-logo">⚡</div>
+            <div class="mini-app-title">Q-Flash-Web</div>
+          </div>
+          <div class="mini-app-body">
+            <div class="step-indicators">
+              <div class="step completed">1. Device</div>
+              <div class="step active">2. Load ROM</div>
+              <div class="step">3. Flash</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="best-for">
+          <div class="best-for-title">Best For</div>
+          <div class="best-for-text">Linear-inspired aesthetic that feels cutting-edge and developer-friendly. Purple/violet is unique in the flash tool space—helps Q-Flash stand out. Premium, modern vibe.</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- THEME 3: QUALCOMM RED -->
+    <div class="theme-card theme-3">
+      <div class="theme-header">
+        <div class="theme-number">Theme 3</div>
+        <div class="theme-name">Qualcomm Red</div>
+        <div class="theme-personality">Bold • Powerful • Brand-aligned</div>
+      </div>
+      <div class="theme-content">
+        <!-- Color Palette -->
+        <div class="palette-section">
+          <div class="palette-label">Primary Colors</div>
+          <div class="color-row">
+            <div class="color-swatch large" style="background: #ef4444;">#ef4444</div>
+            <div class="color-swatch large" style="background: #dc2626;">#dc2626</div>
+            <div class="color-swatch large" style="background: #fb923c;">#fb923c</div>
+          </div>
+        </div>
+        
+        <div class="palette-section">
+          <div class="palette-label">Semantic Colors</div>
+          <div class="color-row">
+            <div class="color-swatch" style="background: #22c55e;">Success</div>
+            <div class="color-swatch" style="background: #eab308;">Warning</div>
+            <div class="color-swatch" style="background: #ef4444;">Error</div>
+            <div class="color-swatch" style="background: #f97316;">Info</div>
+          </div>
+        </div>
+        
+        <div class="palette-section">
+          <div class="palette-label">Backgrounds</div>
+          <div class="color-row">
+            <div class="color-swatch" style="background: #0a0a0b; border-color: #333;">Base</div>
+            <div class="color-swatch" style="background: #111113; border-color: #333;">Card</div>
+            <div class="color-swatch" style="background: #1a1a1c; border-color: #333;">Hover</div>
+            <div class="color-swatch" style="background: #222225; border-color: #333;">Border</div>
+          </div>
+        </div>
+        
+        <!-- Components Preview -->
+        <div class="components-section">
+          <div class="palette-label">Components</div>
+          <div class="component-row">
+            <button class="btn btn-primary">Flash Device</button>
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-ghost">Settings</button>
+          </div>
+          
+          <div class="input-preview">
+            <input type="text" class="input" placeholder="Search partitions..." />
+          </div>
+          
+          <div class="badges-row">
+            <span class="badge badge-success">✓ Connected</span>
+            <span class="badge badge-warning">⚠ Low Storage</span>
+            <span class="badge badge-error">✕ Failed</span>
+          </div>
+          
+          <div class="card-preview">
+            <div class="card-title">Flashing super.img</div>
+            <div class="card-desc">3.2 GB / 4.9 GB • 65% complete</div>
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+          </div>
+          
+          <div class="alert">
+            <div class="alert-icon">i</div>
+            Device ready for flashing operations
+          </div>
+        </div>
+        
+        <!-- Mini App Preview -->
+        <div class="mini-app">
+          <div class="mini-app-header">
+            <div class="mini-app-logo">⚡</div>
+            <div class="mini-app-title">Q-Flash-Web</div>
+          </div>
+          <div class="mini-app-body">
+            <div class="step-indicators">
+              <div class="step completed">1. Device</div>
+              <div class="step active">2. Load ROM</div>
+              <div class="step">3. Flash</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="best-for">
+          <div class="best-for-title">Best For</div>
+          <div class="best-for-text">Aligns with Qualcomm's brand colors. Red conveys power and urgency—appropriate for a flash tool. ⚠️ Caution: Red as primary can feel "dangerous" which may conflict with "safe" emotion goal.</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- THEME 4: MINT TERMINAL -->
+    <div class="theme-card theme-4">
+      <div class="theme-header">
+        <div class="theme-number">Theme 4</div>
+        <div class="theme-name">Mint Terminal</div>
+        <div class="theme-personality">Hacker • Technical • Matrix-inspired</div>
+      </div>
+      <div class="theme-content">
+        <!-- Color Palette -->
+        <div class="palette-section">
+          <div class="palette-label">Primary Colors</div>
+          <div class="color-row">
+            <div class="color-swatch large" style="background: #10b981;">#10b981</div>
+            <div class="color-swatch large" style="background: #059669;">#059669</div>
+            <div class="color-swatch large" style="background: #06b6d4;">#06b6d4</div>
+          </div>
+        </div>
+        
+        <div class="palette-section">
+          <div class="palette-label">Semantic Colors</div>
+          <div class="color-row">
+            <div class="color-swatch" style="background: #22c55e;">Success</div>
+            <div class="color-swatch" style="background: #eab308;">Warning</div>
+            <div class="color-swatch" style="background: #ef4444;">Error</div>
+            <div class="color-swatch" style="background: #10b981;">Info</div>
+          </div>
+        </div>
+        
+        <div class="palette-section">
+          <div class="palette-label">Backgrounds</div>
+          <div class="color-row">
+            <div class="color-swatch" style="background: #0a0a0b; border-color: #333;">Base</div>
+            <div class="color-swatch" style="background: #111113; border-color: #333;">Card</div>
+            <div class="color-swatch" style="background: #1a1a1c; border-color: #333;">Hover</div>
+            <div class="color-swatch" style="background: #222225; border-color: #333;">Border</div>
+          </div>
+        </div>
+        
+        <!-- Components Preview -->
+        <div class="components-section">
+          <div class="palette-label">Components</div>
+          <div class="component-row">
+            <button class="btn btn-primary">Flash Device</button>
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-ghost">Settings</button>
+          </div>
+          
+          <div class="input-preview">
+            <input type="text" class="input" placeholder="Search partitions..." />
+          </div>
+          
+          <div class="badges-row">
+            <span class="badge badge-success">✓ Connected</span>
+            <span class="badge badge-warning">⚠ Low Storage</span>
+            <span class="badge badge-error">✕ Failed</span>
+          </div>
+          
+          <div class="card-preview">
+            <div class="card-title">Flashing super.img</div>
+            <div class="card-desc">3.2 GB / 4.9 GB • 65% complete</div>
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+          </div>
+          
+          <div class="alert">
+            <div class="alert-icon">i</div>
+            Device ready for flashing operations
+          </div>
+        </div>
+        
+        <!-- Mini App Preview -->
+        <div class="mini-app">
+          <div class="mini-app-header">
+            <div class="mini-app-logo">⚡</div>
+            <div class="mini-app-title">Q-Flash-Web</div>
+          </div>
+          <div class="mini-app-body">
+            <div class="step-indicators">
+              <div class="step completed">1. Device</div>
+              <div class="step active">2. Load ROM</div>
+              <div class="step">3. Flash</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="best-for">
+          <div class="best-for-title">Best For</div>
+          <div class="best-for-text">Terminal/Matrix aesthetic that appeals to power users. Green = "go", success, safe—aligns with your emotion goals. Classic hacker vibe while remaining professional. Similar to Termius, HTerm.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Vote Section -->
+  <div class="vote-section">
+    <h2>🗳️ Which theme resonates with you?</h2>
+    <p>Tell me your preference: A number (1-4), or describe a combination!</p>
+    <div class="vote-options">
+      <button class="vote-btn vote-1">1. Cyber Blue</button>
+      <button class="vote-btn vote-2">2. Linear Violet</button>
+      <button class="vote-btn vote-3">3. Qualcomm Red</button>
+      <button class="vote-btn vote-4">4. Mint Terminal</button>
+    </div>
+  </div>
+  
+  <script>
+    // Add some interactivity
+    document.querySelectorAll('.vote-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert('Great choice! Tell me your selection in the chat to continue the design process.');
+      });
+    });
+    
+    // Add hover effects to inputs
+    document.querySelectorAll('.input').forEach(input => {
+      input.addEventListener('focus', () => {
+        input.style.borderColor = 'var(--primary)';
+      });
+      input.addEventListener('blur', () => {
+        input.style.borderColor = '#333';
+      });
+    });
+  </script>
+</body>
+</html>

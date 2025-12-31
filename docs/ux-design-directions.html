@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-Flash-Web - Design Directions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --primary-glow: rgba(139, 92, 246, 0.25);
+            --secondary: #a78bfa;
+            --accent: #c084fc;
+            --success: #22c55e;
+            --warning: #eab308;
+            --error: #ef4444;
+            --bg-base: #09090b;
+            --bg-card: #111113;
+            --bg-elevated: #18181b;
+            --border: #27272a;
+            --text: #fafafa;
+            --text-muted: #71717a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-base);
+            color: var(--text);
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(9, 9, 11, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav h1 {
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        .nav-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .directions {
+            padding-top: 80px;
+        }
+
+        .direction {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .direction.active {
+            display: block;
+        }
+
+        .direction-header {
+            padding: 32px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .direction-header h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .direction-header p {
+            color: var(--text-muted);
+        }
+
+        /* Direction 1: Etcher Style */
+        .etcher-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 200px);
+            padding: 48px;
+        }
+
+        .steps-container {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .step-card {
+            width: 280px;
+            padding: 32px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .step-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .step-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .step-card.completed {
+            border-color: var(--success);
+        }
+
+        .step-num {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .step-card.active .step-num {
+            background: var(--primary);
+        }
+
+        .step-card.completed .step-num {
+            background: var(--success);
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .step-value {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--secondary);
+        }
+
+        .main-action {
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .main-action:disabled {
+            opacity: 0.5;
+        }
+
+        /* Direction 2: Linear Dashboard */
+        .linear-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr 320px;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .device-card {
+            padding: 16px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .device-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .device-chip {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-dot.connected {
+            background: var(--success);
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-elevated);
+        }
+
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--primary);
+        }
+
+        .main-content {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .content-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .partition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .partition-item {
+            padding: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .partition-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .partition-size {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .partition-check {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 2px solid var(--border);
+        }
+
+        .partition-check.checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .log-panel {
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .log-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .log-content {
+            font-family: 'SF Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .log-line {
+            padding: 2px 0;
+        }
+
+        .log-line.success {
+            color: var(--success);
+        }
+
+        .log-line.error {
+            color: var(--error);
+        }
+
+        /* Direction 3: Docker Panels */
+        .docker-layout {
+            padding: 24px;
+        }
+
+        .docker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .docker-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-card);
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .docker-tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+        }
+
+        .docker-tab.active {
+            background: var(--bg-elevated);
+            color: var(--text);
+        }
+
+        .docker-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .docker-btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .docker-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .docker-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .docker-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .docker-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .docker-table tr:hover {
+            background: var(--bg-card);
+        }
+
+        .table-name {
+            font-weight: 500;
+        }
+
+        .table-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .table-badge.system {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--primary);
+        }
+
+        .table-badge.user {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .table-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .table-action:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Direction 4: Command Center */
+        .cmd-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            height: calc(100vh - 80px);
+        }
+
+        .cmd-main {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cmd-palette {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cmd-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            color: var(--text);
+            outline: none;
+        }
+
+        .cmd-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .cmd-shortcut {
+            padding: 4px 8px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .cmd-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            flex: 1;
+        }
+
+        .cmd-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cmd-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(139, 92, 246, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .cmd-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .cmd-card-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            flex: 1;
+        }
+
+        .cmd-card-action {
+            margin-top: 16px;
+            padding: 10px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .cmd-card-action:hover {
+            background: var(--primary);
+        }
+
+        .cmd-terminal {
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cmd-term-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .cmd-term-content {
+            flex: 1;
+            padding: 16px;
+            font-family: 'SF Mono', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text-muted);
+            overflow-y: auto;
+        }
+
+        .cmd-term-input {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+        }
+
+        .cmd-term-field {
+            flex: 1;
+            padding: 10px 14px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .vote-footer {
+            padding: 48px;
+            text-align: center;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+        }
+
+        .vote-footer h3 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .vote-footer p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <h1>🎨 Q-Flash-Web Design Directions</h1>
+        <div class="nav-btns">
+            <button class="nav-btn active" onclick="showDirection(1)">1. Etcher Style</button>
+            <button class="nav-btn" onclick="showDirection(2)">2. Linear Dashboard</button>
+            <button class="nav-btn" onclick="showDirection(3)">3. Docker Panels</button>
+            <button class="nav-btn" onclick="showDirection(4)">4. Command Center</button>
+        </div>
+    </nav>
+
+    <div class="directions">
+        <!-- Direction 1: Etcher Style -->
+        <div class="direction active" id="dir1">
+            <div class="direction-header">
+                <h2>Direction 1: Etcher Style</h2>
+                <p>Simple 3-step visual workflow • Best for first-time users • Fail-safe design</p>
+            </div>
+            <div class="etcher-layout">
+                <div class="steps-container">
+                    <div class="step-card completed">
+                        <div class="step-num">✓</div>
+                        <div class="step-title">1. Select Device</div>
+                        <div class="step-desc">Choose your Qualcomm device</div>
+                        <div class="step-value">OnePlus 12R • SM7675</div>
+                    </div>
+                    <div class="step-card active">
+                        <div class="step-num">2</div>
+                        <div class="step-title">2. Load ROM</div>
+                        <div class="step-desc">Select ROM files to flash</div>
+                        <div class="step-value">Click to select files...</div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">3</div>
+                        <div class="step-title">3. Flash</div>
+                        <div class="step-desc">Start flashing process</div>
+                        <div class="step-value">Ready when files loaded</div>
+                    </div>
+                </div>
+                <button class="main-action" disabled>⚡ Flash Device</button>
+            </div>
+        </div>
+
+        <!-- Direction 2: Linear Dashboard -->
+        <div class="direction" id="dir2">
+            <div class="direction-header">
+                <h2>Direction 2: Linear Dashboard</h2>
+                <p>Sidebar navigation • Partition grid • Real-time log • Power user friendly</p>
+            </div>
+            <div class="linear-layout">
+                <div class="sidebar">
+                    <div class="sidebar-section">
+                        <div class="sidebar-label">Device</div>
+                        <div class="device-card">
+                            <div class="device-name"><span class="status-dot connected"></span>OnePlus 12R</div>
+                            <div class="device-chip">SM7675 • Connected</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="sidebar-label">Navigation</div>
+                        <ul class="nav-list">
+                            <li class="nav-item active">📋 Partitions</li>
+                            <li class="nav-item">💾 Backup</li>
+                            <li class="nav-item">⚡ Flash</li>
+                            <li class="nav-item">🔧 Tools</li>
+                            <li class="nav-item">⚙️ Settings</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="main-content">
+                    <div class="content-header">
+                        <h2 class="content-title">Partitions</h2>
+                        <div style="display:flex;gap:8px;">
+                            <button class="docker-btn">Select All</button>
+                            <button class="docker-btn primary">⚡ Flash Selected</button>
+                        </div>
+                    </div>
+                    <div class="partition-grid">
+                        <div class="partition-item">
+                            <div>
+                                <div class="partition-name">boot</div>
+                                <div class="partition-size">64 MB</div>
+                            </div>
+                            <div class="partition-check checked"></div>
+                        </div>
+                        <div class="partition-item">
+                            <div>
+                                <div class="partition-name">system</div>
+                                <div class="partition-size">2.1 GB</div>
+                            </div>
+                            <div class="partition-check checked"></div>
+                        </div>
+                        <div class="partition-item">
+                            <div>
+                                <div class="partition-name">vendor</div>
+                                <div class="partition-size">1.2 GB</div>
+                            </div>
+                            <div class="partition-check"></div>
+                        </div>
+                        <div class="partition-item">
+                            <div>
+                                <div class="partition-name">super</div>
+                                <div class="partition-size">4.9 GB</div>
+                            </div>
+                            <div class="partition-check"></div>
+                        </div>
+                        <div class="partition-item">
+                            <div>
+                                <div class="partition-name">recovery</div>
+                                <div class="partition-size">128 MB</div>
+                            </div>
+                            <div class="partition-check"></div>
+                        </div>
+                        <div class="partition-item">
+                            <div>
+                                <div class="partition-name">userdata</div>
+                                <div class="partition-size">128 GB</div>
+                            </div>
+                            <div class="partition-check"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="log-panel">
+                    <div class="log-title">Console <span style="color:var(--text-muted)">↗</span></div>
+                    <div class="log-content">
+                        <div class="log-line">[14:25:01] Device connected</div>
+                        <div class="log-line success">[14:25:02] Sahara handshake OK</div>
+                        <div class="log-line">[14:25:03] Firehose loaded</div>
+                        <div class="log-line success">[14:25:04] VIP auth success</div>
+                        <div class="log-line">[14:25:05] Reading partition table...</div>
+                        <div class="log-line">[14:25:06] Found 48 partitions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direction 3: Docker Panels -->
+        <div class="direction" id="dir3">
+            <div class="direction-header">
+                <h2>Direction 3: Docker Panels</h2>
+                <p>Table-based management • Quick actions • Visual status • Clean overview</p>
+            </div>
+            <div class="docker-layout">
+                <div class="docker-header">
+                    <div class="docker-tabs">
+                        <button class="docker-tab active">Partitions</button>
+                        <button class="docker-tab">Backups</button>
+                        <button class="docker-tab">Logs</button>
+                        <button class="docker-tab">Settings</button>
+                    </div>
+                    <div class="docker-actions">
+                        <button class="docker-btn">🔄 Refresh</button>
+                        <button class="docker-btn primary">⚡ Flash All</button>
+                    </div>
+                </div>
+                <table class="docker-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="table-name">boot</td>
+                            <td>64 MB</td>
+                            <td><span class="table-badge system">System</span></td>
+                            <td style="color:var(--success)">● Ready</td>
+                            <td class="table-actions"><button class="table-action">Backup</button><button
+                                    class="table-action">Flash</button></td>
+                        </tr>
+                        <tr>
+                            <td class="table-name">super</td>
+                            <td>4.9 GB</td>
+                            <td><span class="table-badge system">System</span></td>
+                            <td style="color:var(--success)">● Ready</td>
+                            <td class="table-actions"><button class="table-action">Backup</button><button
+                                    class="table-action">Flash</button></td>
+                        </tr>
+                        <tr>
+                            <td class="table-name">userdata</td>
+                            <td>128 GB</td>
+                            <td><span class="table-badge user">User</span></td>
+                            <td style="color:var(--warning)">○ Skip</td>
+                            <td class="table-actions"><button class="table-action">Backup</button><button
+                                    class="table-action">Erase</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Direction 4: Command Center -->
+        <div class="direction" id="dir4">
+            <div class="direction-header">
+                <h2>Direction 4: Command Center</h2>
+                <p>Command palette (Cmd+K) • Action cards • Integrated terminal • Power user focus</p>
+            </div>
+            <div class="cmd-layout">
+                <div class="cmd-main">
+                    <div class="cmd-palette">
+                        <span>⌘</span>
+                        <input type="text" class="cmd-input" placeholder="Type a command or search...">
+                        <span class="cmd-shortcut">Ctrl+K</span>
+                    </div>
+                    <div class="cmd-grid">
+                        <div class="cmd-card">
+                            <div class="cmd-card-icon">📱</div>
+                            <div class="cmd-card-title">Connect Device</div>
+                            <div class="cmd-card-desc">Connect to Qualcomm device in EDL mode</div>
+                            <div class="cmd-card-action">Connect</div>
+                        </div>
+                        <div class="cmd-card">
+                            <div class="cmd-card-icon">📂</div>
+                            <div class="cmd-card-title">Load ROM</div>
+                            <div class="cmd-card-desc">Load firmware files from folder</div>
+                            <div class="cmd-card-action">Browse</div>
+                        </div>
+                        <div class="cmd-card">
+                            <div class="cmd-card-icon">⚡</div>
+                            <div class="cmd-card-title">Quick Flash</div>
+                            <div class="cmd-card-desc">Flash loaded partitions to device</div>
+                            <div class="cmd-card-action">Flash</div>
+                        </div>
+                        <div class="cmd-card">
+                            <div class="cmd-card-icon">💾</div>
+                            <div class="cmd-card-title">Full Backup</div>
+                            <div class="cmd-card-desc">Backup all partitions to disk</div>
+                            <div class="cmd-card-action">Backup</div>
+                        </div>
+                        <div class="cmd-card">
+                            <div class="cmd-card-icon">🔧</div>
+                            <div class="cmd-card-title">Erase Data</div>
+                            <div class="cmd-card-desc">Factory reset userdata partition</div>
+                            <div class="cmd-card-action">Erase</div>
+                        </div>
+                        <div class="cmd-card">
+                            <div class="cmd-card-icon">📚</div>
+                            <div class="cmd-card-title">Guide</div>
+                            <div class="cmd-card-desc">Step-by-step usage instructions</div>
+                            <div class="cmd-card-action">Open Guide</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cmd-terminal">
+                    <div class="cmd-term-header">Terminal</div>
+                    <div class="cmd-term-content">
+                        <div>$ qflash connect</div>
+                        <div style="color:var(--success)">Device connected: OnePlus 12R</div>
+                        <div>$ qflash read-gpt</div>
+                        <div>Reading partition table...</div>
+                        <div style="color:var(--success)">Found 48 partitions on 6 LUNs</div>
+                    </div>
+                    <div class="cmd-term-input">
+                        <input type="text" class="cmd-term-field" placeholder="Enter command...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="vote-footer">
+        <h3>🗳️ Which direction resonates with you?</h3>
+        <p>Pick one, combine elements, or describe what you'd change!</p>
+    </div>
+
+    <script>
+        function showDirection(n) {
+            document.querySelectorAll('.direction').forEach(d => d.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('dir' + n).classList.add('active');
+            document.querySelectorAll('.nav-btn')[n - 1].classList.add('active');
+        }
+    </script>
+</body>
+
+</html>

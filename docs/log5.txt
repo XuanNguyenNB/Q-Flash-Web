@@ -1,0 +1,229 @@
+[00:45:46]
+Found 1 paired ADB device(s). Attempting restore...
+[00:45:46]
+Found previously paired device, attempting to reconnect...
+[00:45:46]
+Device selected: OPPO Find X7 Ultra
+[00:45:46]
+Establishing ADB connection...
+[00:45:46]
+Connected to OPPO Find X7 Ultra
+[00:45:46]
+⚡ ADB Connection restored successfully
+[00:45:46]
+Reading device properties and stats...
+[00:45:46]
+Shell: dumpsys battery
+[00:45:46]
+Shell: df -h /data
+[00:45:46]
+Shell: cat /proc/meminfo
+[00:45:46]
+Shell: ip -4 addr show wlan0
+[00:45:46]
+Shell: settings get global wifi_on
+[00:45:46]
+Device: OPPO PHY110 (Android 15)
+[00:45:46]
+🧹 Cleaning up Scrcpy session...
+[00:45:52]
+🧹 Cleaning up Scrcpy session...
+[00:45:53]
+Reading device properties and stats...
+[00:45:53]
+Shell: dumpsys battery
+[00:45:53]
+Shell: df -h /data
+[00:45:53]
+Shell: cat /proc/meminfo
+[00:45:53]
+Shell: ip -4 addr show wlan0
+[00:45:53]
+Shell: settings get global wifi_on
+[00:45:53]
+Reading device properties and stats...
+[00:45:53]
+Shell: dumpsys battery
+[00:45:53]
+Shell: df -h /data
+[00:45:53]
+Shell: cat /proc/meminfo
+[00:45:53]
+Shell: ip -4 addr show wlan0
+[00:45:53]
+Shell: settings get global wifi_on
+[00:45:53]
+Reading device properties and stats...
+[00:45:53]
+Shell: dumpsys battery
+[00:45:53]
+Shell: df -h /data
+[00:45:53]
+Shell: cat /proc/meminfo
+[00:45:53]
+Shell: ip -4 addr show wlan0
+[00:45:53]
+Shell: settings get global wifi_on
+[00:45:53]
+Reading device properties and stats...
+[00:45:53]
+Shell: dumpsys battery
+[00:45:53]
+Shell: df -h /data
+[00:45:53]
+Shell: cat /proc/meminfo
+[00:45:53]
+Shell: ip -4 addr show wlan0
+[00:45:53]
+Shell: settings get global wifi_on
+[00:45:53]
+[Fastboot] Not connected - cannot get partition list
+
+[00:45:53]
+🧹 Cleaning up Scrcpy session...
+[00:45:53]
+Device: OPPO PHY110 (Android 15)
+[00:45:53]
+Device: OPPO PHY110 (Android 15)
+[00:45:53]
+Device: OPPO PHY110 (Android 15)
+[00:45:53]
+Device: OPPO PHY110 (Android 15)
+[00:45:54]
+🧹 Cleaning up Scrcpy session...
+[00:45:54]
+Loading firehose files for Find N5 (Snapdragon 8 Elite)...
+[00:45:54]
+Downloading programmer.melf...
+[00:45:54]
+Downloaded programmer.melf (1618.8 KB)
+[00:45:54]
+Downloading digest.elf...
+[00:45:55]
+Downloaded digest.elf (32.5 KB)
+[00:45:55]
+Downloading signature.bin...
+[00:45:55]
+Downloaded signature.bin (4.0 KB)
+[00:45:55]
+Firehose loaded successfully for Snapdragon 8 Elite
+[00:45:57]
+Reading device properties and stats...
+[00:45:57]
+Shell: dumpsys battery
+[00:45:57]
+Shell: df -h /data
+[00:45:57]
+Shell: cat /proc/meminfo
+[00:45:57]
+Shell: ip -4 addr show wlan0
+[00:45:57]
+Shell: settings get global wifi_on
+[00:45:57]
+Reading device properties and stats...
+[00:45:57]
+Shell: dumpsys battery
+[00:45:57]
+Shell: df -h /data
+[00:45:57]
+Shell: cat /proc/meminfo
+[00:45:57]
+Shell: ip -4 addr show wlan0
+[00:45:57]
+Shell: settings get global wifi_on
+[00:45:57]
+Reading device properties and stats...
+[00:45:57]
+Shell: dumpsys battery
+[00:45:57]
+Shell: df -h /data
+[00:45:57]
+Shell: cat /proc/meminfo
+[00:45:57]
+Shell: ip -4 addr show wlan0
+[00:45:57]
+Shell: settings get global wifi_on
+[00:45:57]
+Reading device properties and stats...
+[00:45:57]
+Shell: dumpsys battery
+[00:45:57]
+Shell: df -h /data
+[00:45:57]
+Shell: cat /proc/meminfo
+[00:45:57]
+Shell: ip -4 addr show wlan0
+[00:45:57]
+Shell: settings get global wifi_on
+[00:45:57]
+Using cached firehose for Snapdragon 8 Elite
+[00:45:57]
+🧹 Cleaning up Scrcpy session...
+[00:45:57]
+🧹 Cleaning up Scrcpy session...
+[00:45:57]
+Reading device properties and stats...
+[00:45:57]
+Shell: dumpsys battery
+[00:45:57]
+Shell: df -h /data
+[00:45:57]
+Shell: cat /proc/meminfo
+[00:45:57]
+Shell: ip -4 addr show wlan0
+[00:45:57]
+Shell: settings get global wifi_on
+[00:45:57]
+Reading device properties and stats...
+[00:45:57]
+Shell: dumpsys battery
+[00:45:57]
+Shell: df -h /data
+[00:45:57]
+Shell: cat /proc/meminfo
+[00:45:57]
+Shell: ip -4 addr show wlan0
+[00:45:57]
+Shell: settings get global wifi_on
+[00:45:57]
+Reading device properties and stats...
+[00:45:57]
+Shell: dumpsys battery
+[00:45:57]
+Shell: df -h /data
+[00:45:57]
+Shell: cat /proc/meminfo
+[00:45:57]
+Shell: ip -4 addr show wlan0
+[00:45:57]
+Shell: settings get global wifi_on
+[00:45:57]
+Reading device properties and stats...
+[00:45:57]
+Shell: dumpsys battery
+[00:45:57]
+Shell: df -h /data
+[00:45:57]
+Shell: cat /proc/meminfo
+[00:45:57]
+Shell: ip -4 addr show wlan0
+[00:45:57]
+Shell: settings get global wifi_on
+[00:45:57]
+🧹 Cleaning up Scrcpy session...
+[00:45:57]
+Device: OPPO PHY110 (Android 15)
+[00:45:57]
+Device: OPPO PHY110 (Android 15)
+[00:45:57]
+Device: OPPO PHY110 (Android 15)
+[00:45:57]
+Device: OPPO PHY110 (Android 15)
+[00:45:57]
+Device: OPPO PHY110 (Android 15)
+[00:45:57]
+Device: OPPO PHY110 (Android 15)
+[00:45:57]
+Device: OPPO PHY110 (Android 15)
+[00:45:57]
+Device: OPPO PHY110 (Android 15)

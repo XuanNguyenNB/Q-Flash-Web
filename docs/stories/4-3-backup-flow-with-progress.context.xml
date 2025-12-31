@@ -1,0 +1,426 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>3</storyId>
+    <title>Backup Flow with Progress</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-3-backup-flow-with-progress.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to backup selected partitions with progress feedback</iWant>
+    <soThat>I can save my device data</soThat>
+    <tasks>
+      - Task 1: Create BackupConfirmDialog component (AC: 2)
+        - Create src/components/features/backup/BackupConfirmDialog.tsx
+        - Use shadcn/ui Dialog component
+        - Display list of selected partitions with names and sizes
+        - Show total backup size calculation
+        - Add "Choose Location" and "Cancel" buttons
+        - Integrate with usePartitionStore to get selected partitions
+        - Style with Linear Violet theme
+      
+      - Task 2: Create BackupProgress component (AC: 4, 5, 10)
+        - Create src/components/features/backup/BackupProgress.tsx
+        - Use shadcn/ui Progress component for overall progress bar
+        - Display current partition being backed up
+        - Show bytes written / total bytes with formatBytes utility
+        - Display percentage (0-100%)
+        - Show partition-by-partition status list with icons (Clock, Loader, CheckCircle, XCircle)
+        - Add "Cancel Backup" button
+        - Read progress from flashStore
+      
+      - Task 3: Enhance flashStore for backup operations (AC: 4, 5, 9, 10)
+        - Add backup-specific state to src/stores/flashStore.ts
+        - Add backup actions (startBackup, updateBackupProgress, setBackupPartitionStatus, completeBackup, cancelBackup, resetBackup)
+        - Ensure state updates trigger re-renders
+      
+      - Task 4: Create useBackup hook (AC: 3, 4, 5, 6, 7, 8, 9)
+        - Create src/hooks/useBackup.ts
+        - Wrap FirehoseProtocol read operations (DO NOT modify core logic)
+        - Implement startBackup method with File System Access API integration
+        - Implement cancelBackup method with graceful cleanup
+        - Log all operations to terminalStore
+        - Handle errors gracefully
+        - Use useRef for cancellation flag and protocol instance
+      
+      - Task 5: Implement File System Access API integration (AC: 3, 7, 8)
+        - Add showDirectoryPicker() call in BackupConfirmDialog
+        - Request write permission for selected directory
+        - Create partition backup files (.img)
+        - Generate rawprogram_backup.xml with partition metadata
+        - Handle permission errors
+      
+      - Task 6: Integrate backup flow into PartitionGrid (AC: 1, 2)
+        - Add "Backup Selected" button to PartitionGrid header
+        - Button is disabled when no partitions selected
+        - Button shows count
+        - Clicking button opens BackupConfirmDialog
+        - Pass selected partitions from partitionStore to dialog
+      
+      - Task 7: Add barrel exports (AC: all)
+        - Create src/components/features/backup/index.ts
+        - Export BackupConfirmDialog and BackupProgress
+        - Update src/hooks/index.ts to export useBackup
+      
+      - Task 8: Add i18n translations (AC: all)
+        - Add English translations to src/i18n/translations/en.json
+        - Add Vietnamese translations to src/i18n/translations/vi.json
+      
+      - Task 9: Testing and verification (AC: 1-10)
+        - Run npm run dev and verify no TypeScript errors
+        - Test backup flow with device connected
+        - Test directory picker
+        - Test backup progress
+        - Test backup completion
+        - Test backup cancellation
+        - Test error handling
+        - Test with large partitions
+        - Test i18n
+        - Test state persistence
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    AC1: When partitions are selected, a "Backup" button is enabled
+    AC2: Clicking "Backup" opens a confirmation dialog showing selected partitions
+    AC3: User can choose save location using File System Access API
+    AC4: Backup progress shows: current partition, bytes/total, percentage
+    AC5: Each partition status updates: pending → in-progress → done
+    AC6: Errors during backup are logged to terminal and shown to user
+    AC7: Success toast shows with backup location after completion
+    AC8: XML metadata file is created for restore compatibility
+    AC9: Backup can be cancelled mid-operation
+    AC10: Progress persists across component re-renders
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 4.3: Backup Flow with Progress</section>
+        <snippet>User story defining backup flow with progress feedback, including confirmation dialog, directory selection, progress tracking, error handling, and metadata generation for restore compatibility.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Q-Flash-Web Architecture</title>
+        <section>Hook Wrapper Pattern</section>
+        <snippet>Pattern for wrapping core Firehose/WebUSB logic in React hooks without modifying core files. Uses useRef for singleton instances, useCallback for memoized methods, and cleanup on unmount.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Q-Flash-Web Architecture</title>
+        <section>Flash Operation State Machine</section>
+        <snippet>State machine pattern for flash/backup operations with states: idle, preparing, connecting, authenticating, flashing/backing-up, completing, success, error. Includes progress tracking with current partition, bytes written, total bytes.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Q-Flash-Web Architecture</title>
+        <section>Performance Considerations - Large File Handling</section>
+        <snippet>Files >1GB: Stream without full memory load. Progress updates: Every 1% or 1MB. Chunk size: 1MB for optimal performance. Retry logic: 3 attempts per chunk.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Q-Flash-Web Architecture</title>
+        <section>ADR-002: Preserve Core Logic</section>
+        <snippet>Core Firehose/WebUSB logic is NEVER modified, only wrapped. Logic is tested and working, risk of regression too high. Implementation: Use ref-based hooks to wrap class instances.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Q-Flash-Web Architecture</title>
+        <section>Component Pattern</section>
+        <snippet>All feature components follow structure: 1) Hooks at top, 2) Derived state, 3) Handlers, 4) Render. Use cn() utility, useTranslation for i18n, and store hooks for state management.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Q-Flash-Web Architecture</title>
+        <section>Zustand Store Pattern</section>
+        <snippet>All stores follow structure with state, actions, and optional persist middleware. Use create() from zustand, define TypeScript interfaces, and implement actions with set/get.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/stores/flashStore.ts</path>
+        <kind>store</kind>
+        <symbol>useFlashStore</symbol>
+        <lines>all</lines>
+        <reason>Base store for flash operations - needs to be extended with backup state and actions (backupStatus, backupProgress, backupPartitionStatuses, etc.)</reason>
+      </artifact>
+      <artifact>
+        <path>src/stores/partitionStore.ts</path>
+        <kind>store</kind>
+        <symbol>usePartitionStore</symbol>
+        <lines>all</lines>
+        <reason>Contains partitions array and selectedPartitions Set - used to get selected partitions for backup</reason>
+      </artifact>
+      <artifact>
+        <path>src/stores/terminalStore.ts</path>
+        <kind>store</kind>
+        <symbol>useTerminalStore</symbol>
+        <lines>all</lines>
+        <reason>Provides log() method for logging backup operations to terminal panel</reason>
+      </artifact>
+      <artifact>
+        <path>src/hooks/useFirehose.ts</path>
+        <kind>hook</kind>
+        <symbol>useFirehose</symbol>
+        <lines>all</lines>
+        <reason>Wrapper hook for FirehoseProtocol - provides getProtocol() method to access readPartition() for backup operations</reason>
+      </artifact>
+      <artifact>
+        <path>src/components/features/partition/PartitionGrid.tsx</path>
+        <kind>component</kind>
+        <symbol>PartitionGrid</symbol>
+        <lines>all</lines>
+        <reason>Main partition display component - needs "Backup Selected" button added to header section</reason>
+      </artifact>
+      <artifact>
+        <path>src/components/ui/dialog.tsx</path>
+        <kind>component</kind>
+        <symbol>Dialog</symbol>
+        <lines>all</lines>
+        <reason>shadcn/ui Dialog component - used for BackupConfirmDialog</reason>
+      </artifact>
+      <artifact>
+        <path>src/components/ui/progress.tsx</path>
+        <kind>component</kind>
+        <symbol>Progress</symbol>
+        <lines>all</lines>
+        <reason>shadcn/ui Progress component - used for BackupProgress progress bar</reason>
+      </artifact>
+      <artifact>
+        <path>src/lib/utils.ts</path>
+        <kind>utility</kind>
+        <symbol>formatBytes</symbol>
+        <lines>all</lines>
+        <reason>Utility function to format bytes for display in backup progress (e.g., "1.5 GB")</reason>
+      </artifact>
+      <artifact>
+        <path>src/core/FirehoseProtocol.ts</path>
+        <kind>core</kind>
+        <symbol>FirehoseProtocol</symbol>
+        <lines>all</lines>
+        <reason>PRESERVED - Core Firehose protocol with readPartition() method. DO NOT MODIFY. Wrap in useBackup hook.</reason>
+      </artifact>
+      <artifact>
+        <path>src/types/partition.ts</path>
+        <kind>types</kind>
+        <symbol>PartitionInfo</symbol>
+        <lines>all</lines>
+        <reason>TypeScript interface for partition data structure (name, size, startSector, etc.)</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>react</package>
+        <version>^19.0.0</version>
+        <usage>Core React hooks (useCallback, useRef, useState, useEffect)</usage>
+      </node>
+      <node>
+        <package>zustand</package>
+        <version>^5.0.0</version>
+        <usage>State management for flashStore backup state</usage>
+      </node>
+      <node>
+        <package>react-i18next</package>
+        <version>latest</version>
+        <usage>Translation hook (useTranslation) for backup UI text</usage>
+      </node>
+      <node>
+        <package>lucide-react</package>
+        <version>latest</version>
+        <usage>Icons for backup progress (Clock, Loader, CheckCircle, XCircle)</usage>
+      </node>
+      <node>
+        <package>@radix-ui/react-dialog</package>
+        <version>latest</version>
+        <usage>Base for shadcn/ui Dialog component used in BackupConfirmDialog</usage>
+      </node>
+      <node>
+        <package>@radix-ui/react-progress</package>
+        <version>latest</version>
+        <usage>Base for shadcn/ui Progress component used in BackupProgress</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - CRITICAL: DO NOT modify any files in src/core/, src/auth/, src/services/ (ADR-002: Preserve Core Logic)
+    - Use Hook Wrapper Pattern: Wrap FirehoseProtocol.readPartition() in useBackup hook without modifying core logic
+    - Follow Component Pattern: Hooks at top, derived state, handlers, render
+    - Follow Zustand Store Pattern: Define state interface, use create(), implement actions with set/get
+    - Use File System Access API for directory selection and file writing (Chrome/Edge 86+ only)
+    - Stream data in 1MB chunks to avoid memory issues with large partitions (>1GB)
+    - Update progress every 1% or 1MB to prevent excessive re-renders
+    - Use useRef for cancellation flag to enable graceful cancellation
+    - Close all writable streams properly to prevent memory leaks
+    - Log all operations to terminalStore with appropriate log levels (info, success, warning, error)
+    - Show toast notifications for user feedback (success, error, cancelled)
+    - Generate rawprogram_backup.xml metadata file for restore compatibility
+    - Follow i18n pattern: backup.{subcategory}.{key} naming convention
+    - Style with Linear Violet theme colors from globals.css
+    - Ensure TypeScript type safety for all components and hooks
+    - Handle errors gracefully: catch read errors, catch file write errors, continue with next partition or stop based on severity
+    - Support cancellation mid-operation with proper cleanup
+    - Persist progress state across component re-renders using flashStore
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>FileSystemDirectoryHandle</name>
+      <kind>Web API</kind>
+      <signature>
+        interface FileSystemDirectoryHandle {
+          getFileHandle(name: string, options?: { create?: boolean }): Promise&lt;FileSystemFileHandle&gt;;
+        }
+        
+        interface FileSystemFileHandle {
+          createWritable(): Promise&lt;FileSystemWritableFileStream&gt;;
+        }
+        
+        interface FileSystemWritableFileStream {
+          write(data: BufferSource | Blob | string): Promise&lt;void&gt;;
+          close(): Promise&lt;void&gt;;
+        }
+        
+        function showDirectoryPicker(options?: { mode?: 'read' | 'readwrite', startIn?: string }): Promise&lt;FileSystemDirectoryHandle&gt;;
+      </signature>
+      <path>Web API - File System Access API</path>
+    </interface>
+    <interface>
+      <name>FirehoseProtocol.readPartition</name>
+      <kind>Core Protocol Method</kind>
+      <signature>
+        async readPartition(partitionName: string, onChunk: (chunk: Uint8Array) => Promise&lt;void&gt;): Promise&lt;void&gt;
+      </signature>
+      <path>src/core/FirehoseProtocol.ts</path>
+    </interface>
+    <interface>
+      <name>usePartitionStore</name>
+      <kind>Zustand Store Hook</kind>
+      <signature>
+        interface PartitionStore {
+          partitions: PartitionInfo[];
+          selectedPartitions: Set&lt;string&gt;;
+          // ... other state and actions
+        }
+      </signature>
+      <path>src/stores/partitionStore.ts</path>
+    </interface>
+    <interface>
+      <name>useFlashStore (to be extended)</name>
+      <kind>Zustand Store Hook</kind>
+      <signature>
+        interface FlashStore {
+          // Existing flash state...
+          
+          // NEW: Backup state
+          backupStatus: 'idle' | 'preparing' | 'backing-up' | 'success' | 'error' | 'cancelled';
+          currentBackupPartition: string | null;
+          backupProgress: number;
+          backupBytesWritten: number;
+          backupTotalBytes: number;
+          backupPartitionStatuses: Map&lt;string, 'pending' | 'in-progress' | 'done' | 'error'&gt;;
+          backupError: AppError | null;
+          backupSavePath: string | null;
+          
+          // NEW: Backup actions
+          startBackup: (partitions: string[], savePath: string) => void;
+          updateBackupProgress: (partition: string, bytesWritten: number, totalBytes: number) => void;
+          setBackupPartitionStatus: (partition: string, status: PartitionStatus) => void;
+          completeBackup: () => void;
+          cancelBackup: () => void;
+          resetBackup: () => void;
+        }
+      </signature>
+      <path>src/stores/flashStore.ts</path>
+    </interface>
+    <interface>
+      <name>useTerminalStore</name>
+      <kind>Zustand Store Hook</kind>
+      <signature>
+        interface TerminalStore {
+          log: (level: 'info' | 'success' | 'warning' | 'error', message: string) => void;
+          // ... other state and actions
+        }
+      </signature>
+      <path>src/stores/terminalStore.ts</path>
+    </interface>
+    <interface>
+      <name>useBackup (to be created)</name>
+      <kind>React Hook</kind>
+      <signature>
+        interface UseBackupReturn {
+          startBackup: (partitions: PartitionInfo[], directoryHandle: FileSystemDirectoryHandle) => Promise&lt;void&gt;;
+          cancelBackup: () => void;
+        }
+        
+        function useBackup(): UseBackupReturn;
+      </signature>
+      <path>src/hooks/useBackup.ts</path>
+    </interface>
+    <interface>
+      <name>BackupConfirmDialog (to be created)</name>
+      <kind>React Component</kind>
+      <signature>
+        interface BackupConfirmDialogProps {
+          open: boolean;
+          onOpenChange: (open: boolean) => void;
+          partitions: PartitionInfo[];
+          onConfirm: (directoryHandle: FileSystemDirectoryHandle) => void;
+        }
+        
+        function BackupConfirmDialog(props: BackupConfirmDialogProps): JSX.Element;
+      </signature>
+      <path>src/components/features/backup/BackupConfirmDialog.tsx</path>
+    </interface>
+    <interface>
+      <name>BackupProgress (to be created)</name>
+      <kind>React Component</kind>
+      <signature>
+        interface BackupProgressProps {
+          className?: string;
+        }
+        
+        function BackupProgress(props: BackupProgressProps): JSX.Element;
+      </signature>
+      <path>src/components/features/backup/BackupProgress.tsx</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing standards for Q-Flash-Web follow Vitest + React Testing Library pattern. Component tests should verify rendering, user interactions, and state updates. Hook tests should verify state management and side effects. Integration tests should verify full backup flow with mocked File System Access API and FirehoseProtocol. All tests should be placed in __tests__ directories adjacent to source files or in tests/ directory at project root.
+    </standards>
+    <locations>
+      - src/components/**/__tests__/*.test.tsx (component tests)
+      - src/hooks/**/__tests__/*.test.ts (hook tests)
+      - src/stores/**/__tests__/*.test.ts (store tests)
+      - tests/integration/**/*.test.ts (integration tests)
+    </locations>
+    <ideas>
+      - AC1: Test "Backup Selected" button is disabled when no partitions selected, enabled when partitions selected
+      - AC2: Test BackupConfirmDialog opens when "Backup Selected" clicked, displays correct partition list and total size
+      - AC3: Test showDirectoryPicker() is called when "Choose Location" clicked, handles user cancellation (AbortError)
+      - AC4: Test BackupProgress displays current partition, bytes/total, percentage correctly during backup
+      - AC5: Test partition status updates from pending → in-progress → done in BackupProgress component
+      - AC6: Test error handling: verify terminal log and toast shown when backup error occurs
+      - AC7: Test success toast shows with correct backup location after completion
+      - AC8: Test rawprogram_backup.xml is generated with correct partition metadata
+      - AC9: Test backup cancellation: verify cancelBackup() stops operation gracefully and closes file handles
+      - AC10: Test flashStore backup state persists across component re-renders (mount/unmount BackupProgress)
+      - Integration: Test full backup flow with mocked File System Access API and FirehoseProtocol.readPartition()
+      - Integration: Test large partition backup (>1GB) with chunked streaming and progress updates
+      - Integration: Test backup with multiple partitions, verify sequential processing and status tracking
+      - Unit: Test useBackup hook startBackup() method with mocked dependencies
+      - Unit: Test useBackup hook cancelBackup() method sets cancellation flag
+      - Unit: Test flashStore backup actions (startBackup, updateBackupProgress, setBackupPartitionStatus, completeBackup, cancelBackup, resetBackup)
+      - Component: Test BackupConfirmDialog renders partition list, total size, and buttons correctly
+      - Component: Test BackupProgress renders progress bar, current partition, status list correctly
+    </ideas>
+  </tests>
+</story-context>

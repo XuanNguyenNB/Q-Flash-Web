@@ -6,9 +6,7 @@
             "description": "ROM Converter & Driver Tool - Convert sparse images, build super.img",
             "version": "1.0.0",
             "icon": "🔧",
-            "platforms": [
-                "windows"
-            ],
+            "platforms": ["windows"],
             "links": {
                 "onedrive": "",
                 "gdrive": "",
@@ -38,5 +36,190 @@
             }
         }
     ],
-    "roms": []
+    "roms": [
+        {
+            "id": "x7_ultra_a15_cn",
+            "device": "Find X7 Ultra",
+            "deviceId": "x7_ultra",
+            "codename": "PHY110",
+            "brand": "oppo",
+            "version": "ColorOS 15.0",
+            "android": "15",
+            "buildNumber": "PHY110_15.0.0.300",
+            "region": "CN",
+            "size": "6.2 GB",
+            "date": "2024-12-15",
+            "type": "full",
+            "format": "extracted",
+            "status": "verified",
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "mega": ""
+            },
+            "changelog": "December 2024 security patch, performance improvements",
+            "md5": ""
+        },
+        {
+            "id": "oneplus_12_a15_cn",
+            "device": "OnePlus 12",
+            "deviceId": "oneplus_12",
+            "codename": "CPH2573",
+            "brand": "oneplus",
+            "version": "ColorOS 15.0",
+            "android": "15",
+            "buildNumber": "CPH2573_15.0.0.201",
+            "region": "CN",
+            "size": "6.0 GB",
+            "date": "2024-12-10",
+            "type": "full",
+            "format": "extracted",
+            "status": "verified",
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "mega": ""
+            },
+            "changelog": "ColorOS 15 stable release, AI features",
+            "md5": ""
+        },
+        {
+            "id": "oneplus_12_a14_global",
+            "device": "OnePlus 12",
+            "deviceId": "oneplus_12",
+            "codename": "CPH2573",
+            "brand": "oneplus",
+            "version": "OxygenOS 14.0",
+            "android": "14",
+            "buildNumber": "CPH2573_14.0.0.800",
+            "region": "Global",
+            "size": "5.8 GB",
+            "date": "2024-11-20",
+            "type": "full",
+            "format": "extracted",
+            "status": "verified",
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "mega": ""
+            },
+            "changelog": "November 2024 security patch, bug fixes",
+            "md5": ""
+        },
+        {
+            "id": "x6_pro_a14_cn",
+            "device": "Find X6 Pro",
+            "deviceId": "x6_pro",
+            "codename": "PGEM10",
+            "brand": "oppo",
+            "version": "ColorOS 14.0",
+            "android": "14",
+            "buildNumber": "PGEM10_14.0.0.600",
+            "region": "CN",
+            "size": "5.5 GB",
+            "date": "2024-10-15",
+            "type": "full",
+            "format": "extracted",
+            "status": "verified",
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "mega": ""
+            },
+            "changelog": "ColorOS 14 update, improved camera",
+            "md5": ""
+        },
+        {
+            "id": "find_n3_a14_cn",
+            "device": "Find N3",
+            "deviceId": "find_n3",
+            "codename": "PHN110",
+            "brand": "oppo",
+            "version": "ColorOS 14.0",
+            "android": "14",
+            "buildNumber": "PHN110_14.0.0.500",
+            "region": "CN",
+            "size": "5.8 GB",
+            "date": "2024-11-01",
+            "type": "full",
+            "format": "extracted",
+            "status": "verified",
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "mega": ""
+            },
+            "changelog": "Foldable optimizations, security patch",
+            "md5": ""
+        },
+        {
+            "id": "oneplus_13_a15_cn",
+            "device": "OnePlus 13",
+            "deviceId": "oneplus_13",
+            "codename": "CPH2653",
+            "brand": "oneplus",
+            "version": "ColorOS 15.0",
+            "android": "15",
+            "buildNumber": "CPH2653_15.0.0.100",
+            "region": "CN",
+            "size": "6.5 GB",
+            "date": "2024-12-20",
+            "type": "full",
+            "format": "extracted",
+            "status": "untested",
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "mega": ""
+            },
+            "changelog": "Launch firmware, Snapdragon 8 Elite",
+            "md5": ""
+        },
+        {
+            "id": "find_n5_a15_cn",
+            "device": "Find N5",
+            "deviceId": "find_n5",
+            "codename": "PHT110",
+            "brand": "oppo",
+            "version": "ColorOS 15.0",
+            "android": "15",
+            "buildNumber": "PHT110_15.0.0.100",
+            "region": "CN",
+            "size": "6.3 GB",
+            "date": "2024-12-25",
+            "type": "full",
+            "format": "extracted",
+            "status": "untested",
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "mega": ""
+            },
+            "changelog": "Launch firmware, ultra-thin foldable",
+            "md5": ""
+        },
+        {
+            "id": "find_n2_a14_cn",
+            "device": "Find N2",
+            "deviceId": "find_n2",
+            "codename": "PHN210",
+            "brand": "oppo",
+            "version": "ColorOS 14.0",
+            "android": "14",
+            "buildNumber": "PHN210_14.0.0.800",
+            "region": "CN",
+            "size": "5.4 GB",
+            "date": "2024-09-10",
+            "type": "full",
+            "format": "extracted",
+            "status": "verified",
+            "links": {
+                "onedrive": "",
+                "gdrive": "",
+                "mega": ""
+            },
+            "changelog": "September 2024 security patch",
+            "md5": ""
+        }
+    ]
 }
