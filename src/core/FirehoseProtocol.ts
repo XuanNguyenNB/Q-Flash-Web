@@ -1068,7 +1068,6 @@ export class FirehoseProtocol {
         this.onLog(`Patch file applied successfully`, 'success');
         return { success: true };
     }
-
     /**
      * Write/flash a large file using chunked writes like native tool.
      * This method sends a SEPARATE program command for each 64MB chunk,
