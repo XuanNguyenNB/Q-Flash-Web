@@ -242,17 +242,27 @@ export function useFlash() {
                 }
             }
 
-            // Apply Patches (patch0.xml, etc.) if flash was successful so far
+            // CRITICAL: Re-configure device after flashing all partitions
+            // This is REQUIRED for device to properly recognize new partition data
+            // before applying patches. Without this, device may not boot properly.
+            if (firehoseProtocol.configure) {
+                log('info', 'Re-configuring device after partition flash...');
+                try {
+                    await firehoseProtocol.configure();
+                    log('success', 'Device re-configured successfully');
+                } catch (e) {
+                    log('error', `Failed to re-configure device: ${e}`);
+                    // Continue anyway as this is best-effort
+                }
+            } else {
+                log('warning', 'configure() not available - device may not boot properly');
+            }
+
+            // Apply Patches (patch0.xml, etc.) AFTER re-configuring device
             if (errorCount === 0 && firehoseProtocol.applyPatch) {
                 const { patchFiles } = useRomStore.getState();
 
                 if (patchFiles && patchFiles.length > 0) {
-                    // Re-configure Firehose before patching (as requested)
-                    if (firehoseProtocol.configure) {
-                        log('info', 'Re-configuring Firehose for patching...');
-                        await firehoseProtocol.configure();
-                    }
-
                     log('info', `Found ${patchFiles.length} patch file(s). Applying...`);
 
                     // Sort patches by name (patch0.xml, patch1.xml, ...)
