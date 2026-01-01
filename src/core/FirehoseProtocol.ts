@@ -68,26 +68,30 @@ export class FirehoseProtocol {
             this.config = newConfig;
             this.isConfigured = true; // Mark as configured
             this.onLog(`Firehose configured successfully`, 'success');
-        } else {
-            // Try fallback with smaller payload size
-            this.onLog('Configure failed, trying with smaller payload...', 'debug');
-            const fallbackConfig = { ...newConfig, maxPayloadSizeToTargetInBytes: 4096 };
-            const fallbackCommand = buildXmlCommand('configure', {
-                MemoryName: fallbackConfig.memoryName,
-                MaxPayloadSizeToTargetInBytes: fallbackConfig.maxPayloadSizeToTargetInBytes,
-            });
-
-            const fallbackResponse = await this.sendCommand(fallbackCommand);
-            if (fallbackResponse.success) {
-                this.config = fallbackConfig;
-                this.isConfigured = true; // Mark as configured
-                this.onLog(`Firehose configured with fallback settings (4KB payload)`, 'success');
-                return fallbackResponse;
-            }
+            return response;
         }
 
-        return response;
+        // Try fallback with smaller payload size
+        this.onLog('Configure failed, trying with smaller payload...', 'debug');
+        const fallbackConfig = { ...newConfig, maxPayloadSizeToTargetInBytes: 4096 };
+        const fallbackCommand = buildXmlCommand('configure', {
+            MemoryName: fallbackConfig.memoryName,
+            MaxPayloadSizeToTargetInBytes: fallbackConfig.maxPayloadSizeToTargetInBytes,
+        });
+
+        const fallbackResponse = await this.sendCommand(fallbackCommand);
+        if (fallbackResponse.success) {
+            this.config = fallbackConfig;
+            this.isConfigured = true; // Mark as configured
+            this.onLog(`Firehose configured with fallback settings (4KB payload)`, 'success');
+            return { success: true };
+        }
+
+        // Both failed
+        this.onLog('Configure failed with both normal and fallback settings', 'error');
+        return { success: false, error: 'Configure failed with all payload sizes' };
     }
+
 
     /**
      * Get partition table (GPT) from device
@@ -1075,7 +1079,8 @@ export class FirehoseProtocol {
      */
     async reset(): Promise<FirehoseResponse> {
         return this.power('reset');
-    }
+    }
+
     /**
      * Write/flash a large file using chunked writes like native tool.
      * This method sends a SEPARATE program command for each 64MB chunk,

@@ -1493,19 +1493,20 @@
         "copied": "Đã sao chép!",
         "thankYou": "Cảm ơn bạn đã ủng hộ!",
         "thankYouDesc": "Mọi đóng góp của bạn giúp tôi tiếp tục phát triển và duy trì công cụ này miễn phí cho cộng đồng."
-    },
+    }
+,
     "xml_flash": {
         "button": "Flash theo XML",
         "title": "Flash bằng XML",
-        "description": "Chọn file rawprogram XML và thư mục chứa các file partition để flash.",
-        "select_xml": "Chọn file XML",
-        "choose_xml": "Chọn XML...",
-        "found_partitions": "Tìm thấy {{count}} phân vùng",
-        "select_images_folder": "Chọn thư mục Images",
-        "choose_folder": "Chọn thư mục...",
-        "partitions_preview": "Các phân vùng sẽ flash",
-        "and_more": "...và {{count}} phân vùng khác",
-        "processing": "Đang xử lý...",
-        "start_flash": "Bắt đầu Flash"
+        "description": "Ch?n file rawprogram XML v� thu m?c ch?a c�c file partition d? flash.",
+        "select_xml": "Ch?n file XML",
+        "choose_xml": "Ch?n XML...",
+        "found_partitions": "T�m th?y {{count}} ph�n v�ng",
+        "select_images_folder": "Ch?n thu m?c Images",
+        "choose_folder": "Ch?n thu m?c...",
+        "partitions_preview": "C�c ph�n v�ng s? flash",
+        "and_more": "...v� {{count}} ph�n v�ng kh�c",
+        "processing": "�ang x? l�...",
+        "start_flash": "B?t d?u Flash"
     }
 }
