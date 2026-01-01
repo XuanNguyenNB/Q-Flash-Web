@@ -166,16 +166,18 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
         }
 
         setIsProcessing(true);
+        // Close dialog immediately when starting flash
+        handleOpenChange(false);
         try {
             // Create a temporary XML with only selected partitions
             // For now, pass all and let hook handle it (we'll update hook next)
             await onConfirm(xmlFile, imagesDir);
-            handleOpenChange(false);
         } catch (error) {
             console.error('Flash failed:', error);
         } finally {
             setIsProcessing(false);
         }
+
     }, [xmlFile, imagesDir, partitions, selectedPartitions, onConfirm, handleOpenChange]);
 
     const canProceed = xmlFile && imagesDir && partitions.length > 0 && selectedPartitions.size > 0 && !parseError;

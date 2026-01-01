@@ -139,15 +139,17 @@ export function XMLBackupDialog({ open, onOpenChange, onConfirm }: XMLBackupDial
         if (!xmlFile || !outputDir) return;
 
         setIsProcessing(true);
+        // Close dialog immediately when starting backup
+        handleOpenChange(false);
         try {
             await onConfirm(xmlFile, outputDir);
-            handleOpenChange(false);
         } catch (error) {
             console.error('Backup failed:', error);
         } finally {
             setIsProcessing(false);
         }
     }, [xmlFile, outputDir, onConfirm, handleOpenChange]);
+
 
     const canProceed = xmlFile && outputDir && partitions.length > 0 && !parseError;
 
