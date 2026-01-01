@@ -102,7 +102,7 @@ export default function DonatePage() {
                     </div>
 
                     {/* Donation Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                         {donationMethods.map((method) => {
                             const Icon = method.icon;
                             const isCopied = copiedId === method.id;
@@ -111,7 +111,7 @@ export default function DonatePage() {
                                 <Card
                                     key={method.id}
                                     className={cn(
-                                        "relative overflow-hidden transition-all duration-300",
+                                        "relative overflow-hidden transition-all duration-300 flex flex-col",
                                         "hover:scale-[1.02] hover:-translate-y-1",
                                         `bg-gradient-to-br ${method.gradient}`,
                                         method.border,
@@ -128,25 +128,23 @@ export default function DonatePage() {
                                         <CardTitle className="text-lg">
                                             {method.nameVi}
                                         </CardTitle>
-                                        {method.extra && (
-                                            <CardDescription className="text-xs">
-                                                {method.extra}
-                                            </CardDescription>
-                                        )}
+                                        <CardDescription className="text-xs min-h-[1.25rem]">
+                                            {method.extra || '\u00A0'}
+                                        </CardDescription>
                                     </CardHeader>
 
-                                    <CardContent className="space-y-4">
-                                        {/* QR Code */}
-                                        <div className="bg-white rounded-lg p-3 flex items-center justify-center">
+                                    <CardContent className="space-y-4 flex-1 flex flex-col">
+                                        {/* QR Code - Fixed height container */}
+                                        <div className="bg-white rounded-lg p-3 flex items-center justify-center aspect-square max-h-[200px]">
                                             <img
                                                 src={method.qrImage}
                                                 alt={`${method.name} QR Code`}
-                                                className="w-full max-w-[180px] h-auto rounded"
+                                                className="w-full h-full object-contain rounded"
                                             />
                                         </div>
 
-                                        {/* Account Details */}
-                                        <div className="space-y-2">
+                                        {/* Account Details - Fixed height */}
+                                        <div className="space-y-2 flex-1">
                                             <div className="flex items-center justify-between gap-2 text-sm">
                                                 <span className="text-muted-foreground shrink-0">
                                                     {method.id === 'binance' ? 'Pay ID:' : t('donate.accountNumber', 'STK:')}
@@ -166,11 +164,11 @@ export default function DonatePage() {
                                             </div>
                                         </div>
 
-                                        {/* Copy Button */}
+                                        {/* Copy Button - Always at bottom */}
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="w-full gap-2"
+                                            className="w-full gap-2 mt-auto"
                                             onClick={() => handleCopy(method.accountNumber, method.id)}
                                         >
                                             {isCopied ? (
@@ -190,6 +188,7 @@ export default function DonatePage() {
                             );
                         })}
                     </div>
+
 
                     {/* Thank You Message */}
                     <div className="text-center mt-12 p-6 rounded-xl bg-muted/30 border border-border/50">
