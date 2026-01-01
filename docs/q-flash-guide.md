@@ -26,7 +26,7 @@
 #### 1.1 Tải Xuống Q-FLASH-FORGE
 - Đây là công cụ tất cả trong một (All-in-One).
 - **Tính năng:** Tích hợp sẵn trình cài đặt **Zadig Drivers** và **ADB/Fastboot**.
-- Link tải: (Sử dụng link tải phiên bản mới nhất của Q-FLASH-FORGE)
+- Link tải: https://github.com/XuanNguyenNB/Q-FLASH-FORGE/releases
 
 #### 1.2 Cài Đặt Driver & Môi Trường Bằng Q-FLASH-FORGE
 
@@ -81,13 +81,13 @@ fastboot reboot edl  # Reboot vào EDL
 - Dùng nhíp ngắn mạch test point với GND
 - Cắm cáp USB vào PC trong khi đang ngắn mạch
 
-> Chỉ nên dùng nếu máy hoàn toàn hard-brick hoặc dovà đã hiểu rõ rủi ro phần cứng.
+> Chỉ nên dùng nếu máy hoàn toàn hard-brick hoặc do nạp nhầm rom EDL của thiết bị khác và đã hiểu rõ rủi ro phần cứng.
 
 #### Xác Nhận EDL Thành Công
 
 - Mở **Device Manager** trên Windows
-- Tại mục *Ports (COM & LPT)* hoặc *Universal Serial Bus devices*: thấy **Qualcomm HS-USB QDLoader 9008**
-
+- Tại mục *Ports (COM & LPT)* hoặc *Universal Serial Bus devices*: thấy **Qualcomm HS-USB QDLoader 9008** (nếu đã cài driver)
+- hoặc QUSB_BULK_CID:XXXX..
 Nếu không thấy:
 - Kiểm tra lại driver WinUSB
 - Đổi cổng USB hoặc cáp
@@ -100,7 +100,7 @@ Nếu không thấy:
 #### 3.1 Tải Stock ROM
 
 Nên dùng ROM chính thức từ nhà sản xuất hoặc các nguồn uy tín:
-
+- Onfix.cn, azrom vvv
 - Oppo: trang tải ROM chính thức hoặc các site tổng hợp stock ROM
 - OnePlus: OnePlus Community / trang firmware chính thức
 - Realme: Realme official / diễn đàn cộng đồng
@@ -112,7 +112,7 @@ Lưu ý:
 #### 3.2 Định Dạng ROM
 
 Các dạng file thường gặp:
-
+- **.zip** (Oppo/Realme)
 - **.ozip** (Oppo/Realme)
 - **.ofp** (Oppo)
 - Bộ file đã giải nén: `boot.img`, `system.img`, `vendor.img`, v.v.

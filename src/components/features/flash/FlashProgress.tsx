@@ -6,10 +6,20 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock, Loader2, CheckCircle2, XCircle, AlertTriangle, X, ChevronDown, ChevronUp, RefreshCcw } from 'lucide-react';
+import { Clock, Loader2, CheckCircle2, XCircle, AlertTriangle, X, ChevronDown, ChevronUp, RefreshCcw, Smartphone } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useFlashStore } from '@/stores/flashStore';
 import type { PartitionStatus } from '@/stores/flashStore';
 import { cn } from '@/lib/utils';
@@ -114,6 +124,7 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
     const hasErrors = errorCount > 0;
     const canReboot = isComplete && !hasErrors && rebootCallback !== null;
     const [isRebooting, setIsRebooting] = useState(false);
+    const [showRebootDialog, setShowRebootDialog] = useState(false);
 
     // Don't render if idle
     if (flashWriteStatus === 'idle') {
@@ -282,14 +293,7 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
                             size="sm"
                             className="w-full gap-2"
                             disabled={isRebooting}
-                            onClick={async () => {
-                                setIsRebooting(true);
-                                try {
-                                    await executeReboot();
-                                } finally {
-                                    setIsRebooting(false);
-                                }
-                            }}
+                            onClick={() => setShowRebootDialog(true)}
                         >
                             {isRebooting ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -299,6 +303,56 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
                             {isRebooting ? t('flash.progress.rebooting', 'Đang khởi động lại...') : t('flash.progress.reboot', 'Khởi động lại thiết bị')}
                         </Button>
                     )}
+
+                    {/* Reboot Confirmation Dialog */}
+                    <AlertDialog open={showRebootDialog} onOpenChange={setShowRebootDialog}>
+                        <AlertDialogContent className="max-w-md">
+                            <AlertDialogHeader>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/20">
+                                        <RefreshCcw className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <AlertDialogTitle className="text-xl">
+                                        {t('flash.reboot.title', 'Khởi động lại thiết bị?')}
+                                    </AlertDialogTitle>
+                                </div>
+                                <AlertDialogDescription className="text-base text-muted-foreground">
+                                    {t('flash.reboot.description', 'Thiết bị sẽ khởi động lại về hệ thống. Đảm bảo bạn đã hoàn tất tất cả các thao tác cần thiết.')}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+
+                            <div className="py-3">
+                                <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                    <Smartphone className="w-5 h-5 text-amber-500 mt-0.5" />
+                                    <div className="text-sm text-muted-foreground">
+                                        <p className="font-medium text-amber-600 dark:text-amber-400 mb-1">
+                                            {t('flash.reboot.note_title', 'Lưu ý')}
+                                        </p>
+                                        <p>{t('flash.reboot.note_desc', 'Kết nối USB có thể bị mất sau khi khởi động lại. Bạn sẽ cần kết nối lại nếu muốn tiếp tục thao tác.')}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>{t('common.cancel', 'Hủy')}</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={async () => {
+                                        setShowRebootDialog(false);
+                                        setIsRebooting(true);
+                                        try {
+                                            await executeReboot();
+                                        } finally {
+                                            setIsRebooting(false);
+                                        }
+                                    }}
+                                    className="gap-2"
+                                >
+                                    <RefreshCcw className="w-4 h-4" />
+                                    {t('flash.reboot.confirm', 'Khởi động lại')}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             )}
 

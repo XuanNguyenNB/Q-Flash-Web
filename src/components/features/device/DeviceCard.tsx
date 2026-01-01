@@ -21,6 +21,7 @@ import { useConnectionFlow, type ConnectionFlowState } from '@/hooks/useConnecti
 // Components
 import { Button } from '@/components/ui/button';
 import { ConnectionStatusDot } from './ConnectionStatusDot';
+import { EDLTroubleshootDialog } from './EDLTroubleshootDialog';
 
 // Icons
 import { Smartphone, Wifi, WifiOff } from 'lucide-react';
@@ -70,6 +71,16 @@ export function DeviceCard({ className }: DeviceCardProps) {
 
     // Connection flow hook
     const { connect, disconnect, retry, status: flowStatus, error: flowError } = useConnectionFlow();
+
+    // Troubleshoot dialog state
+    const [showTroubleshoot, setShowTroubleshoot] = useState(false);
+
+    // Auto-show troubleshoot dialog on USB error
+    useEffect(() => {
+        if (flowStatus === 'error' && flowError?.code === 'USB_ERROR') {
+            setShowTroubleshoot(true);
+        }
+    }, [flowStatus, flowError]);
 
     // Reset state when selected device changes
     useEffect(() => {
@@ -232,6 +243,14 @@ export function DeviceCard({ className }: DeviceCardProps) {
                     {getStatusText()}
                 </Button>
             )}
+
+            {/* Troubleshoot Dialog */}
+            <EDLTroubleshootDialog
+                open={showTroubleshoot}
+                onOpenChange={setShowTroubleshoot}
+                onRetry={handleRetry}
+                errorMessage={flowError?.message}
+            />
         </div>
     );
 }

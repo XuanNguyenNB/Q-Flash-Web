@@ -532,7 +532,8 @@ export class FastbootProtocol {
             await this.device.runCommand('reboot-bootloader');
 
             this.onLog('Reboot to bootloader command sent', 'success');
-            // Don't disconnect as device stays in fastboot
+            // Device USB connection will reset even for reboot-bootloader
+            await this.disconnect();
             return true;
 
         } catch (error) {

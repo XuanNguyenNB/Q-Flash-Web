@@ -441,6 +441,13 @@ export function useFastboot(): UseFastbootReturn {
         try {
             fastbootStore.setPendingOperation('Rebooting to bootloader...');
             const success = await protocol.rebootBootloader();
+
+            if (success) {
+                // Device will disconnect and reconnect in bootloader mode
+                deviceStore.setConnected(false);
+                fastbootStore.reset();
+            }
+
             return success;
 
         } catch (error) {
@@ -451,7 +458,7 @@ export function useFastboot(): UseFastbootReturn {
         } finally {
             fastbootStore.setPendingOperation(null);
         }
-    }, [getInstance, fastbootStore, logToTerminal]);
+    }, [getInstance, fastbootStore, deviceStore, logToTerminal]);
 
     const rebootRecovery = useCallback(async (): Promise<boolean> => {
         const protocol = getInstance();

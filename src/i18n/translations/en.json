@@ -1548,5 +1548,37 @@
             "thankYou": "Thank you for your support!",
             "thankYouDesc": "Every contribution helps me continue to develop and maintain this tool free for the community."
         }
+    },
+    "xml_flash": {
+        "title": "Flash by XML",
+        "description": "Select a rawprogram XML file and folder containing partition images to flash.",
+        "select_xml": "Select XML File",
+        "choose_xml": "Choose XML...",
+        "found_partitions": "Found {{count}} partitions",
+        "select_images_folder": "Select Images Folder",
+        "choose_folder": "Choose Folder...",
+        "partitions_preview": "Partitions to Flash",
+        "and_more": "...and {{count}} more",
+        "processing": "Processing...",
+        "start_flash": "Start Flash",
+        "files_found": "found",
+        "files_missing": "missing",
+        "file_not_found": "not found",
+        "checking_files": "Checking files...",
+        "error_no_selection": "Please select at least one partition to flash",
+        "error_missing_files": "Cannot flash - missing files: {{files}}"
+    },
+    "edl": {
+        "troubleshoot": {
+            "title": "Cannot connect to device",
+            "description": "Failed to connect to the device. Possible causes:",
+            "reason1_title": "EDL mode timeout",
+            "reason1_desc": "The EDL mode on your phone may have timed out. Please try entering EDL mode again!",
+            "reason2_title": "Driver not installed correctly",
+            "reason2_desc": "Use Device Manager on Windows to check and change the driver to WinUSB (QUSB_BULK).",
+            "reason3_title": "Qualcomm HS-USB QDLoader 9008",
+            "reason3_desc": "If the device shows \"Qualcomm HS-USB QDLoader 9008\" in Device Manager, manually switch the driver to WinUSB or use Zadig.",
+            "help_text": "See detailed guide on the Q-Flash Support page"
+        }
     }
 }

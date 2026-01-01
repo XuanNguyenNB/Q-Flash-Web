@@ -73,10 +73,10 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     };
 
     // Handle XML Flash
-    const handleXMLFlashConfirm = async (xmlFile: File, imagesDir: FileSystemDirectoryHandle) => {
+    const handleXMLFlashConfirm = async (xmlFile: File, imagesDir: FileSystemDirectoryHandle, selectedFilenames: string[]) => {
         const usbManager = getManager();
         if (usbManager) {
-            await startXMLFlash(usbManager, xmlFile, imagesDir);
+            await startXMLFlash(usbManager, xmlFile, imagesDir, selectedFilenames);
         }
     };
 

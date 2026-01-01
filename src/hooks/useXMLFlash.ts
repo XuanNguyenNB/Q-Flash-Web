@@ -66,7 +66,8 @@ export function useXMLFlash() {
     const startXMLFlash = useCallback(async (
         usbManager: any,
         xmlFile: File,
-        imagesDir: FileSystemDirectoryHandle
+        imagesDir: FileSystemDirectoryHandle,
+        selectedFilenames?: string[] // Optional: if provided, only flash these files
     ) => {
         if (!usbManager) {
             log('error', 'USB Manager not available');
@@ -76,24 +77,52 @@ export function useXMLFlash() {
         try {
             log('info', `📋 Parsing XML file: ${xmlFile.name}`);
 
-            const programs = await parseXMLFile(xmlFile);
+            let programs = await parseXMLFile(xmlFile);
 
             if (programs.length === 0) {
                 throw new Error('No valid partitions with filename found in XML');
             }
 
-            log('success', `✅ Found ${programs.length} partitions in XML`);
-            log('info', '⚡ Starting XML-based flash...');
+            // If selectedFilenames provided, filter to only those
+            if (selectedFilenames && selectedFilenames.length > 0) {
+                const selectedSet = new Set(selectedFilenames);
+                programs = programs.filter(p => selectedSet.has(p.filename));
+                log('info', `📋 Filtered to ${programs.length} selected partitions`);
+            }
 
-            // Calculate total size
+            if (programs.length === 0) {
+                throw new Error('No partitions selected for flashing');
+            }
+
+            log('info', `📋 Will flash ${programs.length} partitions, checking files...`);
+
+            // Pre-check: Filter only programs with existing files
+            const validPrograms: typeof programs = [];
+            for (const program of programs) {
+                try {
+                    await imagesDir.getFileHandle(program.filename);
+                    validPrograms.push(program);
+                } catch {
+                    log('warning', `⚠️ Skipping "${program.label}" - file "${program.filename}" not found`);
+                }
+            }
+
+            if (validPrograms.length === 0) {
+                throw new Error('No image files found in selected folder');
+            }
+
+            log('success', `✅ Found ${validPrograms.length}/${programs.length} files, starting flash...`);
+
+            // Calculate total size for VALID programs only
             const sectorSize = 4096; // UFS sector size
-            const totalBytes = programs.reduce((sum, p) => {
+            const totalBytes = validPrograms.reduce((sum, p) => {
                 return sum + (BigInt(p.num_partition_sectors) * BigInt(sectorSize));
             }, BigInt(0));
 
-            // Start flash in store
+            // Start flash in store - use filename as unique key (label can be duplicate like BackupGPT)
+            // Format: "label (filename)" for display - ONLY for valid programs
             startFlashWrite(
-                programs.map(p => p.label),
+                validPrograms.map(p => `${p.label} (${p.filename})`),
                 Number(totalBytes)
             );
 
@@ -107,13 +136,15 @@ export function useXMLFlash() {
             let errorCount = 0;
             let bytesProcessed = BigInt(0);
 
-            for (const program of programs) {
+            for (const program of validPrograms) {
                 const partitionName = program.label;
                 const imageFilename = program.filename;
+                // Use unique key for tracking (label can be duplicate)
+                const uniqueKey = `${partitionName} (${imageFilename})`;
 
                 try {
                     log('info', `⚡ Flashing "${partitionName}" from "${imageFilename}"...`);
-                    setFlashWritePartitionStatus(partitionName, 'in-progress');
+                    setFlashWritePartitionStatus(uniqueKey, 'in-progress');
 
                     // Load image file from directory
                     let imageFile: File;
@@ -145,7 +176,7 @@ export function useXMLFlash() {
                         (percent: number) => {
                             const currentBytes = BigInt(Math.floor((percent / 100) * Number(sizeInBytes)));
                             updateFlashWriteProgress(
-                                partitionName,
+                                uniqueKey,
                                 Number(bytesProcessed + currentBytes),
                                 Number(totalBytes)
                             );
@@ -159,13 +190,13 @@ export function useXMLFlash() {
                     bytesProcessed += sizeInBytes;
                     const sizeStr = (Number(sizeInBytes) / 1024 / 1024).toFixed(2);
                     log('success', `✅ Wrote "${partitionName}" (${sizeStr} MB)`);
-                    setFlashWritePartitionStatus(partitionName, 'done');
+                    setFlashWritePartitionStatus(uniqueKey, 'done');
                     successCount++;
 
                 } catch (error) {
                     const message = error instanceof Error ? error.message : String(error);
                     log('error', `❌ Failed to flash "${partitionName}": ${message}`);
-                    setFlashWritePartitionStatus(partitionName, 'error');
+                    setFlashWritePartitionStatus(uniqueKey, 'error');
                     errorCount++;
                 }
             }

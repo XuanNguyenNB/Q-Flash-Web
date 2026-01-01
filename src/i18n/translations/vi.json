@@ -1562,6 +1562,25 @@
         "partitions_preview": "Các phân vùng sẽ flash",
         "and_more": "...và {{count}} phân vùng khác",
         "processing": "Đang xử lý...",
-        "start_flash": "Bắt đầu Flash"
+        "start_flash": "Bắt đầu Flash",
+        "files_found": "tìm thấy",
+        "files_missing": "thiếu",
+        "file_not_found": "không tìm thấy",
+        "checking_files": "Đang kiểm tra files...",
+        "error_no_selection": "Vui lòng chọn ít nhất một phân vùng để flash",
+        "error_missing_files": "Không thể flash - thiếu files: {{files}}"
+    },
+    "edl": {
+        "troubleshoot": {
+            "title": "Không thể kết nối thiết bị",
+            "description": "Chưa kết nối thành công tới thiết bị. Nguyên nhân có thể là:",
+            "reason1_title": "Hết thời gian chờ EDL",
+            "reason1_desc": "Quá hạn chờ của chế độ EDL trên điện thoại, bạn hãy thử vào lại chế độ EDL nhé!",
+            "reason2_title": "Driver chưa được cài đặt đúng",
+            "reason2_desc": "Hãy sử dụng Device Manager trên Windows để kiểm tra và thay đổi driver thành WinUSB (QUSB_BULK).",
+            "reason3_title": "Qualcomm HS-USB QDLoader 9008",
+            "reason3_desc": "Nếu thiết bị hiển thị \"Qualcomm HS-USB QDLoader 9008\" trong Device Manager, hãy chuyển driver sang WinUSB thủ công hoặc bằng Zadig.",
+            "help_text": "Xem hướng dẫn chi tiết tại trang Support của Q-Flash"
+        }
     }
 }
