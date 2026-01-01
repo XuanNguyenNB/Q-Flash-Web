@@ -28,9 +28,13 @@ export type { UseAuthReturn, VipCredentials } from './useAuth';
 export { useTerminal } from './useTerminal';
 export type { UseTerminalReturn } from './useTerminal';
 
-// Devices Hook - Device data loading
-export { useDevices, groupDevicesByChipset } from './useDevices';
+// Device Hooks - Manage device configurations and presets
+export { useDevices } from './useDevices';
 export type { DeviceEntry } from './useDevices';
+
+// Chipset Hook - Simpler chipset selection (alternative to device selection)
+export { useChipsets } from './useChipsets';
+export type { ChipsetEntry } from './useChipsets';
 
 // Firehose Loader Hook - Auto-load firehose files
 export { useFirehoseLoader } from './useFirehoseLoader';

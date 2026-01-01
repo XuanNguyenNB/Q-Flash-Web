@@ -12,25 +12,29 @@
         },
         "guide": {
             "title": "Connection Guide",
-            "intro": "To use EDL mode, your device must be recognized as \"Qualcomm HS-USB QDLoader 9008\" or \"QUSB_BULK\". If not detected, follow these steps:",
+            "intro": "To use EDL mode on WEB, the device must be recognized as \"QUSB_BULK\" or \"Qualcomm HS-USB QDLoader 9008\" via WinUSB. Follow these steps to set it up:",
             "step1": {
-                "title": "Enter EDL Mode",
-                "desc": "Power off device -> Hold Vol Up + Vol Down -> Connect USB cable."
+                "title": "Download and Open Zadig",
+                "desc": "Download and open Zadig.exe application"
             },
             "step2": {
-                "title": "Install Drivers (Zadig)",
-                "desc": "If device appears as \"QUSB_BULK\", use Zadig to install WinUSB driver."
+                "title": "Enter EDL Mode",
+                "desc": "Connect USB cable and hold Volume Down + Volume Up + Power simultaneously until computer recognizes it (you'll hear a sound or see it in Device Manager). Then find and replace the driver as shown in the illustration."
+            },
+            "reconnect": {
+                "title": "Reconnect",
+                "desc": "After installation, the device may exit EDL mode. Click the connect button on this WEB and enter EDL again: Connect USB cable and hold Volume Down + Volume Up + Power simultaneously until Chrome shows the device (as QUSB_BULK), then select that device."
             },
             "tip": {
                 "title": "Tip: Use Q-Flash Forge",
-                "desc": "Use our Q-Flash Forge tool for automatic driver fixing and Zadig guidance."
+                "desc": "Use Q-Flash Forge tool to automatically fix drivers and guide you through Zadig."
             },
             "openForge": "Open Q-Flash Forge Project"
         },
         "zadig": {
             "title": "Driver Installation Guide",
-            "step1": "Step 1: Select 'Qualcomm HS-USB QDLoader 9008' from the dropdown",
-            "step2": "Step 2: Choose 'WinUSB' as the target driver",
+            "step1": "Step 1: Select 'Qualcomm HS-USB QDLoader 9008' or 'QUSB_BULK' from the list",
+            "step2": "Step 2: Select 'WinUSB' as the target driver",
             "step3": "Step 3: Click 'Install Driver' or 'Replace Driver'"
         }
     },
@@ -709,11 +713,23 @@
                 "4": "Find and enable OEM unlocking.",
                 "5": "Enter password and tap Enable to confirm."
             },
-            "step3Title": "Authorize Computer",
+            "step3Title": "Connect ADB",
             "step3": {
-                "desc": "Connect your device via USB. Press button connect ADB and select your device. A popup will appear on your phone screen.",
+                "desc": "Connect your device via USB, then press the green **Connect ADB** button. A browser popup will show a list of devices - select your device and click **OK**."
+            },
+            "step4Title": "Authorize Computer",
+            "step4": {
+                "desc": "A popup will appear on your phone screen.",
                 "check": "Check **\"Always allow from this computer\"**",
                 "allow": "Tap **Allow** or **OK**"
+            },
+            "troubleshooting": {
+                "title": "If you don't see the dialog",
+                "items": [
+                    "Disconnect and reconnect the USB cable",
+                    "Toggle USB Debugging off and on",
+                    "Change USB mode (Charging only / File transfer)"
+                ]
             },
             "troubleshoot": "If popup doesn't appear, try:\n- Unplug and replug cable\n- Toggle USB Debugging off/on\n- Switch USB modes (Charging / File Transfer)",
             "header": {

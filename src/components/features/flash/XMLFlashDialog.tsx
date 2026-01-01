@@ -29,6 +29,8 @@ interface ParsedPartition {
     label: string;
     filename?: string;
     num_partition_sectors: string;
+    start_sector?: string;
+    physical_partition_number?: string;
 }
 
 export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialogProps) {
@@ -36,8 +38,10 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
     const [xmlFile, setXmlFile] = useState<File | null>(null);
     const [imagesDir, setImagesDir] = useState<FileSystemDirectoryHandle | null>(null);
     const [partitions, setPartitions] = useState<ParsedPartition[]>([]);
+    const [selectedPartitions, setSelectedPartitions] = useState<Set<number>>(new Set());
     const [isProcessing, setIsProcessing] = useState(false);
     const [parseError, setParseError] = useState<string | null>(null);
+    const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
 
     // Reset state when dialog closes
     const handleOpenChange = useCallback((newOpen: boolean) => {
@@ -45,7 +49,9 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
             setXmlFile(null);
             setImagesDir(null);
             setPartitions([]);
+            setSelectedPartitions(new Set());
             setParseError(null);
+            setDuplicateWarning(null);
         }
         onOpenChange(newOpen);
     }, [onOpenChange]);
@@ -72,22 +78,57 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                 const label = tag.getAttribute('label');
                 const filename = tag.getAttribute('filename');
                 const numSectors = tag.getAttribute('num_partition_sectors');
+                const startSector = tag.getAttribute('start_sector');
+                const physicalPartition = tag.getAttribute('physical_partition_number');
+
+                // Debug log
+                console.log('XML Entry:', { label, filename, numSectors, startSector, lun: physicalPartition });
 
                 if (label && numSectors && numSectors !== '0' && filename) {
                     parsed.push({
                         label,
                         filename,
-                        num_partition_sectors: numSectors
+                        num_partition_sectors: numSectors,
+                        start_sector: startSector || undefined,
+                        physical_partition_number: physicalPartition || undefined
                     });
                 }
             });
 
-            if (parsed.length === 0) {
+            console.log('Parsed partitions:', parsed);
+
+            // Filter duplicates: keep last entry for each label
+            const labelMap = new Map<string, ParsedPartition>();
+            const duplicates: string[] = [];
+
+            parsed.forEach(p => {
+                if (labelMap.has(p.label)) {
+                    if (!duplicates.includes(p.label)) {
+                        duplicates.push(p.label);
+                    }
+                }
+                labelMap.set(p.label, p); // Keep last entry
+            });
+
+            const filtered = Array.from(labelMap.values());
+
+            // Warn about duplicates
+            if (duplicates.length > 0) {
+                setDuplicateWarning(`Warning: Found duplicate labels (${duplicates.join(', ')}). Only the last entry for each will be used.`);
+            } else {
+                setDuplicateWarning(null);
+            }
+
+            if (filtered.length === 0) {
                 throw new Error('No valid partitions with filename found in XML');
             }
 
-            setPartitions(parsed);
-            return parsed;
+            setPartitions(filtered);
+
+            // Auto-select all partitions
+            setSelectedPartitions(new Set(filtered.map((_, idx) => idx)));
+
+            return filtered;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to parse XML';
             setParseError(message);
@@ -137,8 +178,18 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
     const handleConfirm = useCallback(async () => {
         if (!xmlFile || !imagesDir) return;
 
+        // Filter only selected partitions
+        const selectedParts = partitions.filter((_, idx) => selectedPartitions.has(idx));
+
+        if (selectedParts.length === 0) {
+            setParseError('Please select at least one partition to flash');
+            return;
+        }
+
         setIsProcessing(true);
         try {
+            // Create a temporary XML with only selected partitions
+            // For now, pass all and let hook handle it (we'll update hook next)
             await onConfirm(xmlFile, imagesDir);
             handleOpenChange(false);
         } catch (error) {
@@ -146,9 +197,9 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
         } finally {
             setIsProcessing(false);
         }
-    }, [xmlFile, imagesDir, onConfirm, handleOpenChange]);
+    }, [xmlFile, imagesDir, partitions, selectedPartitions, onConfirm, handleOpenChange]);
 
-    const canProceed = xmlFile && imagesDir && partitions.length > 0 && !parseError;
+    const canProceed = xmlFile && imagesDir && partitions.length > 0 && selectedPartitions.size > 0 && !parseError;
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -189,12 +240,21 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                         )}
 
                         {xmlFile && partitions.length > 0 && (
-                            <div className="flex items-start gap-2 text-xs text-green-500 bg-green-500/10 p-2 rounded border border-green-500/20">
-                                <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                                <span>
-                                    {t('xml_flash.found_partitions', 'Found {{count}} partitions', { count: partitions.length })}
-                                </span>
-                            </div>
+                            <>
+                                <div className="flex items-start gap-2 text-xs text-green-500 bg-green-500/10 p-2 rounded border border-green-500/20">
+                                    <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                    <span>
+                                        {t('xml_flash.found_partitions', 'Found {{count}} partitions', { count: partitions.length })}
+                                    </span>
+                                </div>
+
+                                {duplicateWarning && (
+                                    <div className="flex items-start gap-2 text-xs text-yellow-600 bg-yellow-500/10 p-2 rounded border border-yellow-500/20">
+                                        <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                        <span>{duplicateWarning}</span>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 

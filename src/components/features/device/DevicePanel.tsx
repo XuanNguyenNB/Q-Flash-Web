@@ -10,7 +10,7 @@
 import { useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDeviceStore } from '@/stores/deviceStore';
-import { useDevices } from '@/hooks/useDevices';
+import { useChipsets } from '@/hooks/useChipsets';
 import { useFirehoseLoader } from '@/hooks/useFirehoseLoader';
 import { DeviceSelector } from './DeviceSelector';
 import { FirehoseLoadingIndicator } from './FirehoseLoadingIndicator';
@@ -40,8 +40,8 @@ export function DevicePanel({ className, collapsed = false }: DevicePanelProps) 
     const selectedDevice = useDeviceStore((state) => state.selectedDevice);
     const setFirehoseLoaded = useDeviceStore((state) => state.setFirehoseLoaded);
 
-    // Devices hook
-    const { devices } = useDevices();
+    // Chipsets hook
+    const { chipsets } = useChipsets();
 
     // Firehose loader
     const {
@@ -57,17 +57,30 @@ export function DevicePanel({ className, collapsed = false }: DevicePanelProps) 
      * Load firehose when device changes.
      */
     useEffect(() => {
-        if (selectedDevice && devices.length > 0) {
-            // Find the DeviceEntry for the selected device
-            const deviceEntry = devices.find(d => d.id === selectedDevice.id);
-            if (deviceEntry) {
+        if (selectedDevice && chipsets.length > 0) {
+            // Find the ChipsetEntry for the selected device
+            const chipsetEntry = chipsets.find(c => c.id === selectedDevice.id);
+            if (chipsetEntry) {
+                // Convert to DeviceEntry format for loader
+                const deviceEntry = {
+                    id: chipsetEntry.id,
+                    brand: 'oppo' as const,
+                    name: chipsetEntry.name,
+                    codename: chipsetEntry.codename,
+                    chipset: chipsetEntry.codename,
+                    chipsetName: chipsetEntry.name,
+                    status: 'tested' as const,
+                    authMethod: 'oppo_vip' as const,
+                    presetId: chipsetEntry.presetId || null,
+                    firehose: chipsetEntry.firehose,
+                };
                 loadFirehose(deviceEntry);
             }
         } else {
             // Reset firehose state when no device selected
             setFirehoseLoaded(false);
         }
-    }, [selectedDevice?.id, devices, loadFirehose, setFirehoseLoaded]);
+    }, [selectedDevice?.id, chipsets, loadFirehose, setFirehoseLoaded]);
 
     /**
      * Handle manual file submission.

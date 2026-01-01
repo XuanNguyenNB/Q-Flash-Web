@@ -12,14 +12,18 @@
         },
         "guide": {
             "title": "Hướng dẫn kết nối",
-            "intro": "Để sử dụng chế độ EDL, thiết bị phải được nhận diện là \"Qualcomm HS-USB QDLoader 9008\" hoặc \"QUSB_BULK\". Nếu không nhận, hãy làm theo các bước sau:",
+            "intro": "Để sử dụng chế độ EDL trên WEB, thiết bị phải được nhận diện là \"QUSB_BULK\" hoặc \"Qualcomm HS-USB QDLoader 9008\" thông qua WinUSB. Hãy làm theo các bước sau để chuyển đổi:",
             "step1": {
-                "title": "Vào chế độ EDL",
-                "desc": "Tắt nguồn -> Giữ Tăng âm + Giảm âm -> Cắm cáp USB."
+                "title": "Tải và mở Zadig",
+                "desc": "Tải về và mở ứng dụng Zadig.exe"
             },
             "step2": {
-                "title": "Cài đặt Driver (Zadig)",
-                "desc": "Nếu hiện \"QUSB_BULK\", dùng Zadig để cài driver WinUSB."
+                "title": "Vào chế độ EDL",
+                "desc": "Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi máy tính nhận (có tiếng kêu hoặc Device Manager hiển thị). Tiến hành tìm và thay thế driver như hình minh họa."
+            },
+            "reconnect": {
+                "title": "Kết nối lại",
+                "desc": "Sau khi đã cài đặt, thiết bị có thể bị thoát khỏi EDL. Hãy ấn nút kết nối trên WEB này và tiến hành vào lại EDL: Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi giao diện chrome hiển thị thiết bị (dạng QUSB_BULK), chúng ta tiến hành chọn thiết bị đó."
             },
             "tip": {
                 "title": "Mẹo: Dùng Q-Flash Forge",
@@ -29,7 +33,7 @@
         },
         "zadig": {
             "title": "Hướng dẫn cài Driver",
-            "step1": "Bước 1: Chọn 'Qualcomm HS-USB QDLoader 9008' từ danh sách",
+            "step1": "Bước 1: Chọn 'Qualcomm HS-USB QDLoader 9008' hoặc 'QUSB_BULK' từ danh sách",
             "step2": "Bước 2: Chọn 'WinUSB' làm driver đích",
             "step3": "Bước 3: Nhấn 'Install Driver' hoặc 'Replace Driver'"
         }
@@ -198,20 +202,6 @@
         "start_backup": "Bắt đầu Backup",
         "processing": "Đang xử lý...",
         "button": "Backup theo XML"
-    },
-    "xml_flash": {
-        "title": "Flash theo XML",
-        "description": "Chọn file XML rawprogram và thư mục chứa các file partition image để flash.",
-        "select_xml": "Chọn file XML",
-        "choose_xml": "Chọn XML...",
-        "select_images_folder": "Chọn thư mục Images",
-        "choose_folder": "Chọn thư mục...",
-        "partitions_preview": "Danh sách Partition",
-        "found_partitions": "Tìm thấy {{count}} partition",
-        "and_more": "...và {{count}} partition khác",
-        "start_flash": "Bắt đầu Flash",
-        "processing": "Đang xử lý...",
-        "button": "Flash theo XML"
     },
     "backup": {
         "button": "Sao lưu đã chọn",
@@ -720,11 +710,23 @@
                 "6": "Tìm và bật công tắc cho mục Gỡ lỗi USB.",
                 "7": "Hệ thống sẽ đưa ra cảnh báo. Hãy nhấn OK để xác nhận."
             },
-            "step3Title": "Cho phép kết nối máy tính",
+            "step3Title": "Kết Nối ADB",
             "step3": {
-                "desc": "Cắm cáp USB vào máy tính. Một hộp thoại sẽ hiện lên màn hình điện thoại.",
+                "desc": "Tiến hành cắm cáp kết nối USB với máy tính, sau đó ấn nút **Kết nối ADB** màu xanh. Màn hình trình duyệt sẽ hiện ra bảng danh sách thiết bị, hãy chọn thiết bị của bạn rồi ấn **OK**."
+            },
+            "step4Title": "Cho phép kết nối máy tính",
+            "step4": {
+                "desc": "Trên màn hình sẽ hiện ra một hộp thoại trên điện thoại.",
                 "check": "Tích vào **\"Luôn cho phép từ máy tính này\"**",
                 "allow": "Nhấn **Cho phép** hoặc **OK**"
+            },
+            "troubleshooting": {
+                "title": "Nếu không thấy hộp thoại",
+                "items": [
+                    "Rút cáp cắm lại",
+                    "Tắt/bật lại Gỡ lỗi USB",
+                    "Chuyển chế độ USB (Chỉ sạc / Truyền tệp)"
+                ]
             },
             "troubleshoot": "Nếu không thấy hộp thoại hãy thử:\n- Rút cáp cắm lại\n- Tắt/bật lại Gỡ lỗi USB\n- Chuyển chế độ USB (Chỉ sạc / Truyền tệp)",
             "header": {
