@@ -344,11 +344,18 @@ export function LogPanel({ className, collapsed = false, onToggleCollapse, varia
             {collapsed && (
                 <button
                     onClick={onToggleCollapse}
-                    className="fixed right-16 top-1/2 -translate-y-1/2 z-50 flex items-center justify-center w-6 h-16 bg-primary/10 hover:bg-primary/20 border border-r-0 border-border rounded-l-lg transition-all duration-200 group"
-                    title={t('terminal.expand') || 'Expand console'}
+                    className="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center justify-center gap-2 w-14 py-4 bg-muted/80 hover:bg-primary/20 border-l border-y border-border rounded-l-lg transition-all duration-200 group backdrop-blur-sm"
+                    title={t('terminal.expand', 'Mở Terminal Log')}
                     aria-label="Expand console"
                 >
-                    <ChevronLeft className="h-4 w-4 text-primary group-hover:text-primary/80 transition-transform group-hover:-translate-x-0.5" />
+                    <Terminal className="h-5 w-5 text-primary" />
+                    <span
+                        className="text-[10px] font-medium text-muted-foreground group-hover:text-primary"
+                        style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+                    >
+                        {t('terminal.title', 'Log')}
+                    </span>
+                    <ChevronLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-transform group-hover:-translate-x-0.5" />
                 </button>
             )}
         </>

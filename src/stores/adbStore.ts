@@ -15,16 +15,22 @@ export interface ADBState {
     // State
     deviceInfo: ADBDeviceInfo | null;
     isConnecting: boolean;
-    isDeviceReady: boolean; // NEW: Tracks if device is ready for complex operations (scrcpy, etc)
+    isDeviceReady: boolean; // Tracks if device is ready for complex operations (scrcpy, etc)
     pendingOperation: string | null;
     operationProgress: number | null;
+    showDeviceInUseDialog: boolean; // Show dialog when device is in use by another program
+    showUserGestureDialog: boolean; // Show dialog when user gesture is required
+    showAuthorizationDialog: boolean; // Show dialog when waiting for USB debugging authorization
 
     // Actions
     setDeviceInfo: (info: ADBDeviceInfo | null) => void;
     setConnecting: (connecting: boolean) => void;
-    setDeviceReady: (ready: boolean) => void; // NEW: Set device readiness
+    setDeviceReady: (ready: boolean) => void;
     setPendingOperation: (op: string | null) => void;
     setOperationProgress: (progress: number | null) => void;
+    setShowDeviceInUseDialog: (show: boolean) => void;
+    setShowUserGestureDialog: (show: boolean) => void;
+    setShowAuthorizationDialog: (show: boolean) => void;
     reset: () => void;
 }
 
@@ -37,6 +43,9 @@ const initialState = {
     isDeviceReady: false,
     pendingOperation: null,
     operationProgress: null,
+    showDeviceInUseDialog: false,
+    showUserGestureDialog: false,
+    showAuthorizationDialog: false,
 };
 
 /**
@@ -57,6 +66,12 @@ export const useADBStore = create<ADBState>()((set) => ({
     setPendingOperation: (op) => set({ pendingOperation: op }),
 
     setOperationProgress: (progress) => set({ operationProgress: progress }),
+
+    setShowDeviceInUseDialog: (show) => set({ showDeviceInUseDialog: show }),
+
+    setShowUserGestureDialog: (show) => set({ showUserGestureDialog: show }),
+
+    setShowAuthorizationDialog: (show) => set({ showAuthorizationDialog: show }),
 
     reset: () => set(initialState),
 }));

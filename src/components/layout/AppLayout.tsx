@@ -44,9 +44,10 @@ export function AppLayout({ children }: AppLayoutProps) {
     });
 
     // Load log panel collapsed state from localStorage (persist user preference)
+    // Default to collapsed (true) for cleaner UI
     const [logPanelCollapsed, setLogPanelCollapsed] = useState(() => {
         const saved = localStorage.getItem('logpanel-collapsed');
-        return saved ? JSON.parse(saved) : false;
+        return saved ? JSON.parse(saved) : true; // Default collapsed
     });
 
     const [isDesktop, setIsDesktop] = useState(true);

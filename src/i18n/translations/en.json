@@ -577,7 +577,63 @@
             "rebootSystemFailed": "Failed to reboot to System",
             "shutdownSuccess": "Command sent: Power Off",
             "shutdownFailed": "Failed to power off",
-            "actionFailed": "Action failed: {{message}}"
+            "actionFailed": "Action failed: {{message}}",
+            "deviceInUse": {
+                "title": "Device is being used",
+                "subtitle": "The device is being used by another program on your computer. Try the following to resolve:",
+                "description": "• Disconnect and reconnect the USB cable\n• Kill ADB server: adb kill-server\n• Close other apps using ADB (Android Studio, Scrcpy, etc.)"
+            },
+            "userGestureRequired": "Please click the Connect button to request device permission"
+        },
+        "deviceInUse": {
+            "step1": {
+                "title": "Disconnect USB",
+                "desc": "Unplug the USB cable from your phone, wait 3-5 seconds, then reconnect."
+            },
+            "step2": {
+                "title": "Kill ADB Server",
+                "desc": "Open Terminal/CMD and run the following command:"
+            },
+            "step3": {
+                "title": "Close other ADB apps",
+                "desc": "Close applications like Android Studio, Scrcpy, Phone Link, or other flash tools."
+            }
+        },
+        "userGesture": {
+            "title": "Click required to connect",
+            "subtitle": "Your browser requires you to click a button to allow USB connection. This is mandatory for security reasons.",
+            "info": "After clicking the button, your browser will display a list of devices. Select your device and click \"Connect\".",
+            "step1": {
+                "title": "Connect USB cable",
+                "desc": "Make sure your phone is connected via USB and USB Debugging is enabled."
+            },
+            "step2": {
+                "title": "Click \"Connect ADB\" button",
+                "desc": "Click the green \"Connect ADB\" button at the top of the screen."
+            }
+        },
+        "authorization": {
+            "title": "Allow USB Debugging",
+            "subtitle": "A dialog will appear on your phone screen. Follow these steps:",
+            "waiting": "Waiting for authorization from phone...",
+            "step1": {
+                "title": "Check your phone screen",
+                "desc": "An <strong>Allow USB debugging?</strong> dialog will appear on your phone."
+            },
+            "step2": {
+                "title": "Check <strong>Always allow</strong>",
+                "desc": "Check the <strong>Always allow from this computer</strong> box to skip this next time."
+            },
+            "step3": {
+                "title": "Tap <strong>Allow</strong> or <strong>OK</strong>",
+                "desc": "Tap the <strong>Allow</strong> or <strong>OK</strong> button to connect. The web will automatically continue."
+            },
+            "troubleshoot": {
+                "title": "If you don't see the dialog",
+                "item1": "Unplug and replug the USB cable",
+                "item2": "Toggle USB Debugging off and on",
+                "item3": "Change USB mode (Charging only / File transfer)"
+            }
         },
         "actions": {
             "rebootEDL": "Reboot EDL",
@@ -1492,4 +1548,5 @@
             "thankYou": "Thank you for your support!",
             "thankYouDesc": "Every contribution helps me continue to develop and maintain this tool free for the community."
         }
-    }}
+    }
+}

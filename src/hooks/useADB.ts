@@ -9,6 +9,7 @@
  */
 
 import { useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ADBProtocol,
     type ADBDeviceInfo,
@@ -98,8 +99,10 @@ export interface UseADBReturn {
  * ```
  */
 export function useADB(): UseADBReturn {
+    const { t } = useTranslation();
+
     // Store connections for state sync
-    const { setDeviceInfo, setConnecting, setDeviceReady, setPendingOperation, pendingOperation, setOperationProgress } = useADBStore();
+    const { setDeviceInfo, setConnecting, setDeviceReady, setPendingOperation, pendingOperation, setOperationProgress, setShowDeviceInUseDialog, setShowUserGestureDialog } = useADBStore();
     const deviceInfo = useADBStore((state) => state.deviceInfo);
     const isConnecting = useADBStore((state) => state.isConnecting);
 
@@ -205,13 +208,36 @@ export function useADB(): UseADBReturn {
                 setDeviceReady(true);
             } else {
                 setConnected(false);
-                log('info', 'ℹ️ Connection cancelled or no device selected');
+
+                // Check if the failure was due to "device in use" error
+                if (adb.isDeviceInUseError) {
+                    setShowDeviceInUseDialog(true);
+                } else if (!adb.lastError) {
+                    // User cancelled or no device selected
+                    log('info', 'ℹ️ Connection cancelled or no device selected');
+                }
             }
 
             return success;
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             log('error', `❌ ADB connection failed: ${message}`);
+
+            const lowerMessage = message.toLowerCase();
+
+            // Check for "device in use" error
+            if (lowerMessage.includes('already in use') ||
+                lowerMessage.includes('in use') ||
+                lowerMessage.includes('busy') ||
+                lowerMessage.includes('claimed')) {
+                setShowDeviceInUseDialog(true);
+            }
+            // Check for "user gesture" error (auto-connect without user click)
+            else if (lowerMessage.includes('user gesture') || lowerMessage.includes('permission request')) {
+                log('warning', '⚠️ Please click the "Connect ADB" button to connect');
+                setShowUserGestureDialog(true);
+            }
+
             setConnected(false);
             setDeviceReady(false);
             return false;
@@ -219,7 +245,7 @@ export function useADB(): UseADBReturn {
             setConnecting(false);
             setPendingOperation(null);
         }
-    }, [getInstance, log, setConnected, setConnecting, setDeviceInfo, setDeviceReady, setPendingOperation]);
+    }, [getInstance, log, setConnected, setConnecting, setDeviceInfo, setDeviceReady, setPendingOperation, setShowDeviceInUseDialog, setShowUserGestureDialog, t]);
 
     /**
      * Disconnect from the current ADB device.

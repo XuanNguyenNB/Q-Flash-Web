@@ -71,6 +71,27 @@ export class ADBProtocol {
     private onLog: LogCallback;
     private connectionPromise: Promise<boolean> | null = null;
     private onConnectionChange: ((connected: boolean) => void) | null = null;
+    private _lastError: string | null = null;
+
+    /**
+     * Get the last connection error (if any)
+     */
+    get lastError(): string | null {
+        return this._lastError;
+    }
+
+    /**
+     * Check if last error was "device in use" type
+     */
+    get isDeviceInUseError(): boolean {
+        if (!this._lastError) return false;
+        const lower = this._lastError.toLowerCase();
+        return lower.includes('in use') ||
+            lower.includes('used by') ||
+            lower.includes('another program') ||
+            lower.includes('claimed') ||
+            lower.includes('busy');
+    }
 
     /**
      * Get the singleton instance of ADBProtocol
@@ -213,8 +234,24 @@ export class ADBProtocol {
             return await this.connectToDevice(device);
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
+            const lowerMessage = message.toLowerCase();
+
+            this._lastError = message; // Store last error
+
             if (message.includes('No device selected')) {
+                this._lastError = null; // User cancelled, not an error
                 this.onLog('Connection cancelled by user', 'info');
+            } else if (lowerMessage.includes('in use') ||
+                lowerMessage.includes('used') ||
+                lowerMessage.includes('busy') ||
+                lowerMessage.includes('claimed') ||
+                lowerMessage.includes('another program')) {
+                // Device is being used by another program
+                this.onLog(`❌ Connection failed: ${message}`, 'error');
+                this.onLog('⚠️ Device is being used by another program. Try:', 'warning');
+                this.onLog('   1. Disconnect and reconnect the USB cable', 'info');
+                this.onLog('   2. Open Terminal/CMD and run: adb kill-server', 'info');
+                this.onLog('   3. Close apps using ADB: Android Studio, Scrcpy, etc.', 'info');
             } else {
                 this.onLog(`Connection failed: ${message}`, 'error');
             }
@@ -269,6 +306,21 @@ export class ADBProtocol {
 
                 } catch (error) {
                     const message = error instanceof Error ? error.message : String(error);
+                    const lowerMessage = message.toLowerCase();
+
+                    // Check for device in use by another program (not retryable)
+                    if (lowerMessage.includes('in use') ||
+                        lowerMessage.includes('used by') ||
+                        lowerMessage.includes('another program') ||
+                        lowerMessage.includes('claimed')) {
+                        this._lastError = message; // Store for useADB to check
+                        this.onLog(`❌ Connection failed: ${message}`, 'error');
+                        this.onLog('⚠️ Device is being used by another program. Try:', 'warning');
+                        this.onLog('   1. Disconnect and reconnect the USB cable', 'info');
+                        this.onLog('   2. Open Terminal/CMD and run: adb kill-server', 'info');
+                        this.onLog('   3. Close apps using ADB: Android Studio, Scrcpy, etc.', 'info');
+                        break; // Don't retry for this error
+                    }
 
                     if (message.includes('No authenticator') ||
                         message.includes('Authentication failed') ||
@@ -276,7 +328,7 @@ export class ADBProtocol {
                         message.includes('busy') ||
                         message.includes('in progress')) {
 
-                        if (message.includes('in progress')) {
+                        if (message.includes('in progress') || message.includes('busy')) {
                             this.onLog('Device is busy (another tab/process?), retrying...', 'warning');
                         } else {
                             this.onLog('⚠️  Please check your phone screen and ALLOW USB debugging!', 'info');
@@ -285,6 +337,12 @@ export class ADBProtocol {
 
                         if (attempt === maxRetries) {
                             this.onLog(`❌ Failed to connect after ${maxRetries * (retryDelay / 1000)}s.`, 'error');
+                            // Show guidance if it was a "busy" type error
+                            if (message.includes('busy') || message.includes('in progress')) {
+                                this.onLog('⚠️ Device may still be in use. Try:', 'warning');
+                                this.onLog('   1. Disconnect and reconnect the USB cable', 'info');
+                                this.onLog('   2. Run: adb kill-server', 'info');
+                            }
                             break;
                         }
 

@@ -41,11 +41,9 @@ export default function FastbootPage() {
     // Get actual Fastboot connection state from protocol (source of truth)
     const protocol = getInstance();
 
-    // Use store state for reactive updates (deviceStore.isConnected is synced by useFastboot)
-    const { isConnected } = useDeviceStore();
-
-    // For initial check, also look at protocol
-    const isFastbootConnected = isConnected || protocol.isConnected;
+    // IMPORTANT: Only use Fastboot protocol's isConnected, NOT deviceStore.isConnected
+    // deviceStore.isConnected could be true from ADB mode, which is different
+    const isFastbootConnected = protocol.isConnected;
 
     // Ensure we are in Fastboot mode when this page loads
     useEffect(() => {
@@ -83,12 +81,13 @@ export default function FastbootPage() {
     }, [setConnected]);
 
     // Sync store with Fastboot protocol state when on this page
+    // This ensures deviceStore stays in sync when Fastboot connects
     useEffect(() => {
-        if (protocol.isConnected && !isConnected) {
+        if (protocol.isConnected) {
             console.log('[FastbootPage] Fastboot is connected, syncing store');
             setConnected(true);
         }
-    }, [protocol.isConnected, isConnected, setConnected]);
+    }, [protocol.isConnected, setConnected]);
 
 
     // Auto-connect on page load if Fastboot device is available

@@ -572,7 +572,63 @@
             "rebootSystemFailed": "Lỗi khởi động lại vào System",
             "shutdownSuccess": "Đã gửi lệnh: Tắt nguồn",
             "shutdownFailed": "Lỗi tắt nguồn",
-            "actionFailed": "Thao tác thất bại: {{message}}"
+            "actionFailed": "Thao tác thất bại: {{message}}",
+            "deviceInUse": {
+                "title": "Thiết bị đang được sử dụng",
+                "subtitle": "Thiết bị đang bị chiếm bởi chương trình khác trên máy tính. Hãy thử các cách sau để giải quyết:",
+                "description": "• Ngắt kết nối USB rồi cắm lại\n• Tắt ADB server: adb kill-server\n• Đóng các ứng dụng sử dụng ADB khác (Android Studio, Scrcpy...)"
+            },
+            "userGestureRequired": "Hãy nhấn nút Kết nối để yêu cầu quyền truy cập thiết bị"
+        },
+        "deviceInUse": {
+            "step1": {
+                "title": "Ngắt kết nối USB",
+                "desc": "Rút cáp USB ra khỏi điện thoại, đợi 3-5 giây rồi cắm lại."
+            },
+            "step2": {
+                "title": "Tắt ADB Server",
+                "desc": "Mở Terminal/CMD và chạy lệnh sau:"
+            },
+            "step3": {
+                "title": "Đóng ứng dụng ADB khác",
+                "desc": "Đóng các ứng dụng như Android Studio, Scrcpy, Phone Link, hoặc các tool flash khác."
+            }
+        },
+        "userGesture": {
+            "title": "Cần nhấn nút kết nối",
+            "subtitle": "Trình duyệt yêu cầu bạn phải nhấn nút để cho phép kết nối USB. Điều này là bắt buộc vì lý do bảo mật.",
+            "info": "Sau khi nhấn nút, trình duyệt sẽ hiển thị danh sách thiết bị. Chọn thiết bị của bạn và nhấn \"Kết nối\".",
+            "step1": {
+                "title": "Cắm cáp USB",
+                "desc": "Đảm bảo điện thoại đã được cắm cáp USB và đã bật USB Debugging."
+            },
+            "step2": {
+                "title": "Nhấn nút \"Kết nối ADB\"",
+                "desc": "Nhấn vào nút màu xanh \"Kết nối ADB\" ở góc trên màn hình."
+            }
+        },
+        "authorization": {
+            "title": "Cho phép USB Debugging",
+            "subtitle": "Một hộp thoại sẽ xuất hiện trên màn hình điện thoại của bạn. Hãy làm theo các bước sau:",
+            "waiting": "Đang chờ cho phép từ điện thoại...",
+            "step1": {
+                "title": "Kiểm tra màn hình điện thoại",
+                "desc": "Một hộp thoại <strong>Cho phép gỡ lỗi USB?</strong> sẽ xuất hiện trên điện thoại."
+            },
+            "step2": {
+                "title": "Tích vào <strong>Luôn luôn cho phép</strong>",
+                "desc": "Tích vào ô <strong>Luôn luôn cho phép máy tính này để gỡ lỗi</strong> để không phải cho phép lại lần sau."
+            },
+            "step3": {
+                "title": "Nhấn <strong>Cho phép</strong> hoặc <strong>OK</strong>",
+                "desc": "Nhấn nút <strong>Cho phép</strong> hoặc <strong>OK</strong> để kết nối. Web sẽ tự động tiếp tục."
+            },
+            "troubleshoot": {
+                "title": "Nếu không thấy hộp thoại",
+                "item1": "Rút cáp cắm lại",
+                "item2": "Tắt/bật lại Gỡ lỗi USB",
+                "item3": "Chuyển chế độ USB (Chỉ sạc / Truyền tệp)"
+            }
         },
         "actions": {
             "rebootEDL": "Reboot EDL",

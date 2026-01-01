@@ -13,6 +13,9 @@ import { ADBDeviceInfo, ADBQuickActions, ADBGuidePanel, ADBTerminal, ScrcpyPanel
 import { ADBAppManager } from '@/components/features/adb/ADBAppManager';
 import { ADBFileManager } from '@/components/features/adb/ADBFileManager';
 import { GlobalADBProgress } from '@/components/features/adb/GlobalADBProgress';
+import { DeviceInUseDialog } from '@/components/features/adb/DeviceInUseDialog';
+import { UserGestureRequiredDialog } from '@/components/features/adb/UserGestureRequiredDialog';
+import { ADBAuthorizationDialog } from '@/components/features/adb/ADBAuthorizationDialog';
 
 // UI
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,11 +23,13 @@ import { LayoutDashboard, AppWindow, FolderOpen, Terminal } from "lucide-react";
 
 // Utils
 import { useDeviceStore } from '@/stores/deviceStore';
+import { useADBStore } from '@/stores/adbStore';
 import { useADB } from '@/hooks/useADB';
 
 export function ADBPage() {
     const { t } = useTranslation();
     const { setMode, setConnected } = useDeviceStore();
+    const { showDeviceInUseDialog, setShowDeviceInUseDialog, showUserGestureDialog, setShowUserGestureDialog, isConnecting } = useADBStore();
     const [activeTab, setActiveTab] = useState("quick-view");
 
     // Ensure we are in ADB mode when this page loads
@@ -194,6 +199,24 @@ export function ADBPage() {
 
             {/* Global Progress Overlay */}
             <GlobalADBProgress />
+
+            {/* Device In Use Error Dialog */}
+            <DeviceInUseDialog
+                open={showDeviceInUseDialog}
+                onClose={() => setShowDeviceInUseDialog(false)}
+            />
+
+            {/* User Gesture Required Dialog */}
+            <UserGestureRequiredDialog
+                open={showUserGestureDialog}
+                onClose={() => setShowUserGestureDialog(false)}
+            />
+
+            {/* Authorization Dialog - shows when connecting */}
+            <ADBAuthorizationDialog
+                open={isConnecting && !showDeviceInUseDialog && !showUserGestureDialog}
+                onClose={() => { }}
+            />
         </div>
     );
 }
