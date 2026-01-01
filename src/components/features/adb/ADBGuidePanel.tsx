@@ -146,27 +146,41 @@ export function ADBGuidePanel() {
 
                     {/* Right Column: Authorization & Verification */}
                     <div className="space-y-6">
-                        {/* Authorization */}
+                        {/* Step 3: Connect USB and Choose Device */}
                         <div className="relative pl-6 border-l-2 border-green-500/20 pb-2">
                             <div className="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-green-500 ring-4 ring-background" />
                             <h3 className="font-semibold text-lg flex items-center gap-2 text-green-500 mb-3">
-                                3. {t('adb.guide.step3Title', 'Authorize Computer')}
+                                3. {t('adb.guide.step3Title', 'Bước 3: Kết nối USB và chọn thiết bị')}
+                            </h3>
+
+                            <div className="bg-muted/30 rounded-lg p-4 border border-border/60">
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                    {renderText(t('adb.guide.step3.desc', 'Tiến hành cắm cáp kết nối USB với máy tính, sau đó ấn nút **Kết nối ADB** màu xanh. Màn hình trình duyệt sẽ hiện ra bảng danh sách thiết bị, hãy chọn thiết bị của bạn rồi ấn **OK**.'))}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Step 4: Allow on Phone */}
+                        <div className="relative pl-6 border-l-2 border-blue-500/20 pb-2">
+                            <div className="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-blue-500 ring-4 ring-background" />
+                            <h3 className="font-semibold text-lg flex items-center gap-2 text-blue-500 mb-3">
+                                4. {t('adb.guide.step4Title', 'Bước 4: Cho phép kết nối trên điện thoại')}
                             </h3>
 
                             <div className="bg-muted/30 rounded-lg p-4 border border-border/60">
                                 <div className="flex gap-4">
                                     <div className="flex-1 space-y-3">
                                         <p className="text-sm text-muted-foreground leading-relaxed">
-                                            {t('adb.guide.step3.desc', 'Connect your device via USB. A popup will appear on your phone screen.')}
+                                            {renderText(t('adb.guide.step4.desc', 'Một hộp thoại sẽ hiện lên màn hình điện thoại.'))}
                                         </p>
                                         <ul className="space-y-2">
                                             <li className="flex items-center gap-2 text-sm">
-                                                <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                <span>{renderText(t('adb.guide.step3.check', 'Check **"Always allow from this computer"**'))}</span>
+                                                <Check className="h-4 w-4 text-blue-500 shrink-0" />
+                                                <span>{renderText(t('adb.guide.step4.check', 'Tích vào **"Luôn cho phép từ máy tính này"**'))}</span>
                                             </li>
                                             <li className="flex items-center gap-2 text-sm">
-                                                <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                <span>{renderText(t('adb.guide.step3.allow', 'Tap **Allow** or **OK**'))}</span>
+                                                <Check className="h-4 w-4 text-blue-500 shrink-0" />
+                                                <span>{renderText(t('adb.guide.step4.allow', 'Nhấn **Cho phép** hoặc **OK**'))}</span>
                                             </li>
                                         </ul>
                                     </div>
@@ -179,8 +193,18 @@ export function ADBGuidePanel() {
 
                             <div className="mt-4 border border-yellow-500/20 bg-yellow-500/5 rounded-lg p-4 flex items-start gap-3">
                                 <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
-                                <div className="text-yellow-600/90 text-sm whitespace-pre-wrap">
-                                    {t('adb.guide.troubleshoot', 'No popup? Revoke authorizations in Developer Options and reconnect.')}
+                                <div className="space-y-2">
+                                    <p className="text-yellow-600/90 text-sm font-medium">
+                                        {t('adb.guide.troubleshooting.title', 'Nếu không thấy hộp thoại')}
+                                    </p>
+                                    <ul className="space-y-1 text-yellow-600/80 text-xs">
+                                        {(t('adb.guide.troubleshooting.items', { returnObjects: true, defaultValue: [] }) as string[] || []).map((item: string, idx: number) => (
+                                            <li key={idx} className="flex items-start gap-2">
+                                                <span className="text-yellow-600 mt-0.5">•</span>
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             </div>
                         </div>

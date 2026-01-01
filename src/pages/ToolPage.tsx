@@ -102,18 +102,24 @@ export default function ToolPage() {
 
                                 <div className="prose prose-sm dark:prose-invert text-muted-foreground">
                                     <p>
-                                        {t('tool.guide.intro', 'To use EDL mode, your device must be recognized as "Qualcomm HS-USB QDLoader 9008" or "QUSB_BULK". If not detected, follow these steps:')}
+                                        {t('tool.guide.intro', 'Để sử dụng chế độ EDL trên WEB, thiết bị phải được nhận diện là "Qualcomm HS-USB QDLoader 9008" hoặc "QUSB_BULK". Nếu chưa được phát hiện, hãy làm theo các bước sau:')}
                                     </p>
-                                    <ol className="list-decimal pl-4 space-y-2 mt-2">
+                                    <ol className="list-decimal pl-4 space-y-3 mt-3">
                                         <li>
-                                            <span className="font-medium text-foreground">{t('tool.guide.step1.title', 'Enter EDL Mode')}</span>
-                                            <p className="text-xs mt-1">{t('tool.guide.step1.desc', 'Power off device -> Hold Vol Up + Vol Down -> Connect USB cable.')}</p>
+                                            <span className="font-medium text-foreground">{t('tool.guide.step1.title', 'Bước 1: Tải về và mở Zadig')}</span>
+                                            <p className="text-xs mt-1">{t('tool.guide.step1.desc', 'Tải về và mở ứng dụng Zadig.exe')}</p>
                                         </li>
                                         <li>
-                                            <span className="font-medium text-foreground">{t('tool.guide.step2.title', 'Install Drivers (Zadig)')}</span>
-                                            <p className="text-xs mt-1">
-                                                {t('tool.guide.step2.desc', 'If device appears as "QUSB_BULK", use Zadig to install WinUSB driver.')}
-                                            </p>
+                                            <span className="font-medium text-foreground">{t('tool.guide.step2.title', 'Bước 2: Vào chế độ EDL')}</span>
+                                            <p className="text-xs mt-1">{t('tool.guide.step2.desc', 'Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi máy tính nhận (có tiếng kêu hoặc Device Manager hiển thị)')}</p>
+                                        </li>
+                                        <li>
+                                            <span className="font-medium text-foreground">{t('tool.guide.step3.title', 'Bước 3: Thay thế Driver')}</span>
+                                            <p className="text-xs mt-1">{t('tool.guide.step3.desc', 'Tiến hành tìm và thay thế driver như hình minh họa kế bên')}</p>
+                                        </li>
+                                        <li>
+                                            <span className="font-medium text-foreground">{t('tool.guide.step4.title', 'Bước 4: Kết nối lại')}</span>
+                                            <p className="text-xs mt-1">{t('tool.guide.step4.desc', 'Sau khi đã cài đặt, thiết bị có thể bị thoát khỏi EDL. Hãy ấn nút kết nối với thiết bị trên WEB này và tiến hành vào lại EDL bằng cách: Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi giao diện Chrome hiển thị thiết bị (dạng QUSB_BULK), chúng ta tiến hành chọn thiết bị đó, web sẽ tự vào EDL mode VIP')}</p>
                                         </li>
                                     </ol>
                                 </div>

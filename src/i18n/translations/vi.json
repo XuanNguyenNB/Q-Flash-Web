@@ -11,19 +11,23 @@
             "subtitle": "Chỉ hỗ trợ thiết bị Oppo/Oneplus/Realme với chip Qualcomm. Có thể cứu brick, sao lưu dữ liệu hoặc sửa lỗi phân vùng."
         },
         "guide": {
-            "title": "Hướng dẫn kết nối",
+            "title": "Hướng dẫn kết nối EDL",
             "intro": "Để sử dụng chế độ EDL trên WEB, thiết bị phải được nhận diện là \"QUSB_BULK\" hoặc \"Qualcomm HS-USB QDLoader 9008\" thông qua WinUSB. Hãy làm theo các bước sau để chuyển đổi:",
             "step1": {
-                "title": "Tải và mở Zadig",
+                "title": "Tải về và mở Zadig",
                 "desc": "Tải về và mở ứng dụng Zadig.exe"
             },
             "step2": {
                 "title": "Vào chế độ EDL",
-                "desc": "Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi máy tính nhận (có tiếng kêu hoặc Device Manager hiển thị). Tiến hành tìm và thay thế driver như hình minh họa."
+                "desc": "Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi máy tính nhận (có tiếng kêu hoặc Device Manager hiển thị)"
             },
-            "reconnect": {
+            "step3": {
+                "title": "Thay thế Driver",
+                "desc": "Tiến hành tìm và thay thế driver như hình minh họa kế bên"
+            },
+            "step4": {
                 "title": "Kết nối lại",
-                "desc": "Sau khi đã cài đặt, thiết bị có thể bị thoát khỏi EDL. Hãy ấn nút kết nối trên WEB này và tiến hành vào lại EDL: Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi giao diện chrome hiển thị thiết bị (dạng QUSB_BULK), chúng ta tiến hành chọn thiết bị đó."
+                "desc": "Sau khi đã cài đặt, thiết bị có thể bị thoát khỏi EDL. Hãy ấn nút kết nối với thiết bị trên WEB này và tiến hành vào lại EDL bằng cách: Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi giao diện Chrome hiển thị thiết bị (dạng QUSB_BULK), chúng ta tiến hành chọn thiết bị đó, web sẽ tự vào EDL mode VIP"
             },
             "tip": {
                 "title": "Mẹo: Dùng Q-Flash Forge",
@@ -685,14 +689,14 @@
                     }
                 }
             },
-            "step1Title": "Bật Tùy chọn nhà phát triển",
+            "step1Title": "Bước 1: Bật Tùy chọn nhà phát triển",
             "step1": {
                 "1": "Mở Cài đặt > Giới thiệu về thiết bị",
                 "2": "Chọn mục 'Phiên bản'",
                 "3": "Nhấn liên tục 7-8 lần vào 'Số phiên bản'",
                 "4": "Nhập mật khẩu khóa màn hình nếu được yêu cầu"
             },
-            "step2Title": "Bật Gỡ lỗi USB",
+            "step2Title": "Bước 2: Bật Gỡ lỗi USB",
             "step2": {
                 "1": "Quay lại Cài đặt > Cài đặt bổ sung (hoặc Hệ thống)",
                 "2": "Chọn 'Tùy chọn nhà phát triển'",
@@ -700,7 +704,7 @@
                 "4": "Nhấn OK để xác nhận cảnh báo"
             },
             "includeOem": "Bao gồm mở khóa OEM",
-            "step2TitleOem": "Bật Mở khóa OEM & Gỡ lỗi USB",
+            "step2TitleOem": "Bước 2: Bật Mở khóa OEM & Gỡ lỗi USB",
             "step2Oem": {
                 "1": "Quay lại màn hình Cài đặt.",
                 "2": "Cuộn xuống và chọn Hệ thống và cập nhật.",
@@ -710,13 +714,13 @@
                 "6": "Tìm và bật công tắc cho mục Gỡ lỗi USB.",
                 "7": "Hệ thống sẽ đưa ra cảnh báo. Hãy nhấn OK để xác nhận."
             },
-            "step3Title": "Kết Nối ADB",
+            "step3Title": "Bước 3: Kết nối USB và chọn thiết bị",
             "step3": {
                 "desc": "Tiến hành cắm cáp kết nối USB với máy tính, sau đó ấn nút **Kết nối ADB** màu xanh. Màn hình trình duyệt sẽ hiện ra bảng danh sách thiết bị, hãy chọn thiết bị của bạn rồi ấn **OK**."
             },
-            "step4Title": "Cho phép kết nối máy tính",
+            "step4Title": "Bước 4: Cho phép kết nối trên điện thoại",
             "step4": {
-                "desc": "Trên màn hình sẽ hiện ra một hộp thoại trên điện thoại.",
+                "desc": "Một hộp thoại sẽ hiện lên màn hình điện thoại.",
                 "check": "Tích vào **\"Luôn cho phép từ máy tính này\"**",
                 "allow": "Nhấn **Cho phép** hoặc **OK**"
             },
