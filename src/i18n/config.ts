@@ -28,7 +28,7 @@ function getInitialLanguage(): 'en' | 'vi' {
     } catch {
         // Ignore parsing errors
     }
-    return 'en';
+    return 'vi'; // Default to Vietnamese (more complete translations)
 }
 
 // Initialize i18next with react-i18next
@@ -40,7 +40,7 @@ i18n
             vi: { translation: vi },
         },
         lng: getInitialLanguage(),
-        fallbackLng: 'en',
+        fallbackLng: 'vi', // Fallback to Vietnamese
         interpolation: {
             escapeValue: false, // React already escapes values
         },
@@ -51,3 +51,5 @@ i18n
     });
 
 export default i18n;
+
+
