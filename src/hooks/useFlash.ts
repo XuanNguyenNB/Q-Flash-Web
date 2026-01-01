@@ -292,11 +292,20 @@ export function useFlash() {
                 }
             }
 
-            // Reboot device if everything successful
-            if (errorCount === 0 && firehoseProtocol.reset) {
-                log('info', 'Rebooting device...');
-                await firehoseProtocol.reset();
+            // Don't auto-reboot - let user decide
+            // Store reboot callback for later use by UI
+            const resetFn = firehoseProtocol.reset;
+            if (errorCount === 0 && resetFn) {
+                log('info', '✅ Flash complete! Device is ready for reboot.');
+                log('info', '💡 Click "Reboot Device" button when ready.');
+                // Store the reset function for later use
+                useFlashStore.getState().setRebootCallback(async () => {
+                    log('info', 'Rebooting device...');
+                    await resetFn();
+                    log('success', 'Reboot command sent!');
+                });
             }
+
 
             // Complete operation
             completeFlashWrite();

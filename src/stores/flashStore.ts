@@ -71,6 +71,7 @@ export interface FlashState {
     lastUpdateTimestamp: number;
     lastBytesWrittenEntry: number;
     smoothedSpeed: number; // bytes per second
+    rebootCallback: (() => Promise<void>) | null; // Stored callback for user-triggered reboot
 
     // Backup state
     backupStatus: BackupStatus;
@@ -102,6 +103,8 @@ export interface FlashState {
     cancelFlashWrite: () => void;
     setFlashWriteError: (error: AppError | null) => void;
     resetFlashWrite: () => void;
+    setRebootCallback: (callback: (() => Promise<void>) | null) => void;
+    executeReboot: () => Promise<void>;
 
     // Backup actions
     startBackup: (partitions: string[], savePath: string, totalBytes: number) => void;
@@ -137,6 +140,7 @@ const initialState = {
     lastUpdateTimestamp: 0,
     lastBytesWrittenEntry: 0,
     smoothedSpeed: 0,
+    rebootCallback: null as (() => Promise<void>) | null,
 
     // Backup initial state
     backupStatus: 'idle' as BackupStatus,
@@ -293,7 +297,18 @@ export const useFlashStore = create<FlashState>()((set, get) => ({
         lastUpdateTimestamp: 0,
         lastBytesWrittenEntry: 0,
         smoothedSpeed: 0,
+        rebootCallback: null,
     }),
+
+    setRebootCallback: (callback) => set({ rebootCallback: callback }),
+
+    executeReboot: async () => {
+        const { rebootCallback } = get();
+        if (rebootCallback) {
+            await rebootCallback();
+            set({ rebootCallback: null });
+        }
+    },
 
     // Backup actions
     startBackup: (partitions, savePath, totalBytes) => {

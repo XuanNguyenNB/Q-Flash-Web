@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock, Loader2, CheckCircle2, XCircle, AlertTriangle, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, Loader2, CheckCircle2, XCircle, AlertTriangle, X, ChevronDown, ChevronUp, RefreshCcw } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -95,6 +95,8 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
         flashTotalBytes,
         flashPartitionStatuses,
         flashETA,
+        rebootCallback,
+        executeReboot,
     } = useFlashStore();
 
     // Check if operation is active
@@ -110,6 +112,8 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
     const successCount = partitions.filter(([, status]) => status === 'done').length;
     const errorCount = partitions.filter(([, status]) => status === 'error').length;
     const hasErrors = errorCount > 0;
+    const canReboot = isComplete && !hasErrors && rebootCallback !== null;
+    const [isRebooting, setIsRebooting] = useState(false);
 
     // Don't render if idle
     if (flashWriteStatus === 'idle') {
@@ -268,8 +272,33 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
 
             {/* Completion message - check for mixed results */}
             {isComplete && !hasErrors && (
-                <div className="text-sm text-green-600 dark:text-green-400 bg-green-500/10 p-2 rounded">
-                    {t('flash.progress.success_all', { count: successCount })}
+                <div className="space-y-2">
+                    <div className="text-sm text-green-600 dark:text-green-400 bg-green-500/10 p-2 rounded">
+                        {t('flash.progress.success_all', { count: successCount })}
+                    </div>
+                    {canReboot && (
+                        <Button
+                            variant="default"
+                            size="sm"
+                            className="w-full gap-2"
+                            disabled={isRebooting}
+                            onClick={async () => {
+                                setIsRebooting(true);
+                                try {
+                                    await executeReboot();
+                                } finally {
+                                    setIsRebooting(false);
+                                }
+                            }}
+                        >
+                            {isRebooting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <RefreshCcw className="h-4 w-4" />
+                            )}
+                            {isRebooting ? t('flash.progress.rebooting', 'Đang khởi động lại...') : t('flash.progress.reboot', 'Khởi động lại thiết bị')}
+                        </Button>
+                    )}
                 </div>
             )}
 
