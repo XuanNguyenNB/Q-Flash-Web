@@ -39,7 +39,12 @@ export default function FastbootPage() {
 
     // Get actual Fastboot connection state from protocol (source of truth)
     const protocol = getInstance();
-    const isFastbootConnected = protocol.isConnected;
+
+    // Use store state for reactive updates (deviceStore.isConnected is synced by useFastboot)
+    const { isConnected } = useDeviceStore();
+
+    // For initial check, also look at protocol
+    const isFastbootConnected = isConnected || protocol.isConnected;
 
     // Ensure we are in Fastboot mode when this page loads
     useEffect(() => {
@@ -47,13 +52,43 @@ export default function FastbootPage() {
         document.title = "Q-Flash - Fastboot Mode";
     }, [setMode]);
 
+    // Listen for USB disconnect events to update state in real-time
+    useEffect(() => {
+        const handleDisconnect = (event: USBConnectionEvent) => {
+            console.log('[FastbootPage] USB device disconnected:', event.device);
+            // Check if it was our Fastboot device
+            const device = event.device;
+            for (const config of device.configurations) {
+                for (const iface of config.interfaces) {
+                    for (const alt of iface.alternates) {
+                        if (alt.interfaceClass === 255 &&
+                            alt.interfaceSubclass === 66 &&
+                            alt.interfaceProtocol === 3) {
+                            // It's a Fastboot device - reset state
+                            console.log('[FastbootPage] Fastboot device disconnected, resetting state');
+                            setConnected(false);
+                            useFastbootStore.getState().reset();
+                            return;
+                        }
+                    }
+                }
+            }
+        };
+
+        navigator.usb.addEventListener('disconnect', handleDisconnect);
+        return () => {
+            navigator.usb.removeEventListener('disconnect', handleDisconnect);
+        };
+    }, [setConnected]);
+
     // Sync store with Fastboot protocol state when on this page
     useEffect(() => {
-        if (isFastbootConnected) {
+        if (protocol.isConnected && !isConnected) {
             console.log('[FastbootPage] Fastboot is connected, syncing store');
             setConnected(true);
         }
-    }, [isFastbootConnected, setConnected]);
+    }, [protocol.isConnected, isConnected, setConnected]);
+
 
     // Auto-connect on page load if Fastboot device is available
     useEffect(() => {

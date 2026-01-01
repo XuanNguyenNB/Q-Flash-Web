@@ -271,9 +271,11 @@ export function useFastboot(): UseFastbootReturn {
             const success = await protocol.unlockBootloader();
 
             if (success) {
-                // Refresh device info to get updated unlock status
-                const info = await protocol.getDeviceInfo();
-                fastbootStore.setDeviceInfo(info);
+                // After unlock, device typically reboots and disconnects
+                // Reset state immediately to reflect disconnection
+                logToTerminal('Bootloader unlocked! Device will reboot.', 'success');
+                deviceStore.setConnected(false);
+                fastbootStore.reset();
             }
 
             return success;
@@ -281,12 +283,16 @@ export function useFastboot(): UseFastbootReturn {
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             logToTerminal(`Unlock bootloader failed: ${message}`, 'error');
+            // Device may have disconnected during unlock
+            deviceStore.setConnected(false);
+            fastbootStore.reset();
             return false;
 
         } finally {
             fastbootStore.setPendingOperation(null);
         }
-    }, [getInstance, fastbootStore, logToTerminal]);
+    }, [getInstance, fastbootStore, deviceStore, logToTerminal]);
+
 
     const lockBootloader = useCallback(async (): Promise<boolean> => {
         const protocol = getInstance();
