@@ -99,7 +99,7 @@ export interface UseADBReturn {
  */
 export function useADB(): UseADBReturn {
     // Store connections for state sync
-    const { setDeviceInfo, setConnecting, setPendingOperation, pendingOperation, setOperationProgress } = useADBStore();
+    const { setDeviceInfo, setConnecting, setDeviceReady, setPendingOperation, pendingOperation, setOperationProgress } = useADBStore();
     const deviceInfo = useADBStore((state) => state.deviceInfo);
     const isConnecting = useADBStore((state) => state.isConnecting);
 
@@ -200,6 +200,9 @@ export function useADB(): UseADBReturn {
                     setDeviceInfo(info);
                     log('success', `📱 ${info.manufacturer} ${info.model} (Android ${info.androidVersion})`);
                 }
+
+                // Mark device as ready immediately - let Scrcpy handle any early-click errors
+                setDeviceReady(true);
             } else {
                 setConnected(false);
                 log('info', 'ℹ️ Connection cancelled or no device selected');
@@ -210,12 +213,13 @@ export function useADB(): UseADBReturn {
             const message = error instanceof Error ? error.message : String(error);
             log('error', `❌ ADB connection failed: ${message}`);
             setConnected(false);
+            setDeviceReady(false);
             return false;
         } finally {
             setConnecting(false);
             setPendingOperation(null);
         }
-    }, [getInstance, log, setConnected, setConnecting, setDeviceInfo, setPendingOperation]);
+    }, [getInstance, log, setConnected, setConnecting, setDeviceInfo, setDeviceReady, setPendingOperation]);
 
     /**
      * Disconnect from the current ADB device.

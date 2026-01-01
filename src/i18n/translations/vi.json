@@ -7,8 +7,8 @@
         "waiting": "Đang đợi thiết bị...",
         "waitingDesc": "Kết nối thiết bị ở chế độ EDL để tải bảng phân vùng.",
         "edl": {
-            "title": "Công cụ Flash EDL",
-            "subtitle": "Chế độ này có thể được dùng để cứu brick, sao lưu dữ liệu hoặc sửa lỗi phân vùng."
+            "title": "Công cụ Flash EDL (Oppo/Oneplus/Realme - Qualcomm)",
+            "subtitle": "Chỉ hỗ trợ thiết bị Oppo/Oneplus/Realme với chip Qualcomm. Có thể cứu brick, sao lưu dữ liệu hoặc sửa lỗi phân vùng."
         },
         "guide": {
             "title": "Hướng dẫn kết nối",
@@ -35,7 +35,7 @@
         }
     },
     "header": {
-        "title": "Q-Flash Universal Qualcomm Tool",
+        "title": "Q-Flash Tool (Oppo/Oneplus/Realme - Qualcomm)",
         "showGuide": "Hiển thị hướng dẫn",
         "showGuideTooltip": "Hiển thị hướng dẫn cài đặt",
         "status": {
@@ -165,20 +165,53 @@
         }
     },
     "scrcpy": {
-        "title": "ViewPhone - Chiếu màn hình",
-        "subtitle": "Để hiển thị nội dung màn hình lên",
+        "title": "Chiếu màn hình",
+        "subtitle": "Xem và điều khiển màn hình thiết bị",
         "resolution_label": "ĐỘ PHÂN GIẢI",
         "bitrate_label": "CHẤT LƯỢNG (BITRATE)",
-        "start_stream": "Bắt đầu",
-        "initializing": "Đang kết nối...",
+        "start_stream": "Bắt đầu chiếu màn hình",
+        "preparing": "Đang chuẩn bị...",
+        "device_preparing": "Đang kiểm tra thiết bị, vui lòng đợi...",
+        "initializing": "Đang khởi tạo...",
+        "error_not_connected": "Chưa kết nối thiết bị",
+        "error_not_ready": "Thiết bị chưa sẵn sàng. Vui lòng đợi 5-10 giây sau khi kết nối, rồi thử lại.",
+        "error_hint": "Mẹo: Đợi thiết bị khởi động hoàn toàn trước khi bắt đầu chiếu màn hình.",
+        "success": "Đã bắt đầu chiếu màn hình",
         "stop": "Dừng",
         "start": "Bắt đầu",
         "live": "TRỰC TIẾP",
         "ready_to_mirror": "Chiếu màn hình",
         "ready_desc": "Sẵn sàng kết nối",
-        "error_not_connected": "Chưa kết nối thiết bị",
         "copy_success": "Đã sao chép vào bộ nhớ tạm",
         "paste_success": "Đã dán vào thiết bị"
+    },
+    "xml_backup": {
+        "title": "Backup theo XML",
+        "description": "Chọn file XML rawprogram và thư mục đầu ra để backup các partition được định nghĩa trong XML.",
+        "select_xml": "Chọn file XML",
+        "choose_xml": "Chọn XML...",
+        "select_folder": "Chọn thư mục đầu ra",
+        "choose_folder": "Chọn thư mục...",
+        "partitions_preview": "Danh sách Partition",
+        "found_partitions": "Tìm thấy {{count}} partition",
+        "and_more": "...và {{count}} partition khác",
+        "start_backup": "Bắt đầu Backup",
+        "processing": "Đang xử lý...",
+        "button": "Backup theo XML"
+    },
+    "xml_flash": {
+        "title": "Flash theo XML",
+        "description": "Chọn file XML rawprogram và thư mục chứa các file partition image để flash.",
+        "select_xml": "Chọn file XML",
+        "choose_xml": "Chọn XML...",
+        "select_images_folder": "Chọn thư mục Images",
+        "choose_folder": "Chọn thư mục...",
+        "partitions_preview": "Danh sách Partition",
+        "found_partitions": "Tìm thấy {{count}} partition",
+        "and_more": "...và {{count}} partition khác",
+        "start_flash": "Bắt đầu Flash",
+        "processing": "Đang xử lý...",
+        "button": "Flash theo XML"
     },
     "backup": {
         "button": "Sao lưu đã chọn",
@@ -314,7 +347,7 @@
     },
     "aiPanel": {
         "title": "Trợ lý AI",
-        "welcome": "Xin chào! Tôi có thể giúp bạn với Q-Flash WebUSB Tool. Hỏi tôi về chế độ EDL, phân vùng, flash, hoặc khôi phục thiết bị.",
+        "welcome": "Xin chào! Tôi có thể giúp bạn với Q-Flash WebUSB Tool cho thiết bị Oppo/Oneplus/Realme dùng chip Qualcomm. Hỏi tôi về chế độ EDL, phân vùng, flash, hoặc khôi phục thiết bị.",
         "placeholder": "Đặt câu hỏi...",
         "send": "Gửi",
         "settings": "Cài đặt",
@@ -730,8 +763,14 @@
             "error": "Lệnh thất bại hoặc chưa kết nối"
         },
         "scrcpy": {
-            "title": "Chiếu màn hình (scrcpy)",
-            "ready": "Sẵn sàng chiếu màn hình thiết bị",
+            "title": "Chiếu màn hình",
+            "subtitle": "Xem và điều khiển màn hình thiết bị",
+            "start_stream": "Bắt đầu chiếu màn hình",
+            "preparing": "Đang chuẩn bị...",
+            "device_preparing": "Đang kiểm tra thiết bị, vui lòng đợi...",
+            "initializing": "Đang khởi tạo...",
+            "error_not_connected": "Thiết bị chưa kết nối",
+            "success": "Đã bắt đầu chiếu màn hình",
             "connectFirst": "Kết nối thiết bị trước",
             "notConnected": "Thiết bị chưa kết nối",
             "noAdbInstance": "Không có kết nối ADB",
@@ -936,7 +975,7 @@
         },
         "welcome": {
             "title": "Chào mừng đến với Q-Flash!",
-            "description": "Trình hướng dẫn này sẽ giúp bạn flash thiết bị Qualcomm một cách an toàn và dễ dàng.",
+            "description": "Trình hướng dẫn này sẽ giúp bạn flash thiết bị Oppo/Oneplus/Realme dùng chip Qualcomm một cách an toàn và dễ dàng.",
             "getStarted": "Bắt đầu"
         },
         "prerequisites": {
@@ -992,10 +1031,10 @@
     },
     "guide": {
         "title": "Hướng dẫn đầy đủ về Q-Flash",
-        "description": "Mọi thứ bạn cần biết để flash thiết bị Qualcomm một cách an toàn và hiệu quả",
+        "description": "Mọi thứ bạn cần biết để flash thiết bị Oppo/Oneplus/Realme dùng chip Qualcomm một cách an toàn và hiệu quả",
         "quickStart": {
             "title": "Bắt đầu nhanh",
-            "intro": "Làm theo 5 bước đơn giản sau để flash thiết bị Qualcomm của bạn:",
+            "intro": "Làm theo 5 bước đơn giản sau để flash thiết bị Oppo/Oneplus/Realme dùng chip Qualcomm:",
             "step1": {
                 "title": "Cài đặt Driver WinUSB",
                 "description": "Tải và cài đặt driver WinUSB bằng công cụ Zadig. Điều này cho phép trình duyệt giao tiếp với thiết bị."
@@ -1366,7 +1405,7 @@
         "badge": "Sử dụng WebUSB • Không cần cài đặt",
         "title": "Q-Flash Web",
         "subtitle": "Công cụ Flash Android Toàn diện",
-        "description": "Flash firmware, quản lý bootloader, debug ứng dụng và điều khiển thiết bị Android - tất cả từ trình duyệt.",
+        "description": "Flash firmware, quản lý bootloader, debug ứng dụng và điều khiển thiết bị Oppo/Oneplus/Realme (EDL) hoặc các thiết bị Android khác (ADB/Fastboot) - tất cả từ trình duyệt.",
         "donate": "Ủng hộ Tôi",
         "startEDL": "Bắt đầu Chế độ EDL",
         "viewGuide": "Xem Hướng dẫn",
@@ -1378,7 +1417,7 @@
         "modes": {
             "edl": {
                 "name": "Chế độ EDL",
-                "description": "Chế độ tải khẩn cấp cho thiết bị Qualcomm. Cứu brick, khôi phục và flash firmware ở cấp thấp nhất.",
+                "description": "Chế độ tải khẩn cấp cho thiết bị Oppo/Oneplus/Realme với chip Qualcomm. Cứu brick, khôi phục và flash firmware ở cấp thấp nhất.",
                 "feature1": "Cứu thiết bị bị brick",
                 "feature2": "Đọc/Ghi phân vùng",
                 "feature3": "Khôi phục thiết bị hoàn toàn",

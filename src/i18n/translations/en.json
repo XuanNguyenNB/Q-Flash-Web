@@ -7,8 +7,8 @@
         "waiting": "Waiting for device...",
         "waitingDesc": "Connect your device in EDL mode to load partition table.",
         "edl": {
-            "title": "EDL Flash",
-            "subtitle": "This mode can be used to unbrick devices, read user data, or manage partitions directly."
+            "title": "EDL Flash (Oppo/Oneplus/Realme - Qualcomm)",
+            "subtitle": "Only for Oppo/Oneplus/Realme devices with Qualcomm chips. Can unbrick devices, read user data, or manage partitions directly."
         },
         "guide": {
             "title": "Connection Guide",
@@ -35,7 +35,7 @@
         }
     },
     "header": {
-        "title": "Q-Flash Universal Qualcomm Tool",
+        "title": "Q-Flash Tool (Oppo/Oneplus/Realme - Qualcomm)",
         "showGuide": "Show Guide",
         "showGuideTooltip": "Show Setup Guide",
         "status": {
@@ -164,20 +164,44 @@
         }
     },
     "scrcpy": {
-        "title": "ViewPhone - Cast Screen",
-        "subtitle": "Display screen content on PC",
-        "resolution_label": "MAX RESOLUTION",
-        "bitrate_label": "BITRATE (QUALITY)",
-        "start_stream": "Start Stream",
-        "initializing": "Initializing Connection...",
-        "stop": "Stop",
-        "start": "Start",
-        "live": "LIVE",
-        "ready_to_mirror": "Device Mirroring",
-        "ready_desc": "Ready to connect",
+        "title": "Screen Mirror",
+        "subtitle": "View and control your device screen",
+        "start_stream": "Start Screen Mirror",
+        "preparing": "Preparing...",
+        "device_preparing": "Device is being verified, please wait...",
+        "initializing": "Initializing...",
         "error_not_connected": "Device not connected",
-        "copy_success": "Copied to Clipboard",
-        "paste_success": "Pasted to Device"
+        "error_not_ready": "Device not ready. Please wait 5-10 seconds after connecting, then try again.",
+        "error_hint": "Tip: Wait for device to fully boot before starting screen mirror.",
+        "success": "Screen mirroring started"
+    },
+    "xml_backup": {
+        "title": "Backup by XML",
+        "description": "Select a rawprogram XML file and output folder to backup partitions defined in the XML.",
+        "select_xml": "Select XML File",
+        "choose_xml": "Choose XML...",
+        "select_folder": "Select Output Folder",
+        "choose_folder": "Choose Folder...",
+        "partitions_preview": "Partitions to Backup",
+        "found_partitions": "Found {{count}} partitions",
+        "and_more": "...and {{count}} more",
+        "start_backup": "Start Backup",
+        "processing": "Processing...",
+        "button": "Backup by XML"
+    },
+    "xml_flash": {
+        "title": "Flash by XML",
+        "description": "Select a rawprogram XML file and folder containing partition images to flash.",
+        "select_xml": "Select XML File",
+        "choose_xml": "Choose XML...",
+        "select_images_folder": "Select Images Folder",
+        "choose_folder": "Choose Folder...",
+        "partitions_preview": "Partitions to Flash",
+        "found_partitions": "Found {{count}} partitions",
+        "and_more": "...and {{count}} more",
+        "start_flash": "Start Flash",
+        "processing": "Processing...",
+        "button": "Flash by XML"
     },
     "backup": {
         "button": "Backup Selected",
@@ -313,7 +337,7 @@
     },
     "aiPanel": {
         "title": "AI Assistant",
-        "welcome": "Hi! I can help you with Q-Flash WebUSB Tool. Ask me about EDL mode, partitions, flashing, or device recovery.",
+        "welcome": "Hi! I can help you with Q-Flash WebUSB Tool for Oppo/Oneplus/Realme devices with Qualcomm chips. Ask me about EDL mode, partitions, flashing, or device recovery.",
         "placeholder": "Ask a question...",
         "send": "Send",
         "settings": "Settings",
@@ -990,10 +1014,10 @@
     },
     "guide": {
         "title": "Complete Guide to Q-Flash",
-        "description": "Everything you need to know about flashing Qualcomm devices safely and effectively",
+        "description": "Everything you need to know about flashing Oppo/Oneplus/Realme devices with Qualcomm chips safely and effectively",
         "quickStart": {
             "title": "Quick Start",
-            "intro": "Follow these 5 simple steps to flash your Qualcomm device:",
+            "intro": "Follow these 5 simple steps to flash your Oppo/Oneplus/Realme device with Qualcomm chip:",
             "step1": {
                 "title": "Install WinUSB Driver",
                 "description": "Download and install the WinUSB driver using Zadig tool. This allows your browser to communicate with the device."
@@ -1364,7 +1388,7 @@
         "badge": "WebUSB Powered • No Installation Required",
         "title": "Q-Flash Web",
         "subtitle": "The Ultimate Android Device Flash Tool",
-        "description": "Flash firmware, manage bootloader, debug apps, and control your Android device - all from your browser.",
+        "description": "Flash firmware, manage bootloader, debug apps, and control your Oppo/Oneplus/Realme (EDL) or other Android devices (ADB/Fastboot) - all from your browser.",
         "donate": "Donate",
         "startEDL": "Start EDL Mode",
         "viewGuide": "View Guide",
@@ -1376,7 +1400,7 @@
         "modes": {
             "edl": {
                 "name": "EDL Mode",
-                "description": "Emergency Download Mode for Qualcomm devices. Unbrick, recover, and flash firmware at the lowest level.",
+                "description": "Emergency Download Mode for Oppo/Oneplus/Realme devices with Qualcomm chips. Unbrick, recover, and flash firmware at the lowest level.",
                 "feature1": "Unbrick bricked devices",
                 "feature2": "Read/Write partitions",
                 "feature3": "Full device recovery",

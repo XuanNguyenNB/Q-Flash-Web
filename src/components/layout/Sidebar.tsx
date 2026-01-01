@@ -6,6 +6,7 @@
  * 
  * Updated: Story 2.4 - Integrated DeviceCard component
  * Updated: Story 4.6 - Added RomLoader component
+ * Updated: Story X.X - Added XML Backup feature
  */
 
 import { useState } from 'react';
@@ -20,16 +21,23 @@ import { RomLoader } from '@/components/features/rom';
 import { ADBConnectionStatus, ADBQuickActions } from '@/components/features/adb';
 import { FastbootConnectionStatus, FastbootDeviceInfo } from '@/components/features/fastboot';
 import { ManualFirehosePopup } from '@/components/features/device/ManualFirehosePopup';
+import { XMLBackupDialog } from '@/components/features/backup';
+import { XMLFlashDialog } from '@/components/features/flash';
 
 // Icons
 import {
     ChevronLeft,
     ChevronRight,
     FileUp,
+    FileText,
+    Zap,
 } from 'lucide-react';
 
 // Stores
 import { useDeviceStore } from '@/stores/deviceStore';
+
+// Hooks
+import { useWebUSB, useXMLBackup, useXMLFlash } from '@/hooks';
 
 // Utils
 import { cn } from '@/lib/utils';
@@ -48,6 +56,29 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     const { t } = useTranslation();
     const { isConnected, currentMode } = useDeviceStore();
     const [showManualPopup, setShowManualPopup] = useState(false);
+    const [showXMLBackupDialog, setShowXMLBackupDialog] = useState(false);
+    const [showXMLFlashDialog, setShowXMLFlashDialog] = useState(false);
+
+    // Hooks
+    const { getManager } = useWebUSB();
+    const { startXMLBackup } = useXMLBackup();
+    const { startXMLFlash } = useXMLFlash();
+
+    // Handle XML Backup
+    const handleXMLBackupConfirm = async (xmlFile: File, outputDir: FileSystemDirectoryHandle) => {
+        const usbManager = getManager();
+        if (usbManager) {
+            await startXMLBackup(usbManager, xmlFile, outputDir);
+        }
+    };
+
+    // Handle XML Flash
+    const handleXMLFlashConfirm = async (xmlFile: File, imagesDir: FileSystemDirectoryHandle) => {
+        const usbManager = getManager();
+        if (usbManager) {
+            await startXMLFlash(usbManager, xmlFile, imagesDir);
+        }
+    };
 
     return (
         <>
@@ -106,6 +137,33 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                                     {t('sidebar.connectFirst')}
                                 </div>
                             )}
+
+                            {/* EDL Quick Actions */}
+                            {isConnected && currentMode === 'edl' && (
+                                <div className="space-y-2">
+                                    {/* Backup by XML Button */}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full justify-start gap-2"
+                                        onClick={() => setShowXMLBackupDialog(true)}
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                        {t('xml_backup.button')}
+                                    </Button>
+
+                                    {/* Flash by XML Button */}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full justify-start gap-2"
+                                        onClick={() => setShowXMLFlashDialog(true)}
+                                    >
+                                        <Zap className="w-4 h-4" />
+                                        {t('xml_flash.button')}
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -157,6 +215,20 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                     setShowManualPopup(false);
                 }}
                 onSkip={() => setShowManualPopup(false)}
+            />
+
+            {/* XML Backup Dialog */}
+            <XMLBackupDialog
+                open={showXMLBackupDialog}
+                onOpenChange={setShowXMLBackupDialog}
+                onConfirm={handleXMLBackupConfirm}
+            />
+
+            {/* XML Flash Dialog */}
+            <XMLFlashDialog
+                open={showXMLFlashDialog}
+                onOpenChange={setShowXMLFlashDialog}
+                onConfirm={handleXMLFlashConfirm}
             />
         </>
     );

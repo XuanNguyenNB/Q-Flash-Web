@@ -67,6 +67,7 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
     // const { isConnected } = useDeviceStore(); // No longer directly used here
     const { getInstance } = useADB();
     const deviceInfo = useADBStore((state) => state.deviceInfo); // Get device info from store
+    const isDeviceReady = useADBStore((state) => state.isDeviceReady); // Check if device is ready for scrcpy
 
     // State
     const [isStreaming, setIsStreaming] = useState(false);
@@ -304,8 +305,13 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
                 log('error', `📜 Server Output:\n${outputStr}`);
             }
 
-            setError(msg);
+            // User-friendly error message
+            const userMessage = t('scrcpy.error_not_ready',
+                'Device not ready. Please wait 5-10 seconds after connecting, then try again.');
+
+            setError(userMessage);
             log('error', `❌ Failed to start Scrcpy: ${msg}`);
+            log('info', '💡 ' + t('scrcpy.error_hint', 'Tip: Wait for device to fully boot before starting screen mirror.'));
             cleanup();
         } finally {
             setIsStarting(false);

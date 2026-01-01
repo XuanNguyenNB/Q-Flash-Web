@@ -353,6 +353,31 @@ export class ADBProtocol {
         }
     }
 
+    /**
+     * Check if device is ready for complex operations (like scrcpy)
+     * This verifies that the device is not only connected but actually responsive
+     */
+    async checkDeviceReadiness(): Promise<boolean> {
+        if (!this.adb) {
+            console.log('[ADB] checkDeviceReadiness: No ADB instance');
+            return false;
+        }
+
+        try {
+            // Try a simple command to check if device is responsive
+            // Using 'echo' is lightweight and safe
+            console.log('[ADB] checkDeviceReadiness: Running echo command...');
+            const result = await this.runShellCommand('echo ready');
+            const isReady = result.trim() === 'ready';
+            console.log('[ADB] checkDeviceReadiness: Result =', result.trim(), ', isReady =', isReady);
+            return isReady;
+        } catch (error) {
+            console.log('[ADB] checkDeviceReadiness: Error =', error);
+            this.onLog('Device not ready yet...', 'debug');
+            return false;
+        }
+    }
+
     // ============================================================================
     // Device Information
     // ============================================================================

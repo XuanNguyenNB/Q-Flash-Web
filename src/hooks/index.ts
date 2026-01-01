@@ -74,3 +74,9 @@ export type {
 export { useFastboot } from './useFastboot';
 export type { UseFastbootReturn } from './useFastboot';
 
+// XML Backup Hook - Backup partitions by XML file
+export { useXMLBackup } from './useXMLBackup';
+
+// XML Flash Hook - Flash partitions by XML file
+export { useXMLFlash } from './useXMLFlash';
+
