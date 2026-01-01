@@ -10,3 +10,5 @@ export { BootloaderActions } from './BootloaderActions';
 export { FastbootFlashPanel } from './FastbootFlashPanel';
 export { FastbootRebootActions } from './FastbootRebootActions';
 export { FastbootTerminal } from './FastbootTerminal';
+export { FastbootConnectionGuide } from './FastbootConnectionGuide';
+

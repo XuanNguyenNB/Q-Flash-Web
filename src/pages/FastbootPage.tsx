@@ -23,7 +23,8 @@ import {
     BootloaderActions,
     FastbootFlashPanel,
     FastbootRebootActions,
-    FastbootTerminal
+    FastbootTerminal,
+    FastbootConnectionGuide
 } from '@/components/features/fastboot';
 import { cn } from '@/lib/utils';
 
@@ -201,20 +202,11 @@ export default function FastbootPage() {
                 )}
             </div>
 
-            {/* Connect Prompt Overlay (if disconnected) */}
-            {!isFastbootConnected && (
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-10 animate-in slide-in-from-bottom-4 fade-in duration-700 delay-300">
-                    <div className="bg-popover/80 backdrop-blur-md border border-border bg-card text-card-foreground shadow-lg px-6 py-3 rounded-full flex items-center gap-3">
-                        <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
-                        </span>
-                        <span className="text-sm font-medium">
-                            {t('fastboot.empty.description', 'Connect your device in Fastboot mode to start')}
-                        </span>
-                    </div>
-                </div>
-            )}
+            {/* Connection Guide (if disconnected) or Disconnect button (if connected) */}
+            <FastbootConnectionGuide
+                onConnect={connect}
+                isConnected={isFastbootConnected}
+            />
         </div>
     );
 }
