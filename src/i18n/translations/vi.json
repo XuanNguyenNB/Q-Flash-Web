@@ -1494,4 +1494,19 @@
         "thankYou": "Cảm ơn bạn đã ủng hộ!",
         "thankYouDesc": "Mọi đóng góp của bạn giúp tôi tiếp tục phát triển và duy trì công cụ này miễn phí cho cộng đồng."
     }
+,
+    "xml_flash": {
+        "button": "Flash theo XML",
+        "title": "Flash b?ng XML",
+        "description": "Ch?n file rawprogram XML v� thu m?c ch?a c�c file partition d? flash.",
+        "select_xml": "Ch?n file XML",
+        "choose_xml": "Ch?n XML...",
+        "found_partitions": "T�m th?y {{count}} ph�n v�ng",
+        "select_images_folder": "Ch?n thu m?c Images",
+        "choose_folder": "Ch?n thu m?c...",
+        "partitions_preview": "C�c ph�n v�ng s? flash",
+        "and_more": "...v� {{count}} ph�n v�ng kh�c",
+        "processing": "�ang x? l�...",
+        "start_flash": "B?t d?u Flash"
+    }
 }
