@@ -89,11 +89,21 @@ export const usePartitionStore = create<PartitionState>()((set, get) => ({
     setRomMapping: (entries) => set(() => {
         const mapping = new Map<string, RomPartitionEntry>();
         for (const entry of entries) {
-            // Map by label - normalize to handle _a/_b suffixes
-            mapping.set(entry.label.toLowerCase(), entry);
-            // Also try without _a/_b suffix for matching
-            const baseName = entry.label.replace(/_[ab]$/i, '');
-            if (baseName !== entry.label) {
+            // Map by FILENAME (without extension) to avoid duplicate label issues
+            // E.g. both misc.img and gpt_backup3.bin may have label="BackupGPT"
+            const filenameWithoutExt = entry.filename.replace(/\.[^.]+$/, ''); // Remove extension
+
+            // Primary mapping: filename basename
+            mapping.set(filenameWithoutExt.toLowerCase(), entry);
+
+            // Secondary mapping: also map by label for backward compatibility
+            if (!mapping.has(entry.label.toLowerCase())) {
+                mapping.set(entry.label.toLowerCase(), entry);
+            }
+
+            // Handle _a/_b suffixes
+            const baseName = filenameWithoutExt.replace(/_[ab]$/i, '');
+            if (baseName !== filenameWithoutExt && !mapping.has(baseName.toLowerCase())) {
                 mapping.set(baseName.toLowerCase(), entry);
             }
         }
