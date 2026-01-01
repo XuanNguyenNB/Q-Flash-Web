@@ -1070,39 +1070,6 @@ export class FirehoseProtocol {
     }
 
     /**
-     * Send power command to device (reset, off, etc.)
-     */
-    async power(mode: 'reset' | 'off' = 'reset'): Promise<{ success: boolean; error?: string }> {
-        this.onLog(`Sending power command: ${mode}`, 'info');
-
-        const command = buildXmlCommand('power', {
-            value: mode,
-            DelayInSeconds: 0
-        });
-
-        this.onLog(`TX: ${command}`, 'debug');
-        const response = await this.sendCommand(command);
-
-        if (response.success) {
-            this.onLog(`Power command (${mode}) sent successfully`, 'success');
-            if (mode === 'reset') {
-                this.onLog('Device will reboot now...', 'info');
-            }
-            return { success: true };
-        } else {
-            this.onLog(`Power command failed: ${response.error}`, 'error');
-            return { success: false, error: response.error };
-        }
-    }
-
-    /**
-     * Send reset command to reboot the device.
-     */
-    async reset(): Promise<{ success: boolean; error?: string }> {
-        return this.power('reset');
-    }
-
-    /**
      * Write/flash a large file using chunked writes like native tool.
      * This method sends a SEPARATE program command for each 64MB chunk,
      * which is how the native tool successfully flashes large files like super.img.
