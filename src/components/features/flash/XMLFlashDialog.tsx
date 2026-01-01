@@ -41,7 +41,6 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
     const [selectedPartitions, setSelectedPartitions] = useState<Set<number>>(new Set());
     const [isProcessing, setIsProcessing] = useState(false);
     const [parseError, setParseError] = useState<string | null>(null);
-    const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
 
     // Reset state when dialog closes
     const handleOpenChange = useCallback((newOpen: boolean) => {
@@ -51,7 +50,6 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
             setPartitions([]);
             setSelectedPartitions(new Set());
             setParseError(null);
-            setDuplicateWarning(null);
         }
         onOpenChange(newOpen);
     }, [onOpenChange]);
@@ -97,27 +95,8 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
 
             console.log('Parsed partitions:', parsed);
 
-            // Filter duplicates: keep last entry for each label
-            const labelMap = new Map<string, ParsedPartition>();
-            const duplicates: string[] = [];
-
-            parsed.forEach(p => {
-                if (labelMap.has(p.label)) {
-                    if (!duplicates.includes(p.label)) {
-                        duplicates.push(p.label);
-                    }
-                }
-                labelMap.set(p.label, p); // Keep last entry
-            });
-
-            const filtered = Array.from(labelMap.values());
-
-            // Warn about duplicates
-            if (duplicates.length > 0) {
-                setDuplicateWarning(`Warning: Found duplicate labels (${duplicates.join(', ')}). Only the last entry for each will be used.`);
-            } else {
-                setDuplicateWarning(null);
-            }
+            // No need to filter duplicates - filename-based mapping handles this
+            const filtered = parsed;
 
             if (filtered.length === 0) {
                 throw new Error('No valid partitions with filename found in XML');
@@ -248,12 +227,7 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                                     </span>
                                 </div>
 
-                                {duplicateWarning && (
-                                    <div className="flex items-start gap-2 text-xs text-yellow-600 bg-yellow-500/10 p-2 rounded border border-yellow-500/20">
-                                        <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                                        <span>{duplicateWarning}</span>
-                                    </div>
-                                )}
+
                             </>
                         )}
                     </div>
