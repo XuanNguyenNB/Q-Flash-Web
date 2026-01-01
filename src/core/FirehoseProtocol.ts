@@ -1068,6 +1068,14 @@ export class FirehoseProtocol {
         this.onLog(`Patch file applied successfully`, 'success');
         return { success: true };
     }
+
+    /**
+     * Send reset command to reboot the device.
+     * Wrapper for power('reset').
+     */
+    async reset(): Promise<FirehoseResponse> {
+        return this.power('reset');
+    }
     /**
      * Write/flash a large file using chunked writes like native tool.
      * This method sends a SEPARATE program command for each 64MB chunk,
