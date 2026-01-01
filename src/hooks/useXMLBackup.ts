@@ -148,7 +148,7 @@ export function useXMLBackup() {
                     const fileHandle = await outputDir.getFileHandle(filename, { create: true });
                     const writable = await fileHandle.createWritable();
 
-                    await writable.write(result.data);
+                    await writable.write(result.data.buffer as ArrayBuffer);
                     await writable.close();
 
                     bytesProcessed += sizeInBytes;

@@ -135,12 +135,13 @@ export function useXMLFlash() {
                     const sectorSize = 4096; // UFS sector size
                     const sizeInBytes = numSectors * BigInt(sectorSize);
 
-                    // Write partition data using writePartition
+                    // Write partition data using writePartition with XML info
                     const result = await firehose.writePartition(
                         lun,
                         startSector,
-                        imageData,
+                        numSectors,
                         partitionName,
+                        imageData,
                         (percent: number) => {
                             const currentBytes = BigInt(Math.floor((percent / 100) * Number(sizeInBytes)));
                             updateFlashWriteProgress(
