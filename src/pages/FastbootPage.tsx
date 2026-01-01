@@ -181,32 +181,40 @@ export default function FastbootPage() {
                 </div>
             </div>
 
-            {/* Main Grid */}
-            <div className={cn(
-                "flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-min transition-all duration-500",
-                !isFastbootConnected ? "opacity-50 pointer-events-none grayscale-[0.5]" : ""
-            )}>
-                {/* Row 1: Bootloader Actions + Reboot Options */}
-                <BootloaderActions />
-                <FastbootRebootActions />
+            {/* Main Grid - Only show when connected */}
+            {isFastbootConnected ? (
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-min">
+                    {/* Row 1: Bootloader Actions + Reboot Options */}
+                    <BootloaderActions />
+                    <FastbootRebootActions />
 
-                {/* Conditional Visibility: Hide Flash & Terminal if FastbootD + Locked */}
-                {!(deviceInfo?.isUserspace && !deviceInfo?.unlocked) && (
-                    <>
-                        {/* Row 2: Flash Panel (full width when terminal is below) */}
-                        <FastbootFlashPanel className="md:col-span-2" />
+                    {/* Conditional Visibility: Hide Flash & Terminal if FastbootD + Locked */}
+                    {!(deviceInfo?.isUserspace && !deviceInfo?.unlocked) && (
+                        <>
+                            {/* Row 2: Flash Panel (full width when terminal is below) */}
+                            <FastbootFlashPanel className="md:col-span-2" />
 
-                        {/* Row 3: Terminal (full width) */}
-                        <FastbootTerminal className="md:col-span-2" />
-                    </>
-                )}
-            </div>
+                            {/* Row 3: Terminal (full width) */}
+                            <FastbootTerminal className="md:col-span-2" />
+                        </>
+                    )}
 
-            {/* Connection Guide (if disconnected) or Disconnect button (if connected) */}
-            <FastbootConnectionGuide
-                onConnect={connect}
-                isConnected={isFastbootConnected}
-            />
+                    {/* Disconnect button at bottom */}
+                    <div className="md:col-span-2">
+                        <FastbootConnectionGuide
+                            onConnect={connect}
+                            isConnected={isFastbootConnected}
+                        />
+                    </div>
+                </div>
+            ) : (
+                /* Connection Guide - Show when disconnected */
+                <FastbootConnectionGuide
+                    onConnect={connect}
+                    isConnected={isFastbootConnected}
+                />
+            )}
+
         </div>
     );
 }
