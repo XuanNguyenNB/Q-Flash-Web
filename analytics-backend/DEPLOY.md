@@ -27,26 +27,21 @@ analytics-backend/
 └── package.json
 ```
 
-## Step 1: Upload to VPS
+## Step 1: Pull Latest Code on VPS
 
-### Option A: Using Git
+Vì `analytics-backend` đã nằm trong repo Q-Flash-Web, chỉ cần pull code mới:
+
 ```bash
-# On VPS
-cd /opt
-git clone <your-repo-url> q-flash-analytics
-# Or copy the analytics-backend folder
+cd /var/www/qflash
+git pull
 ```
 
-### Option B: Using SCP
-```bash
-# From local machine
-scp -r analytics-backend/ user@your-vps-ip:/opt/q-flash-analytics
-```
+Analytics backend sẽ có sẵn tại: `/var/www/qflash/analytics-backend`
 
 ## Step 2: Install Dependencies
 
 ```bash
-cd /opt/q-flash-analytics
+cd /var/www/qflash/analytics-backend
 npm install
 ```
 
@@ -58,7 +53,7 @@ npm run init-db
 
 Output should show:
 ```
-🗄️  Initializing database at: /opt/q-flash-analytics/analytics.db
+🗄️  Initializing database at: /var/www/qflash/analytics-backend/analytics.db
 ✅ Database initialized successfully!
 📊 Tables created:
    - sessions
@@ -124,7 +119,7 @@ server {
     listen 80;
     server_name admin.xuannguyen.site;
     
-    root /opt/q-flash-analytics/dashboard/dist;
+    root /var/www/qflash/analytics-backend/dashboard/dist;
     index index.html;
     
     location / {
@@ -169,7 +164,7 @@ sudo certbot --nginx -d admin.xuannguyen.site
 ## Step 7: Build Dashboard
 
 ```bash
-cd /opt/q-flash-analytics/dashboard
+cd /var/www/qflash/analytics-backend/dashboard
 npm install
 npm run build
 ```
@@ -177,7 +172,7 @@ npm run build
 ## Step 8: Start Analytics Server with PM2
 
 ```bash
-cd /opt/q-flash-analytics
+cd /var/www/qflash/analytics-backend
 pm2 start src/server.js --name analytics-api
 pm2 save
 pm2 startup  # Follow instructions to auto-start on reboot
@@ -194,7 +189,7 @@ const ANALYTICS_ENDPOINT = 'https://xuannguyen.site/api/analytics';
 
 2. Rebuild and deploy Q-Flash-Web:
 ```bash
-cd /path/to/Q-Flash-Web
+cd /var/www/qflash
 npm run build
 # Copy dist/ to your web server
 ```
@@ -236,12 +231,12 @@ sudo systemctl restart nginx
 
 ### Database location
 ```bash
-/opt/q-flash-analytics/analytics.db
+/var/www/qflash/analytics-backend/analytics.db
 ```
 
 ### View database content
 ```bash
-sqlite3 /opt/q-flash-analytics/analytics.db
+sqlite3 /var/www/qflash/analytics-backend/analytics.db
 sqlite> .tables
 sqlite> SELECT COUNT(*) FROM sessions;
 sqlite> .quit
@@ -249,7 +244,7 @@ sqlite> .quit
 
 ## Environment Variables (Optional)
 
-Create `/opt/q-flash-analytics/.env`:
+Create `/var/www/qflash/analytics-backend/.env`:
 ```
 PORT=3001
 JWT_SECRET=your-very-secure-secret-key-here
@@ -279,7 +274,7 @@ pm2 logs analytics-api
 pm2 status
 
 # Rebuild dashboard
-cd /opt/q-flash-analytics/dashboard && npm run build
+cd /var/www/qflash/analytics-backend/dashboard && npm run build
 
 # Reload nginx
 sudo systemctl reload nginx

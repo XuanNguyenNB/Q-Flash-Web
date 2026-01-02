@@ -62,7 +62,7 @@ interface DeviceStats {
 const COLORS = ['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'];
 
 export function Dashboard({ onLogout }: DashboardProps) {
-    const [socket, setSocket] = useState<Socket | null>(null);
+    const [_socket, setSocket] = useState<Socket | null>(null);
     const [realtimeStats, setRealtimeStats] = useState<RealtimeStats | null>(null);
     const [overview, setOverview] = useState<OverviewStats | null>(null);
     const [pageviews, setPageviews] = useState<PageviewStats | null>(null);
@@ -113,11 +113,11 @@ export function Dashboard({ onLogout }: DashboardProps) {
             setRealtimeStats(stats);
         });
 
-        newSocket.on('pageview', (data) => {
+        newSocket.on('pageview', (data: { path: string }) => {
             console.log('New pageview:', data);
         });
 
-        newSocket.on('event', (data) => {
+        newSocket.on('event', (data: { category: string; action: string }) => {
             console.log('New event:', data);
         });
 
@@ -255,8 +255,8 @@ export function Dashboard({ onLogout }: DashboardProps) {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab
-                                    ? 'bg-primary-600 text-white'
-                                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                ? 'bg-primary-600 text-white'
+                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                                 }`}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -288,7 +288,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                                         <XAxis
                                             dataKey="date"
                                             stroke="#64748b"
-                                            tickFormatter={(val) => new Date(val).toLocaleDateString('en', { weekday: 'short' })}
+                                            tickFormatter={(val: string) => new Date(val).toLocaleDateString('en', { weekday: 'short' })}
                                         />
                                         <YAxis stroke="#64748b" />
                                         <Tooltip
@@ -348,7 +348,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
                                             cx="50%"
                                             cy="50%"
                                             outerRadius={60}
-                                            label={({ device_type, percent }) =>
+                                            label={({ device_type, percent }: { device_type: string; percent: number }) =>
                                                 `${device_type} ${(percent * 100).toFixed(0)}%`
                                             }
                                         >
