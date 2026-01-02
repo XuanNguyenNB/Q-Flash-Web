@@ -219,6 +219,9 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
             configure: async () => {
                 const result = await firehose.configure(firehose.currentConfig);
                 return result.success;
+            },
+            setBootableDrive: async (value: number) => {
+                return await firehose.setBootableDrive(value);
             }
         };
 

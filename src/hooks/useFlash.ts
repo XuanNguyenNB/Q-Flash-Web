@@ -84,6 +84,7 @@ export function useFlash() {
             applyPatch?: (xmlContent: string) => Promise<boolean>;
             reset?: () => Promise<boolean>;
             configure?: () => Promise<boolean>;
+            setBootableDrive?: (value: number) => Promise<{ success: boolean; error?: string }>;
         } | null
     ) => {
 
@@ -296,6 +297,23 @@ export function useFlash() {
                             errorCount++;
                         }
                     }
+                }
+            }
+
+            // CRITICAL: Set bootable drive after patches
+            // This tells the device which LUN to boot from - REQUIRED for device to boot properly
+            if (firehoseProtocol.setBootableDrive) {
+                log('info', 'Setting bootable drive (LUN 1)...');
+                try {
+                    const bootResult = await firehoseProtocol.setBootableDrive(1);
+                    if (bootResult.success) {
+                        log('success', 'Bootable drive set successfully');
+                    } else {
+                        log('warning', `Failed to set bootable drive: ${bootResult.error}`);
+                    }
+                } catch (e) {
+                    log('warning', `Error setting bootable drive: ${e}`);
+                    // Continue anyway - some devices may not support this
                 }
             }
 
