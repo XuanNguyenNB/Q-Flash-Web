@@ -143,15 +143,20 @@ class AnalyticsService {
     /**
      * Track a custom event
      */
-    trackEvent(
+    async trackEvent(
         category: string,
         action: string,
         label?: string,
         value?: string | number,
-        metadata?: Record<string, unknown>
-    ): void {
+        _metadata?: Record<string, unknown>
+    ): Promise<void> {
+        // Auto-init if not initialized
+        if (!this.initialized || !this.sessionId) {
+            await this.init();
+        }
+
         if (!this.sessionId) {
-            console.warn('[Analytics] Session not initialized');
+            console.warn('[Analytics] Session still not initialized after init attempt');
             return;
         }
 
