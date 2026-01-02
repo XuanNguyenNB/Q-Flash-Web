@@ -207,6 +207,35 @@
         "processing": "Đang xử lý...",
         "button": "Backup theo XML"
     },
+    "xml_flash": {
+        "title": "Flash theo XML",
+        "description": "Chọn file XML rawprogram và thư mục chứa các file ảnh partition để flash.",
+        "select_xml": "Chọn file XML",
+        "choose_xml": "Chọn XML...",
+        "select_images_folder": "Chọn thư mục ảnh",
+        "choose_folder": "Chọn thư mục...",
+        "partitions_preview": "Danh sách Partition",
+        "found_partitions": "Tìm thấy {{count}} partition",
+        "and_more": "...và {{count}} partition khác",
+        "start_flash": "Bắt đầu Flash",
+        "processing": "Đang xử lý...",
+        "button": "Flash theo XML",
+        "files_found": "file có sẵn",
+        "files_missing": "file thiếu",
+        "checking_files": "Đang kiểm tra file...",
+        "file_not_found": "không tìm thấy",
+        "super_missing": "Không tìm thấy super.img",
+        "super_can_build": "Tìm thấy {{count}} partition để build super.img",
+        "build_super": "Build",
+        "select_partitions": "Chọn Partition để Flash",
+        "select_all": "Chọn tất cả",
+        "deselect_all": "Bỏ chọn tất cả",
+        "selected_to_flash": "đã chọn để flash",
+        "flash_selected": "Flash {{count}} Partition",
+        "select_at_least_one": "Vui lòng chọn ít nhất một partition để flash",
+        "no_files_found": "Không tìm thấy file nào khớp trong thư mục đã chọn",
+        "not_found": "không tìm thấy"
+    },
     "backup": {
         "button": "Sao lưu đã chọn",
         "title": "Tùy chọn sao lưu",
@@ -339,6 +368,23 @@
             "message": "Thao tác flash đã bị hủy"
         }
     },
+    "superBuild": {
+        "title": "Build Super Image",
+        "description": "Không tìm thấy super.img. Build từ các partition image.",
+        "partitions": "Số phân vùng:",
+        "estimatedSize": "Dung lượng ước tính:",
+        "region": "Vùng:",
+        "warning": "Quá trình này có thể mất vài phút với ROM lớn. Không đóng cửa sổ này.",
+        "convertingPartition": "Đang chuyển đổi {{partition}}...",
+        "partitionProgress": "Phân vùng {{current}} / {{total}}",
+        "error": "Build thất bại",
+        "success": "Build hoàn tất!",
+        "startBuild": "Bắt đầu Build",
+        "download": "Tải xuống",
+        "continue": "Tiếp tục Flash",
+        "building": "Đang build...",
+        "retry": "Thử lại"
+    },
     "aiPanel": {
         "title": "Trợ lý AI",
         "welcome": "Xin chào! Tôi có thể giúp bạn với Q-Flash WebUSB Tool cho thiết bị Oppo/Oneplus/Realme dùng chip Qualcomm. Hỏi tôi về chế độ EDL, phân vùng, flash, hoặc khôi phục thiết bị.",
@@ -367,6 +413,25 @@
         "disabled": "Đã tắt",
         "processing": "Đang xử lý...",
         "error": "Lỗi"
+    },
+    "rom": {
+        "domesticFlash": "Flash theo ROM gốc",
+        "selectFolder": "Chọn thư mục ROM",
+        "loaded": "Đã tải ROM thành công",
+        "cleared": "Đã xóa ROM",
+        "reload": "Tải lại ROM",
+        "clear": "Xóa ROM",
+        "files": "tệp",
+        "partitionCount": "phân vùng",
+        "guide": "Hướng dẫn",
+        "guideTitle": "Hướng dẫn Flash ROM gốc",
+        "guideStep1Title": "Giải nén ROM",
+        "guideStep1Desc": "Giải nén file ROM (.zip/.rar) ra thư mục chứa rawprogram.xml",
+        "guideStep2Title": "Build super.img (Nếu mới giải nén ROM thì phải build super.img)",
+        "guideStep2Desc": "Dùng Q-Flash Forge để build super.img từ các partition",
+        "guideStep3Title": "Chọn thư mục ROM",
+        "guideStep3Desc": "Nhấn nút và chọn thư mục chứa file rawprogram.xml",
+        "openForge": "Mở Q-Flash Forge"
     },
     "nav": {
         "home": "Công cụ",
@@ -1353,7 +1418,9 @@
             "invalidXml": "Định dạng XML không hợp lệ",
             "parseError": "Lỗi phân tích ROM: {{error}}",
             "permissionDenied": "Không có quyền truy cập thư mục"
-        }
+        },
+        "superMissing": "Thiếu super.img - có thể build",
+        "buildSuper": "Build Super"
     },
     "downloads": {
         "title": "Tải xuống",
@@ -1568,7 +1635,10 @@
         "file_not_found": "không tìm thấy",
         "checking_files": "Đang kiểm tra files...",
         "error_no_selection": "Vui lòng chọn ít nhất một phân vùng để flash",
-        "error_missing_files": "Không thể flash - thiếu files: {{files}}"
+        "error_missing_files": "Không thể flash - thiếu files: {{files}}",
+        "super_missing": "Không tìm thấy super.img",
+        "super_can_build": "Tìm thấy {{count}} partition để build super.img",
+        "build_super": "Build"
     },
     "edl": {
         "troubleshoot": {

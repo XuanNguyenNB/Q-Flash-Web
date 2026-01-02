@@ -115,13 +115,6 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                     )}
                 </div>
 
-                {/* ROM Loader - Shows when connected (EDL only) */}
-                {!collapsed && isConnected && currentMode === 'edl' && (
-                    <div className="p-4 border-b border-border">
-                        <RomLoader compact />
-                    </div>
-                )}
-
                 {/* Quick Actions */}
                 <div className="flex-1 p-4 overflow-y-auto">
 
@@ -141,6 +134,9 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                             {/* EDL Quick Actions */}
                             {isConnected && currentMode === 'edl' && (
                                 <div className="space-y-2">
+                                    {/* Flash Domestic ROM (RomLoader) */}
+                                    <RomLoader compact />
+
                                     {/* Backup by XML Button */}
                                     <Button
                                         variant="outline"

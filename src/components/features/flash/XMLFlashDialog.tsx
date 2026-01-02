@@ -5,7 +5,7 @@
  * This is useful for flashing partitions that may not be in the partition table.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Dialog,
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileText, FolderOpen, Zap, AlertCircle, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { FileText, FolderOpen, Zap, AlertCircle, CheckCircle2, AlertTriangle, X, CheckCheck, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface XMLFlashDialogProps {
@@ -28,12 +28,11 @@ interface XMLFlashDialogProps {
 
 interface ParsedPartition {
     label: string;
-    filename?: string;
+    filename: string;
     num_partition_sectors: string;
     start_sector?: string;
     physical_partition_number?: string;
-    fileExists?: boolean; // Track if file exists in selected folder
-    fileSize?: number; // Actual file size
+    fileExists?: boolean; // Track if file exists in folder
 }
 
 export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialogProps) {
@@ -94,26 +93,22 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                         num_partition_sectors: numSectors,
                         start_sector: startSector || undefined,
                         physical_partition_number: physicalPartition || undefined,
-                        fileExists: undefined, // Will be checked when folder is selected
+                        fileExists: undefined // Will be set after folder selection
                     });
                 }
             });
 
             console.log('Parsed partitions:', parsed);
 
-            // No need to filter duplicates - filename-based mapping handles this
-            const filtered = parsed;
-
-            if (filtered.length === 0) {
+            if (parsed.length === 0) {
                 throw new Error('No valid partitions with filename found in XML');
             }
 
-            setPartitions(filtered);
+            setPartitions(parsed);
+            // Clear selections until folder is checked
+            setSelectedPartitions(new Set());
 
-            // Auto-select all partitions
-            setSelectedPartitions(new Set(filtered.map((_, idx) => idx)));
-
-            return filtered;
+            return parsed;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to parse XML';
             setParseError(message);
@@ -122,42 +117,47 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
         }
     }, []);
 
-    // Check if files exist in selected folder
-    const checkFilesExist = useCallback(async (dirHandle: FileSystemDirectoryHandle, partitionList: ParsedPartition[]) => {
-        console.log('[XMLFlashDialog] Checking files...', partitionList.length, 'partitions');
+    // Check files existence when folder is selected
+    const checkFilesInFolder = useCallback(async (dirHandle: FileSystemDirectoryHandle, partitionList: ParsedPartition[]) => {
         setIsCheckingFiles(true);
-        const updatedPartitions = [...partitionList];
+        const updatedPartitions: ParsedPartition[] = [];
         const newSelected = new Set<number>();
 
-        for (let i = 0; i < updatedPartitions.length; i++) {
-            const p = updatedPartitions[i];
-            if (p.filename) {
-                try {
-                    const fileHandle = await dirHandle.getFileHandle(p.filename);
-                    const file = await fileHandle.getFile();
-                    updatedPartitions[i] = {
-                        ...p,
-                        fileExists: true,
-                        fileSize: file.size
-                    };
-                    newSelected.add(i); // Auto-select files that exist
-                    console.log(`[XMLFlashDialog] ✅ Found: ${p.filename}`);
-                } catch {
-                    updatedPartitions[i] = {
-                        ...p,
-                        fileExists: false,
-                        fileSize: undefined
-                    };
-                    console.log(`[XMLFlashDialog] ❌ Missing: ${p.filename}`);
-                }
+        for (let i = 0; i < partitionList.length; i++) {
+            const partition = partitionList[i];
+            let exists = false;
+
+            try {
+                await dirHandle.getFileHandle(partition.filename);
+                exists = true;
+                // Auto-select partitions with existing files
+                newSelected.add(i);
+            } catch {
+                exists = false;
             }
+
+            updatedPartitions.push({
+                ...partition,
+                fileExists: exists
+            });
         }
 
-        console.log('[XMLFlashDialog] Check complete. Found:', newSelected.size, 'files');
         setPartitions(updatedPartitions);
         setSelectedPartitions(newSelected);
         setIsCheckingFiles(false);
-    }, []);
+
+        // Count missing files
+        const missingCount = updatedPartitions.filter(p => !p.fileExists).length;
+        const existingCount = updatedPartitions.filter(p => p.fileExists).length;
+
+        if (existingCount === 0) {
+            setParseError(t('xml_flash.no_files_found', 'No matching files found in selected folder'));
+        } else if (missingCount > 0) {
+            setParseError(null); // Clear error, show warning instead
+        }
+
+        return updatedPartitions;
+    }, [t]);
 
     // Handle XML file selection
     const handleSelectXML = useCallback(async () => {
@@ -177,10 +177,7 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
             const file = await fileHandle.getFile();
             setXmlFile(file);
             setImagesDir(null); // Reset folder when new XML is selected
-            const parsed = await parseXML(file);
-
-            // If there was a previously selected dir, re-check
-            // This won't run since we reset imagesDir
+            await parseXML(file);
         } catch (error: any) {
             if (error.name === 'AbortError') return;
             console.error('Failed to select XML:', error);
@@ -194,18 +191,23 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                 mode: 'read',
             });
             setImagesDir(dirHandle);
-            // Check files immediately after selecting folder
+
+            // Check files in folder
             if (partitions.length > 0) {
-                await checkFilesExist(dirHandle, partitions);
+                await checkFilesInFolder(dirHandle, partitions);
             }
         } catch (error: any) {
             if (error.name === 'AbortError') return;
             console.error('Failed to select directory:', error);
         }
-    }, [partitions, checkFilesExist]);
+    }, [partitions, checkFilesInFolder]);
 
     // Toggle partition selection
     const togglePartition = useCallback((idx: number) => {
+        const partition = partitions[idx];
+        // Only allow selection if file exists
+        if (!partition.fileExists) return;
+
         setSelectedPartitions(prev => {
             const newSet = new Set(prev);
             if (newSet.has(idx)) {
@@ -215,16 +217,20 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
             }
             return newSet;
         });
-    }, []);
-
-    // Select all / Deselect all
-    const selectAll = useCallback(() => {
-        const existingIndices = partitions
-            .map((p, idx) => (p.fileExists !== false ? idx : -1))
-            .filter(idx => idx >= 0);
-        setSelectedPartitions(new Set(existingIndices));
     }, [partitions]);
 
+    // Select all available
+    const selectAllAvailable = useCallback(() => {
+        const newSet = new Set<number>();
+        partitions.forEach((p, idx) => {
+            if (p.fileExists) {
+                newSet.add(idx);
+            }
+        });
+        setSelectedPartitions(newSet);
+    }, [partitions]);
+
+    // Deselect all
     const deselectAll = useCallback(() => {
         setSelectedPartitions(new Set());
     }, []);
@@ -237,15 +243,7 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
         const selectedParts = partitions.filter((_, idx) => selectedPartitions.has(idx));
 
         if (selectedParts.length === 0) {
-            setParseError(t('xml_flash.error_no_selection', 'Please select at least one partition to flash'));
-            return;
-        }
-
-        // Check if any selected partition has missing file or unchecked status
-        const invalidParts = selectedParts.filter(p => p.fileExists !== true);
-        if (invalidParts.length > 0) {
-            const missingNames = invalidParts.map(p => p.filename).join(', ');
-            setParseError(t('xml_flash.error_missing_files', 'Cannot flash - missing files: {{files}}', { files: missingNames }));
+            setParseError(t('xml_flash.select_at_least_one', 'Please select at least one partition to flash'));
             return;
         }
 
@@ -253,10 +251,8 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
         // Close dialog immediately when starting flash
         handleOpenChange(false);
         try {
-            // Get selected partition filenames
-            const selectedFilenames = selectedParts
-                .filter(p => p.filename)
-                .map(p => p.filename as string);
+            // Get filenames of selected partitions
+            const selectedFilenames = selectedParts.map(p => p.filename).filter(Boolean);
 
             await onConfirm(xmlFile, imagesDir, selectedFilenames);
         } catch (error) {
@@ -267,22 +263,15 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
 
     }, [xmlFile, imagesDir, partitions, selectedPartitions, onConfirm, handleOpenChange, t]);
 
-    // Calculate stats
-    const existingCount = partitions.filter(p => p.fileExists === true).length;
-    const missingCount = partitions.filter(p => p.fileExists === false).length;
+    // Computed values
+    const existingFilesCount = partitions.filter(p => p.fileExists).length;
+    const missingFilesCount = partitions.filter(p => p.fileExists === false).length;
     const selectedCount = selectedPartitions.size;
-
-    // Check if all selected partitions have existing files
-    const selectedPartsWithFiles = partitions.filter((p, idx) =>
-        selectedPartitions.has(idx) && p.fileExists === true
-    ).length;
-    const allSelectedHaveFiles = selectedCount > 0 && selectedPartsWithFiles === selectedCount;
-
-    const canProceed = xmlFile && imagesDir && partitions.length > 0 && selectedCount > 0 && allSelectedHaveFiles && !parseError && !isCheckingFiles;
+    const canProceed = xmlFile && imagesDir && selectedCount > 0 && !parseError && !isCheckingFiles;
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="sm:max-w-[650px] max-h-[85vh] overflow-hidden flex flex-col">
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Zap className="w-5 h-5 text-primary" />
@@ -293,7 +282,7 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-4 flex-1 overflow-y-auto">
+                <div className="space-y-4 py-4 flex-1 overflow-hidden flex flex-col">
                     {/* Step 1: Select XML File */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-2">
@@ -311,14 +300,7 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                             {xmlFile ? xmlFile.name : t('xml_flash.choose_xml', 'Choose XML...')}
                         </Button>
 
-                        {parseError && (
-                            <div className="flex items-start gap-2 text-xs text-red-500 bg-red-500/10 p-2 rounded border border-red-500/20">
-                                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                                <span>{parseError}</span>
-                            </div>
-                        )}
-
-                        {xmlFile && partitions.length > 0 && (
+                        {xmlFile && partitions.length > 0 && !imagesDir && (
                             <div className="flex items-start gap-2 text-xs text-green-500 bg-green-500/10 p-2 rounded border border-green-500/20">
                                 <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
                                 <span>
@@ -345,88 +327,141 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                             <FolderOpen className="w-4 h-4" />
                             {imagesDir ? imagesDir.name : t('xml_flash.choose_folder', 'Choose Folder...')}
                         </Button>
-
-                        {/* File status summary */}
-                        {imagesDir && !isCheckingFiles && (
-                            <div className="flex items-center gap-3 text-xs">
-                                <span className="flex items-center gap-1 text-green-500">
-                                    <CheckCircle2 className="w-3 h-3" />
-                                    {existingCount} {t('xml_flash.files_found', 'found')}
-                                </span>
-                                {missingCount > 0 && (
-                                    <span className="flex items-center gap-1 text-amber-500">
-                                        <AlertTriangle className="w-3 h-3" />
-                                        {missingCount} {t('xml_flash.files_missing', 'missing')}
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        {isCheckingFiles && (
-                            <div className="text-xs text-muted-foreground">
-                                {t('xml_flash.checking_files', 'Checking files...')}
-                            </div>
-                        )}
                     </div>
 
-                    {/* Partition Preview with Checkboxes - show when partitions exist */}
-                    {partitions.length > 0 && (
+                    {/* File Check Status */}
+                    {imagesDir && !isCheckingFiles && (
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium">
-                                    {t('xml_flash.partitions_preview', 'Partitions to Flash')} ({selectedCount}/{partitions.length})
-                                </label>
-                                <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" onClick={selectAll} className="text-xs h-7">
-                                        {t('common.selectAll', 'Select All')}
-                                    </Button>
-                                    <Button variant="ghost" size="sm" onClick={deselectAll} className="text-xs h-7">
-                                        {t('common.deselectAll', 'Deselect All')}
-                                    </Button>
-                                </div>
+                            {/* Summary */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                                {existingFilesCount > 0 && (
+                                    <div className="flex items-center gap-1 text-xs text-green-500 bg-green-500/10 px-2 py-1 rounded border border-green-500/20">
+                                        <CheckCircle2 className="w-3 h-3" />
+                                        <span>{existingFilesCount} {t('xml_flash.files_found', 'files found')}</span>
+                                    </div>
+                                )}
+                                {missingFilesCount > 0 && (
+                                    <div className="flex items-center gap-1 text-xs text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20">
+                                        <AlertTriangle className="w-3 h-3" />
+                                        <span>{missingFilesCount} {t('xml_flash.files_missing', 'files missing')}</span>
+                                    </div>
+                                )}
+                                {selectedCount > 0 && (
+                                    <div className="flex items-center gap-1 text-xs text-blue-500 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">
+                                        <Zap className="w-3 h-3" />
+                                        <span>{selectedCount} {t('xml_flash.selected_to_flash', 'selected to flash')}</span>
+                                    </div>
+                                )}
                             </div>
-                            <div className="max-h-[250px] overflow-y-auto border rounded-lg">
+
+                            {/* Quick Actions */}
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 text-xs gap-1"
+                                    onClick={selectAllAvailable}
+                                >
+                                    <CheckCheck className="w-3 h-3" />
+                                    {t('xml_flash.select_all', 'Select All')}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 text-xs gap-1"
+                                    onClick={deselectAll}
+                                >
+                                    <Square className="w-3 h-3" />
+                                    {t('xml_flash.deselect_all', 'Deselect All')}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Loading state */}
+                    {isCheckingFiles && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            {t('xml_flash.checking_files', 'Checking files...')}
+                        </div>
+                    )}
+
+                    {/* Error Display */}
+                    {parseError && (
+                        <div className="flex items-start gap-2 text-xs text-red-500 bg-red-500/10 p-2 rounded border border-red-500/20">
+                            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                            <span>{parseError}</span>
+                        </div>
+                    )}
+
+                    {/* Partition List with Checkboxes */}
+                    {imagesDir && partitions.length > 0 && !isCheckingFiles && (
+                        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                            <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary text-xs font-bold">
+                                    3
+                                </span>
+                                {t('xml_flash.select_partitions', 'Select Partitions to Flash')}
+                            </label>
+                            <div className="flex-1 overflow-y-auto border rounded-lg min-h-0">
                                 <div className="divide-y">
                                     {partitions.map((p, idx) => {
                                         const sizeInMB = (parseInt(p.num_partition_sectors) * 4096 / 1024 / 1024);
                                         const sizeStr = sizeInMB >= 1024
                                             ? `${(sizeInMB / 1024).toFixed(2)} GB`
                                             : `${sizeInMB.toFixed(2)} MB`;
+
                                         const isSelected = selectedPartitions.has(idx);
-                                        const fileStatus = p.fileExists;
+                                        const isAvailable = p.fileExists === true;
+                                        const isMissing = p.fileExists === false;
 
                                         return (
                                             <div
                                                 key={idx}
                                                 className={cn(
-                                                    "px-3 py-2 text-sm flex items-center gap-3 hover:bg-muted/50 cursor-pointer",
-                                                    fileStatus === false && "opacity-60 bg-red-500/5"
+                                                    "px-3 py-2 text-sm flex items-center gap-3 transition-colors",
+                                                    isAvailable && "hover:bg-muted/50 cursor-pointer",
+                                                    isMissing && "bg-red-500/5 opacity-60",
+                                                    isSelected && isAvailable && "bg-primary/5"
                                                 )}
-                                                onClick={() => fileStatus !== false && togglePartition(idx)}
+                                                onClick={() => togglePartition(idx)}
                                             >
+                                                {/* Checkbox */}
                                                 <Checkbox
                                                     checked={isSelected}
-                                                    disabled={fileStatus === false}
+                                                    disabled={!isAvailable}
                                                     onCheckedChange={() => togglePartition(idx)}
+                                                    className={cn(
+                                                        isMissing && "opacity-50"
+                                                    )}
                                                 />
+
+                                                {/* Status Icon */}
+                                                {isAvailable ? (
+                                                    <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                                ) : (
+                                                    <X className="w-4 h-4 text-red-500 flex-shrink-0" />
+                                                )}
+
+                                                {/* Partition Info */}
                                                 <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-mono text-xs">{p.label}</span>
-                                                        {fileStatus === true && (
-                                                            <CheckCircle2 className="w-3 h-3 text-green-500 flex-shrink-0" />
-                                                        )}
-                                                        {fileStatus === false && (
-                                                            <XCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
-                                                        )}
-                                                    </div>
+                                                    <span className={cn(
+                                                        "font-mono text-xs truncate",
+                                                        isMissing && "text-muted-foreground"
+                                                    )}>
+                                                        {p.label}
+                                                    </span>
                                                     <span className={cn(
                                                         "text-xs truncate",
-                                                        fileStatus === false ? "text-red-400" : "text-muted-foreground"
+                                                        isMissing ? "text-red-500" : "text-muted-foreground"
                                                     )}>
                                                         {p.filename}
-                                                        {fileStatus === false && ` (${t('xml_flash.file_not_found', 'not found')})`}
+                                                        {isMissing && ` (${t('xml_flash.not_found', 'not found')})`}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs text-muted-foreground whitespace-nowrap">
+
+                                                {/* Size */}
+                                                <span className="text-xs text-muted-foreground flex-shrink-0">
                                                     {sizeStr}
                                                 </span>
                                             </div>
@@ -438,7 +473,7 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                     )}
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className="flex-shrink-0">
                     <Button
                         variant="outline"
                         onClick={() => handleOpenChange(false)}
@@ -454,7 +489,9 @@ export function XMLFlashDialog({ open, onOpenChange, onConfirm }: XMLFlashDialog
                         <Zap className="w-4 h-4" />
                         {isProcessing
                             ? t('xml_flash.processing', 'Processing...')
-                            : t('xml_flash.start_flash', 'Start Flash')
+                            : selectedCount > 0
+                                ? t('xml_flash.flash_selected', 'Flash {{count}} Partitions', { count: selectedCount })
+                                : t('xml_flash.start_flash', 'Start Flash')
                         }
                     </Button>
                 </DialogFooter>

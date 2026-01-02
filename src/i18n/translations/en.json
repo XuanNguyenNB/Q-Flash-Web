@@ -209,7 +209,22 @@
         "and_more": "...and {{count}} more",
         "start_flash": "Start Flash",
         "processing": "Processing...",
-        "button": "Flash by XML"
+        "button": "Flash by XML",
+        "files_found": "files found",
+        "files_missing": "files missing",
+        "checking_files": "Checking files...",
+        "file_not_found": "not found",
+        "super_missing": "super.img not found",
+        "super_can_build": "Found {{count}} partitions to build super.img",
+        "build_super": "Build",
+        "select_partitions": "Select Partitions to Flash",
+        "select_all": "Select All",
+        "deselect_all": "Deselect All",
+        "selected_to_flash": "selected to flash",
+        "flash_selected": "Flash {{count}} Partitions",
+        "select_at_least_one": "Please select at least one partition to flash",
+        "no_files_found": "No matching files found in selected folder",
+        "not_found": "not found"
     },
     "backup": {
         "button": "Backup Selected",
@@ -343,6 +358,23 @@
             "message": "Flash operation was cancelled"
         }
     },
+    "superBuild": {
+        "title": "Build Super Image",
+        "description": "super.img not found. Build it from partition images.",
+        "partitions": "Partitions:",
+        "estimatedSize": "Estimated size:",
+        "region": "Region:",
+        "warning": "This process may take several minutes for large ROMs. Do not close this window.",
+        "convertingPartition": "Converting {{partition}}...",
+        "partitionProgress": "Partition {{current}} of {{total}}",
+        "error": "Build failed",
+        "success": "Build complete!",
+        "startBuild": "Start Build",
+        "download": "Download",
+        "continue": "Continue to Flash",
+        "building": "Building...",
+        "retry": "Retry"
+    },
     "aiPanel": {
         "title": "AI Assistant",
         "welcome": "Hi! I can help you with Q-Flash WebUSB Tool for Oppo/Oneplus/Realme devices with Qualcomm chips. Ask me about EDL mode, partitions, flashing, or device recovery.",
@@ -371,6 +403,25 @@
         "disabled": "Disabled",
         "processing": "Processing...",
         "error": "Error"
+    },
+    "rom": {
+        "domesticFlash": "Flash Domestic ROM",
+        "selectFolder": "Select ROM Folder",
+        "loaded": "ROM loaded successfully",
+        "cleared": "ROM cleared",
+        "reload": "Reload ROM",
+        "clear": "Clear ROM",
+        "files": "files",
+        "partitionCount": "partitions",
+        "guide": "Guide",
+        "guideTitle": "Domestic ROM Flash Guide",
+        "guideStep1Title": "Extract ROM",
+        "guideStep1Desc": "Extract the ROM file (.zip/.rar) to a folder containing rawprogram.xml",
+        "guideStep2Title": "Build super.img (if just extract ROM, need build super.img to flash)",
+        "guideStep2Desc": "Use Q-Flash Forge to build super.img from partitions",
+        "guideStep3Title": "Select ROM folder",
+        "guideStep3Desc": "Click the button and select the folder containing rawprogram.xml",
+        "openForge": "Open Q-Flash Forge"
     },
     "nav": {
         "home": "Tool",
@@ -1351,7 +1402,9 @@
                 "invalidXml": "Invalid XML format",
                 "parseError": "Failed to parse ROM: {{error}}",
                 "permissionDenied": "Permission denied to access folder"
-            }
+            },
+            "superMissing": "super.img missing - can build",
+            "buildSuper": "Build Super"
         },
         "downloads": {
             "title": "Downloads",
