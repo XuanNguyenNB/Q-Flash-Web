@@ -66,6 +66,7 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { trackEvent } from '@/services/analytics';
 
 export function ADBAppManager() {
     const { t } = useTranslation();
@@ -161,9 +162,11 @@ export function ADBAppManager() {
 
                 if (newApps.length > 0) {
                     toast.success(t('adb.apps.installSuccessNamed', { app: newApps[0].package, name: file.name }));
+                    trackEvent('adb', 'app_install', newApps[0].package);
                 } else {
                     // Could be an update or verification failed, but command said success
                     toast.success(t('adb.apps.installSuccess', { app: file.name }));
+                    trackEvent('adb', 'app_update', file.name);
                 }
             } else {
                 toast.error(t('adb.apps.installFailed', { app: file.name }));
@@ -348,6 +351,7 @@ export function ADBAppManager() {
         const result = await runCommand(`pm disable-user --user 0 ${pkg}`);
         if (result && (result.includes('Success') || result.includes('disabled'))) {
             toast.success(t('adb.apps.disableSuccess', { package: pkg }));
+            trackEvent('adb', 'app_disable', pkg);
             // Refresh app list to show disabled status
             fetchApps(appType);
         } else {
@@ -402,6 +406,7 @@ export function ADBAppManager() {
 
         if (successCount === total) {
             toast.success(t('adb.apps.uninstallSuccess', { package: `${successCount} apps` }));
+            trackEvent('adb', 'app_uninstall', `${successCount}_apps`, successCount);
         } else {
             toast.warning(`Uninstalled ${successCount}/${total} apps`);
         }

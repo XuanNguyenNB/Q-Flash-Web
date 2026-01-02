@@ -18,7 +18,6 @@ import { useFastbootStore } from '@/stores/fastbootStore';
 // Hooks
 import { useFastboot } from '@/hooks/useFastboot';
 
-// Components
 import {
     BootloaderActions,
     FastbootFlashPanel,
@@ -27,6 +26,7 @@ import {
     FastbootConnectionGuide
 } from '@/components/features/fastboot';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/services/analytics';
 
 export default function FastbootPage() {
     const { t } = useTranslation();
@@ -86,8 +86,9 @@ export default function FastbootPage() {
         if (protocol.isConnected) {
             console.log('[FastbootPage] Fastboot is connected, syncing store');
             setConnected(true);
+            trackEvent('fastboot', 'connected', deviceInfo?.product || 'unknown');
         }
-    }, [protocol.isConnected, setConnected]);
+    }, [protocol.isConnected, setConnected, deviceInfo]);
 
 
     // Auto-connect on page load if Fastboot device is available

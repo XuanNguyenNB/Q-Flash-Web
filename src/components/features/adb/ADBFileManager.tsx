@@ -76,6 +76,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
+import { trackEvent } from '@/services/analytics';
 
 const DEFAULT_PATH = '/sdcard/';
 
@@ -158,6 +159,7 @@ export function ADBFileManager() {
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
                 toast.success(t('adb.files.downloadSuccess', { file: entry.name }));
+                trackEvent('adb', 'file_download', entry.name);
             } else {
                 toast.error(t('adb.files.actionFailed', { error: 'Empty file or download failed' }));
             }
@@ -227,6 +229,7 @@ export function ADBFileManager() {
 
             if (success) {
                 toast.success(t('adb.files.uploadSuccess', { file: file.name }));
+                trackEvent('adb', 'file_upload', file.name);
                 refresh();
             } else {
                 toast.error(t('adb.files.actionFailed', { error: 'Upload failed' }));

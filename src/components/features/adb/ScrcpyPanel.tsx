@@ -25,6 +25,7 @@ import { useDeviceStore } from '@/stores/deviceStore';
 import { useADB } from '@/hooks/useADB';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useADBStore } from '@/stores/adbStore';
+import { trackEvent } from '@/services/analytics';
 
 // Scrcpy Dependencies
 import {
@@ -292,6 +293,7 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
 
             setIsStreaming(true);
             toast.success(t('adb.scrcpy.success', 'Screen Mirror Started (MVP)'));
+            trackEvent('adb', 'scrcpy_start', `${resolution}p_${bitrate / 1000000}mbps`);
 
         } catch (err: any) {
             console.error("Scrcpy Start Error:", err);

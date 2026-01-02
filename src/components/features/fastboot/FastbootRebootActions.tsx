@@ -21,6 +21,7 @@ import { useFastboot } from '@/hooks/useFastboot';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/services/analytics';
 
 interface FastbootRebootActionsProps {
     className?: string;
@@ -63,6 +64,7 @@ export function FastbootRebootActions({ className }: FastbootRebootActionsProps)
 
             if (success) {
                 toast.success(t(`fastboot.reboot.${action}Success`, `Rebooting to ${action}...`));
+                trackEvent('fastboot', `reboot_${action}`);
             } else {
                 toast.error(t(`fastboot.reboot.${action}Failed`, `Failed to reboot to ${action}`));
             }

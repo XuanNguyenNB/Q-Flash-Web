@@ -25,6 +25,7 @@ import { LayoutDashboard, AppWindow, FolderOpen, Terminal } from "lucide-react";
 import { useDeviceStore } from '@/stores/deviceStore';
 import { useADBStore } from '@/stores/adbStore';
 import { useADB } from '@/hooks/useADB';
+import { trackEvent } from '@/services/analytics';
 
 export function ADBPage() {
     const { t } = useTranslation();
@@ -50,8 +51,9 @@ export function ADBPage() {
         if (isADBConnected) {
             console.log('[ADBPage] ADB is connected, syncing store');
             setConnected(true);
+            trackEvent('adb', 'connected', deviceInfo?.model || 'unknown');
         }
-    }, [isADBConnected, setConnected]);
+    }, [isADBConnected, setConnected, deviceInfo]);
 
     // Auto-connect on page load if ADB device is available
     useEffect(() => {
@@ -126,7 +128,10 @@ export function ADBPage() {
                 <div className="flex-1">
                     {isADBConnected ? (
                         /* Connected View - Tabbed Interface */
-                        <Tabs defaultValue="quick-view" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <Tabs defaultValue="quick-view" value={activeTab} onValueChange={(tab) => {
+                            setActiveTab(tab);
+                            trackEvent('adb', 'tab_switch', tab);
+                        }} className="w-full">
 
                             {/* Navigation Bar */}
                             <div className="flex justify-center mb-6">
