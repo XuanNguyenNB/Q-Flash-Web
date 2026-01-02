@@ -137,9 +137,19 @@ router.post('/event', (req, res) => {
             });
         }
 
-        // Update session last activity
-        db.prepare('UPDATE sessions SET last_activity = ? WHERE id = ?')
-            .run(now(), sessionId);
+        // Check if session exists, create if not (auto-recovery)
+        const existingSession = db.prepare('SELECT id FROM sessions WHERE id = ?').get(sessionId);
+        if (!existingSession) {
+            // Auto-create a minimal session
+            db.prepare(`
+                INSERT INTO sessions (id, visitor_id, started_at, last_activity, device_type)
+                VALUES (?, ?, ?, ?, ?)
+            `).run(sessionId, sessionId, now(), now(), 'unknown');
+        } else {
+            // Update session last activity
+            db.prepare('UPDATE sessions SET last_activity = ? WHERE id = ?')
+                .run(now(), sessionId);
+        }
 
         // Insert event
         const result = db.prepare(`
