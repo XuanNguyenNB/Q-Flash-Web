@@ -9,6 +9,8 @@ import { renderDevicesPage } from './pages/devices';
 import { renderDonatePage } from './pages/donate';
 import { renderSupportPage } from './pages/support';
 import { initI18n, getCurrentLanguage, setLanguage, type Language } from './i18n/i18n';
+import { analytics, trackPageview } from './services/analytics';
+
 
 // ============================================================================
 // App Shell
@@ -89,6 +91,9 @@ async function onRouteChange(route: Route): Promise<void> {
   // Update sidebar active state
   updateSidebarActive(route);
 
+  // Track pageview for analytics
+  trackPageview(`/${route}`, `${route.charAt(0).toUpperCase() + route.slice(1)} - Q-Flash`);
+
   // Special handling for tool page - needs initialization
   if (route === 'tool') {
     // Give DOM a moment to update
@@ -101,7 +106,7 @@ async function onRouteChange(route: Route): Promise<void> {
 // Initialization
 // ============================================================================
 
-function init(): void {
+async function init(): Promise<void> {
   const app = document.getElementById('app');
   if (!app) {
     console.error('App container not found');
@@ -110,6 +115,9 @@ function init(): void {
 
   // Initialize i18n system
   initI18n();
+
+  // Initialize analytics tracking
+  await analytics.init();
 
   // Render app shell
   app.innerHTML = createAppShell();

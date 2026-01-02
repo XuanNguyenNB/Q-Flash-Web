@@ -1,0 +1,25 @@
+{
+    "name": "q-flash-analytics",
+    "version": "1.0.0",
+    "description": "Analytics backend for Q-Flash-Web",
+    "main": "src/server.js",
+    "type": "module",
+    "scripts": {
+        "start": "node src/server.js",
+        "dev": "node --watch src/server.js",
+        "init-db": "node src/db/init.js",
+        "create-admin": "node scripts/create-admin.js"
+    },
+    "dependencies": {
+        "bcrypt": "^5.1.1",
+        "better-sqlite3": "^11.7.0",
+        "cors": "^2.8.5",
+        "express": "^4.21.2",
+        "jsonwebtoken": "^9.0.2",
+        "socket.io": "^4.8.1",
+        "uuid": "^11.0.4"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

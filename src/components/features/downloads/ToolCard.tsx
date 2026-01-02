@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download, ExternalLink, Github } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/services/analytics';
 
 export interface ToolCardProps {
     name: string;
@@ -26,9 +27,12 @@ export function ToolCard({
 }: ToolCardProps) {
     const { t } = useTranslation();
 
-    const handleClick = () => {
-        // Placeholder for future analytics
-        console.log(`Tool clicked: ${trackingId}`);
+    const handleDownloadClick = () => {
+        trackEvent('download', 'click', trackingId, name);
+    };
+
+    const handleGithubClick = () => {
+        trackEvent('download', 'github', trackingId, name);
     };
 
     return (
@@ -54,7 +58,7 @@ export function ToolCard({
                             variant="outline"
                             className="w-full"
                             asChild
-                            onClick={handleClick}
+                            onClick={handleGithubClick}
                             data-action="visit"
                         >
                             <a href={githubUrl} target="_blank" rel="noopener noreferrer">
@@ -69,7 +73,7 @@ export function ToolCard({
                             variant="default"
                             className="w-full"
                             asChild
-                            onClick={handleClick}
+                            onClick={handleDownloadClick}
                             data-action="download"
                         >
                             <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
