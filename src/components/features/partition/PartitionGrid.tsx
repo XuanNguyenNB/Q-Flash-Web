@@ -720,11 +720,26 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
             <FlashConfirmDialog
                 open={isFlashDialogOpen}
                 onOpenChange={setIsFlashDialogOpen}
-                partitions={selectedPartitionObjects.map(p => ({
-                    name: p.name,
-                    size: p.size,  // Use pre-calculated size (correct for both UFS 4096 and eMMC 512 sector sizes)
-                    lun: p.lun
-                }))}
+                partitions={selectedPartitionObjects.map(p => {
+                    // Get ROM entry for this partition
+                    const romEntry = getRomEntry(p.name);
+                    // Check manual file
+                    const manualFile = manualFiles.get(p.name.toLowerCase());
+
+                    // Priority: manualFile > romEntry fileSize > partition size (fallback)
+                    let actualSize = p.size;
+                    if (manualFile) {
+                        actualSize = manualFile.size;
+                    } else if (romEntry?.exists && romEntry.fileSize > 0) {
+                        actualSize = romEntry.fileSize;
+                    }
+
+                    return {
+                        name: p.name,
+                        size: actualSize,
+                        lun: p.lun
+                    };
+                })}
                 onConfirm={handleFlashConfirm}
             />
 

@@ -351,7 +351,7 @@ export function RomLoader({ className, compact = false }: RomLoaderProps) {
 
                         {/* Q-Forge Link */}
                         <a
-                            href="https://github.com/nicenightcc/Q-Flash-Forge"
+                            href="https://github.com/XuanNguyenNB/Q-FLASH-FORGE/releases"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-sm font-medium"

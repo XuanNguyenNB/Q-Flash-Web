@@ -166,12 +166,19 @@ export function useFlash() {
                         log('warning', `Activating Spoof Mode for protected partition: ${partition.name}`);
                     }
 
-                    // Prefer streaming if available (efficient for all files, required for large ones)
-                    if (firehoseProtocol.writePartitionChunked) {
+                    // SMART ROUTING: Choose optimal write method based on file size
+                    // - Small files (< 100MB): Use writePartition (1 configure, faster for small files)
+                    // - Large files (>= 100MB): Use writePartitionChunked (chunked transfer, required for large files)
+                    // This avoids the ~5 second overhead per partition for small files
+                    const SMALL_FILE_THRESHOLD = 100 * 1024 * 1024; // 100MB
+                    const useChunkedWrite = romFile.size >= SMALL_FILE_THRESHOLD || isProtected;
+
+                    if (useChunkedWrite && firehoseProtocol.writePartitionChunked) {
+                        // Large file or protected partition: use chunked write
                         if (isProtected) {
                             log('debug', `Using chunked flash with spoofing for ${partition.name}`);
                         } else {
-                            log('debug', `Using chunked flash for ${partition.name}`);
+                            log('debug', `Using chunked flash for large file: ${partition.name}`);
                         }
 
                         success = await firehoseProtocol.writePartitionChunked(
@@ -197,8 +204,8 @@ export function useFlash() {
                             spoofFilename
                         );
                     } else {
-                        // Fallback to memory buffer (legacy)
-                        log('debug', `Using buffer flash for ${partition.name}`);
+                        // Small file: use single writePartition (faster, less overhead)
+                        log('debug', `Using fast single-write for small file: ${partition.name}`);
                         const fileData = await romFile.arrayBuffer();
                         const data = new Uint8Array(fileData);
 

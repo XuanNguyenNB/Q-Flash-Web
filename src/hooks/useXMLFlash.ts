@@ -113,16 +113,26 @@ export function useXMLFlash() {
 
             log('success', `✅ Found ${validPrograms.length}/${programs.length} files, starting flash...`);
 
-            // Calculate total size for VALID programs only
-            const sectorSize = 4096; // UFS sector size
-            const totalBytes = validPrograms.reduce((sum, p) => {
-                return sum + (BigInt(p.num_partition_sectors) * BigInt(sectorSize));
-            }, BigInt(0));
+            // Calculate total size from ACTUAL file sizes (not sector sizes from XML)
+            // This ensures progress bar matches bytesProcessed which uses file.size
+            let totalBytes = BigInt(0);
+            const programsWithSize: Array<typeof validPrograms[0] & { fileSize: number }> = [];
+            for (const program of validPrograms) {
+                try {
+                    const fileHandle = await imagesDir.getFileHandle(program.filename);
+                    const file = await fileHandle.getFile();
+                    totalBytes += BigInt(file.size);
+                    programsWithSize.push({ ...program, fileSize: file.size });
+                } catch {
+                    // Skip files that can't be read
+                    log('warning', `⚠️ Cannot read file size for "${program.filename}"`);
+                }
+            }
 
             // Start flash in store - use filename as unique key (label can be duplicate like BackupGPT)
             // Format: "label (filename)" for display - ONLY for valid programs
             startFlashWrite(
-                validPrograms.map(p => `${p.label} (${p.filename})`),
+                programsWithSize.map(p => `${p.label} (${p.filename})`),
                 Number(totalBytes)
             );
 
@@ -136,7 +146,7 @@ export function useXMLFlash() {
             let errorCount = 0;
             let bytesProcessed = BigInt(0);
 
-            for (const program of validPrograms) {
+            for (const program of programsWithSize) {
                 const partitionName = program.label;
                 const imageFilename = program.filename;
                 // Use unique key for tracking (label can be duplicate)
@@ -146,7 +156,7 @@ export function useXMLFlash() {
                     log('info', `⚡ Flashing "${partitionName}" from "${imageFilename}"...`);
                     setFlashWritePartitionStatus(uniqueKey, 'in-progress');
 
-                    // Load image file from directory
+                    // Load image file from directory (File object, not buffer)
                     let imageFile: File;
                     try {
                         const fileHandle = await imagesDir.getFileHandle(imageFilename);
@@ -155,40 +165,39 @@ export function useXMLFlash() {
                         throw new Error(`Image file "${imageFilename}" not found in selected folder`);
                     }
 
-                    // Read image data
-                    const arrayBuffer = await imageFile.arrayBuffer();
-                    const imageData = new Uint8Array(arrayBuffer);
-
                     // Get LUN and start sector from XML
                     const lun = program.physical_partition_number ? parseInt(program.physical_partition_number) : 0;
                     const startSector = program.start_sector ? BigInt(program.start_sector) : BigInt(0);
                     const numSectors = BigInt(program.num_partition_sectors);
                     const sectorSize = 4096; // UFS sector size
-                    const sizeInBytes = numSectors * BigInt(sectorSize);
+                    // Use actual file size for progress (more accurate than partition size)
+                    const fileSizeInBytes = BigInt(imageFile.size);
 
-                    // Write partition data using writePartition with XML info
-                    const result = await firehose.writePartition(
+                    // OPTIMIZATION: Use writePartitionFromFile for streaming instead of loading entire file
+                    // This reduces memory pressure and enables efficient streaming for large files
+                    const result = await firehose.writePartitionFromFile(
                         lun,
                         startSector,
                         numSectors,
                         partitionName,
-                        imageData,
+                        imageFile,  // Pass File object directly for streaming
                         (percent: number) => {
-                            const currentBytes = BigInt(Math.floor((percent / 100) * Number(sizeInBytes)));
+                            const currentBytes = BigInt(Math.floor((percent / 100) * Number(fileSizeInBytes)));
                             updateFlashWriteProgress(
                                 uniqueKey,
                                 Number(bytesProcessed + currentBytes),
                                 Number(totalBytes)
                             );
-                        }
+                        },
+                        imageFilename  // Pass original filename from XML
                     );
 
                     if (!result.success) {
                         throw new Error(result.error || 'Write failed');
                     }
 
-                    bytesProcessed += sizeInBytes;
-                    const sizeStr = (Number(sizeInBytes) / 1024 / 1024).toFixed(2);
+                    bytesProcessed += fileSizeInBytes;
+                    const sizeStr = (Number(fileSizeInBytes) / 1024 / 1024).toFixed(2);
                     log('success', `✅ Wrote "${partitionName}" (${sizeStr} MB)`);
                     setFlashWritePartitionStatus(uniqueKey, 'done');
                     successCount++;
