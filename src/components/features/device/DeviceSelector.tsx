@@ -18,6 +18,7 @@ import {
 import { Smartphone, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { trackEvent } from '@/services/analytics';
 
 interface DeviceSelectorProps {
     className?: string;
@@ -51,6 +52,7 @@ export function DeviceSelector({ className, collapsed = false }: DeviceSelectorP
                 },
             };
             setDevice(profile);
+            trackEvent('edl', 'device_selected', chipset.name);
         }
     };
 

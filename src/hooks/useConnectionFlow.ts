@@ -20,6 +20,7 @@ import { useDeviceStore, type DeviceProfile } from '@/stores/deviceStore';
 import { usePartitionStore } from '@/stores/partitionStore';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useEDLConnectionStore } from '@/stores/edlConnectionStore';
+import { trackEvent } from '@/services/analytics';
 
 /**
  * Connection flow state machine.
@@ -220,6 +221,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             const usbManager = getUSBManager();
 
             log('success', '[USB] Device connected');
+            trackEvent('edl', 'connection_step', 'usb_connected');
 
             // Step 2: Sahara Handshake & Firehose Upload
             setStatus('sahara');
@@ -234,6 +236,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             }
 
             log('success', '[Sahara] Handshake complete');
+            trackEvent('edl', 'connection_step', 'sahara_complete');
 
             // CRITICAL: Wait for device to settle after Sahara
             // Device transitions from Sahara mode to Firehose mode
@@ -275,6 +278,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
                 }
 
                 log('success', '[VIP] Authentication successful');
+                trackEvent('edl', 'connection_step', 'vip_authenticated');
             } else {
                 log('info', '[VIP] Not required for this device');
             }
@@ -291,6 +295,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             }
 
             log('success', '[Firehose] Protocol configured, ready for operations');
+            trackEvent('edl', 'connection_step', 'firehose_configured');
 
             // Step 5: Read Partition Table
             setStatus('reading-partitions');
@@ -309,6 +314,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             setStatus('connected');
             setConnected(true);
             log('success', '[Connection] Device ready for operations');
+            trackEvent('edl', 'connection_complete', selectedDevice?.name || 'manual', partitionResult.partitions.length);
 
         } catch (err) {
             // Use statusRef.current to get the latest status value
@@ -316,6 +322,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             setStatus('error');
             setError(connectionError);
             log('error', `[ERROR] ${connectionError.code}: ${connectionError.message}`);
+            trackEvent('edl', 'connection_error', connectionError.code);
             setConnected(false);
             throw err;
         }

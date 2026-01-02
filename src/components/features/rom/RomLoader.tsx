@@ -10,6 +10,7 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { trackEvent } from '@/services/analytics';
 
 // Components
 import { Button } from '@/components/ui/button';
@@ -101,6 +102,7 @@ export function RomLoader({ className, compact = false }: RomLoaderProps) {
             toast.success(t('rom.loaded'), {
                 description: `${result.entries.length} ${t('rom.partitionCount', { count: result.entries.length })}`,
             });
+            trackEvent('edl', 'rom_loaded', result.directoryName, result.entries.length);
         }
     }, [loadRomFromDirectory, t, setRomMapping, selectAvailableRomPartitions]);
 

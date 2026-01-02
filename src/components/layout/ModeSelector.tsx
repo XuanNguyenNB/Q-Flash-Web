@@ -8,6 +8,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Zap, Smartphone, Wrench } from 'lucide-react';
+import { trackEvent } from '@/services/analytics';
 
 // Stores
 import { useDeviceStore, type DeviceMode } from '@/stores/deviceStore';
@@ -51,6 +52,9 @@ export function ModeSelector() {
      * Handle mode selection
      */
     const handleModeClick = (mode: ModeConfig) => {
+        // Track mode switch
+        trackEvent('mode', 'switch', mode.id);
+
         // Allow switching mode even if connected
         // This allows users to manually switch if auto-detection fails
         // or if they want to view other pages while connected
