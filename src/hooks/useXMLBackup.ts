@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useFlashStore } from '@/stores/flashStore';
 import { useFirehose } from './useFirehose';
+import { trackEvent } from '@/services/analytics';
 
 interface XMLProgram {
     label: string;
@@ -98,6 +99,9 @@ export function useXMLBackup() {
                 Number(totalBytes)
             );
 
+            // Track backup start event with folder name
+            trackEvent('edl', 'backup_start', outputDir.name, programs.length);
+
             // Get Firehose protocol using useFirehose hook
             const firehose = getFirehose(usbManager);
             if (!firehose) {
@@ -171,10 +175,13 @@ export function useXMLBackup() {
             // Summary
             if (errorCount === 0) {
                 log('success', `🎉 XML Backup completed successfully! ${successCount} partitions backed up.`);
+                trackEvent('edl', 'backup_complete', outputDir.name, successCount);
             } else if (successCount > 0) {
                 log('warning', `⚠️ XML Backup completed with errors: ${successCount} success, ${errorCount} failed`);
+                trackEvent('edl', 'backup_partial', outputDir.name, successCount);
             } else {
                 log('error', `❌ XML Backup failed: All ${errorCount} partitions failed`);
+                trackEvent('edl', 'backup_failed', outputDir.name, errorCount);
             }
 
         } catch (error) {

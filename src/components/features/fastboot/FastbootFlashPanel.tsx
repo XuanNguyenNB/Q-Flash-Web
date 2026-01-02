@@ -12,6 +12,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HardDrive, FileUp, Check, ChevronsUpDown, RefreshCw, Loader2, Activity } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/services/analytics';
 
 // Stores
 import { useDeviceStore } from '@/stores/deviceStore';
@@ -165,11 +166,14 @@ export function FastbootFlashPanel({ className }: FastbootFlashPanelProps) {
             const success = await flashPartition(selectedPartition, selectedFile);
             if (success) {
                 toast.success(t('fastboot.flash.success', 'Flash completed successfully'));
+                trackEvent('fastboot', 'flash_partition', selectedPartition, selectedFile.size);
             } else {
                 toast.error(t('fastboot.flash.failed', 'Flash failed'));
+                trackEvent('fastboot', 'flash_failed', selectedPartition);
             }
         } catch (error) {
             toast.error(t('fastboot.flash.failed', 'Flash failed') + ': ' + (error instanceof Error ? error.message : String(error)));
+            trackEvent('fastboot', 'flash_error', selectedPartition);
         } finally {
             setSelectedFile(null);
             setSelectedPartition('');

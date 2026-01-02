@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { trackEvent } from '@/services/analytics';
 
 // Stores
 import { useDeviceStore } from '@/stores/deviceStore';
@@ -70,6 +71,7 @@ export function ADBQuickActions({ className }: ADBQuickActionsProps) {
         try {
             const success = await actionFn();
             if (success) {
+                trackEvent('adb', actionName, useADBStore.getState().deviceInfo?.model || 'unknown');
                 toast.success(t(`adb.toast.${actionName}Success`, `${actionName} command sent successfully`));
                 // Navigate to target page after reboot
                 if (navigateTo) {

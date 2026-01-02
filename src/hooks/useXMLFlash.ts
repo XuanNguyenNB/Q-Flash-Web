@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useFlashStore } from '@/stores/flashStore';
 import { useFirehose } from './useFirehose';
+import { trackEvent } from '@/services/analytics';
 
 interface XMLProgram {
     label: string;
@@ -136,6 +137,9 @@ export function useXMLFlash() {
                 Number(totalBytes)
             );
 
+            // Track flash start event with folder name
+            trackEvent('edl', 'flash_start', imagesDir.name, programsWithSize.length);
+
             // Get Firehose protocol
             const firehose = getFirehose(usbManager);
             if (!firehose) {
@@ -216,10 +220,13 @@ export function useXMLFlash() {
             // Summary
             if (errorCount === 0) {
                 log('success', `🎉 XML Flash completed successfully! ${successCount} partitions flashed.`);
+                trackEvent('edl', 'flash_complete', imagesDir.name, successCount);
             } else if (successCount > 0) {
                 log('warning', `⚠️ XML Flash completed with errors: ${successCount} success, ${errorCount} failed`);
+                trackEvent('edl', 'flash_partial', imagesDir.name, successCount);
             } else {
                 log('error', `❌ XML Flash failed: All ${errorCount} partitions failed`);
+                trackEvent('edl', 'flash_failed', imagesDir.name, errorCount);
             }
 
         } catch (error) {

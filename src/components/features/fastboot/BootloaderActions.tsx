@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock, Unlock, AlertTriangle, ArrowDown, Power } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/services/analytics';
 
 // Stores
 import { useDeviceStore } from '@/stores/deviceStore';
@@ -66,6 +67,7 @@ export function BootloaderActions({ className }: BootloaderActionsProps) {
         try {
             const success = await unlockBootloader();
             if (success) {
+                trackEvent('fastboot', 'unlock_bootloader', deviceInfo?.product || 'unknown');
                 toast.success(t('fastboot.bootloader.unlockSuccess', 'Unlock command sent! Check device screen to confirm.'));
                 setShowUnlockInstructionDialog(true);
                 // Refresh device info after a delay to allow device to process
@@ -86,6 +88,7 @@ export function BootloaderActions({ className }: BootloaderActionsProps) {
         try {
             const success = await lockBootloader();
             if (success) {
+                trackEvent('fastboot', 'lock_bootloader', deviceInfo?.product || 'unknown');
                 toast.success(t('fastboot.bootloader.lockSuccess', 'Lock command sent! Check device screen to confirm.'));
                 setShowLockInstructionDialog(true);
                 setTimeout(() => getDeviceInfo(), 5000);
