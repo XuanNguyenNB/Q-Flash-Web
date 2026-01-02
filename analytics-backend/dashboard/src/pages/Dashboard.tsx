@@ -6,7 +6,8 @@ import {
 } from 'recharts';
 import {
     Users, Eye, MousePointer, AlertTriangle, LogOut, RefreshCw,
-    Monitor, Smartphone, Tablet, Globe, Clock, TrendingUp, Activity
+    Monitor, Smartphone, Tablet, Globe, Clock, TrendingUp, Activity,
+    Zap, HardDrive, Filter, ChevronDown
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -47,6 +48,7 @@ interface EventStats {
         category: string;
         action: string;
         label?: string;
+        value?: number;
         timestamp: string;
         device_type?: string;
         browser?: string;
@@ -61,6 +63,26 @@ interface DeviceStats {
 
 const COLORS = ['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'];
 
+// Category colors for visual distinction
+const CATEGORY_COLORS: Record<string, string> = {
+    'edl': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    'adb': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    'fastboot': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    'mode': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    'download': 'bg-green-500/20 text-green-400 border-green-500/30',
+    'default': 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+};
+
+// Action icons
+const getActionIcon = (category: string, action: string) => {
+    if (category === 'edl') {
+        if (action.includes('flash')) return <Zap className="w-4 h-4" />;
+        if (action.includes('backup')) return <HardDrive className="w-4 h-4" />;
+        if (action.includes('connection')) return <Activity className="w-4 h-4" />;
+    }
+    return <MousePointer className="w-4 h-4" />;
+};
+
 export function Dashboard({ onLogout }: DashboardProps) {
     const [_socket, setSocket] = useState<Socket | null>(null);
     const [realtimeStats, setRealtimeStats] = useState<RealtimeStats | null>(null);
@@ -69,7 +91,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
     const [events, setEvents] = useState<EventStats | null>(null);
     const [devices, setDevices] = useState<DeviceStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'errors'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'journey' | 'errors'>('overview');
+    const [categoryFilter, setCategoryFilter] = useState<string>('all');
+    const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
     const token = localStorage.getItem('admin_token');
 
@@ -119,6 +143,8 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
         newSocket.on('event', (data: { category: string; action: string }) => {
             console.log('New event:', data);
+            // Refresh events when new event comes in
+            fetchData();
         });
 
         setSocket(newSocket);
@@ -126,7 +152,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
         return () => {
             newSocket.disconnect();
         };
-    }, [token]);
+    }, [token, fetchData]);
 
     // Fetch initial data
     useEffect(() => {
@@ -152,6 +178,25 @@ export function Dashboard({ onLogout }: DashboardProps) {
             default: return <Monitor className="w-4 h-4" />;
         }
     };
+
+    const getCategoryColor = (category: string) => {
+        return CATEGORY_COLORS[category.toLowerCase()] || CATEGORY_COLORS.default;
+    };
+
+    // Get unique categories for filter
+    const categories = ['all', ...new Set(events?.byCategory.map(c => c.category) || [])];
+
+    // Filter events by category
+    const filteredEvents = categoryFilter === 'all'
+        ? events?.recent
+        : events?.recent.filter(e => e.category === categoryFilter);
+
+    // Group events by action for journey view
+    const journeyStats = events?.byAction.reduce((acc, item) => {
+        if (!acc[item.category]) acc[item.category] = [];
+        acc[item.category].push({ action: item.action, count: item.count });
+        return acc;
+    }, {} as Record<string, Array<{ action: string; count: number }>>);
 
     if (isLoading) {
         return (
@@ -250,15 +295,16 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
                 {/* Tabs */}
                 <div className="flex gap-2 mb-6">
-                    {(['overview', 'events', 'errors'] as const).map((tab) => (
+                    {(['overview', 'events', 'journey', 'errors'] as const).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab
+                            className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${activeTab === tab
                                 ? 'bg-primary-600 text-white'
                                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                                 }`}
                         >
+                            {tab === 'journey' && <Activity className="w-4 h-4" />}
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
                     ))}
@@ -421,36 +467,71 @@ export function Dashboard({ onLogout }: DashboardProps) {
                             </div>
                         </div>
 
-                        {/* Recent Events */}
+                        {/* Recent Events with Filter */}
                         <div className="card lg:col-span-2">
-                            <div className="card-header">
+                            <div className="card-header flex items-center justify-between">
                                 <h3 className="card-title flex items-center gap-2">
                                     <Clock className="w-5 h-5 text-primary-500" />
                                     Recent Events
                                 </h3>
+                                {/* Category Filter */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700 text-sm text-slate-300 hover:bg-slate-600"
+                                    >
+                                        <Filter className="w-4 h-4" />
+                                        {categoryFilter === 'all' ? 'All Categories' : categoryFilter}
+                                        <ChevronDown className="w-4 h-4" />
+                                    </button>
+                                    {showFilterDropdown && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-10">
+                                            {categories.map(cat => (
+                                                <button
+                                                    key={cat}
+                                                    onClick={() => {
+                                                        setCategoryFilter(cat);
+                                                        setShowFilterDropdown(false);
+                                                    }}
+                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg ${categoryFilter === cat ? 'text-primary-400 bg-slate-700/50' : 'text-slate-300'
+                                                        }`}
+                                                >
+                                                    {cat === 'all' ? 'All Categories' : cat.toUpperCase()}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="overflow-auto max-h-80">
+                            <div className="overflow-auto max-h-96">
                                 <table className="data-table">
                                     <thead>
                                         <tr>
                                             <th>Category</th>
                                             <th>Action</th>
                                             <th>Label</th>
+                                            <th>Value</th>
                                             <th>Device</th>
                                             <th>Time</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {events?.recent.slice(0, 15).map((event, i) => (
-                                            <tr key={i}>
+                                        {filteredEvents?.slice(0, 20).map((event, i) => (
+                                            <tr key={i} className="hover:bg-slate-800/50">
                                                 <td>
-                                                    <span className="px-2 py-1 rounded-full text-xs bg-primary-600/20 text-primary-400">
+                                                    <span className={`px-2 py-1 rounded-full text-xs border ${getCategoryColor(event.category)}`}>
                                                         {event.category}
                                                     </span>
                                                 </td>
-                                                <td>{event.action}</td>
-                                                <td className="text-slate-400 truncate max-w-[150px]">
+                                                <td className="flex items-center gap-2">
+                                                    {getActionIcon(event.category, event.action)}
+                                                    <span>{event.action}</span>
+                                                </td>
+                                                <td className="text-slate-400 truncate max-w-[200px]" title={event.label}>
                                                     {event.label || '-'}
+                                                </td>
+                                                <td className="text-slate-400">
+                                                    {event.value ?? '-'}
                                                 </td>
                                                 <td>
                                                     <span className="flex items-center gap-1">
@@ -465,6 +546,83 @@ export function Dashboard({ onLogout }: DashboardProps) {
                                         ))}
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'journey' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Journey by Mode */}
+                        {journeyStats && Object.entries(journeyStats).map(([category, actions]) => (
+                            <div key={category} className="card">
+                                <div className="card-header">
+                                    <h3 className="card-title flex items-center gap-2">
+                                        <span className={`px-2 py-1 rounded-full text-xs border ${getCategoryColor(category)}`}>
+                                            {category.toUpperCase()}
+                                        </span>
+                                        User Actions
+                                    </h3>
+                                </div>
+                                <div className="space-y-3">
+                                    {actions.sort((a, b) => b.count - a.count).map((action, i) => (
+                                        <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
+                                            <div className="flex items-center gap-3">
+                                                {getActionIcon(category, action.action)}
+                                                <span className="text-sm text-slate-300">{action.action}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-primary-500 rounded-full"
+                                                        style={{ width: `${Math.min(100, (action.count / Math.max(...actions.map(a => a.count))) * 100)}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-sm font-medium text-white min-w-[40px] text-right">
+                                                    {action.count}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* User Flow Funnel */}
+                        <div className="card lg:col-span-2">
+                            <div className="card-header">
+                                <h3 className="card-title flex items-center gap-2">
+                                    <TrendingUp className="w-5 h-5 text-primary-500" />
+                                    EDL Flash Funnel
+                                </h3>
+                            </div>
+                            <div className="flex items-center justify-center gap-4 py-8">
+                                {[
+                                    { label: 'Device Selected', action: 'device_selected', color: 'bg-blue-500' },
+                                    { label: 'Connected', action: 'connection_complete', color: 'bg-purple-500' },
+                                    { label: 'ROM Loaded', action: 'rom_loaded', color: 'bg-yellow-500' },
+                                    { label: 'Flash Started', action: 'flash_start', color: 'bg-orange-500' },
+                                    { label: 'Flash Complete', action: 'flash_complete', color: 'bg-green-500' },
+                                ].map((step, i, arr) => {
+                                    const count = events?.byAction.find(
+                                        a => a.category === 'edl' && a.action === step.action
+                                    )?.count ?? 0;
+                                    return (
+                                        <div key={i} className="flex items-center gap-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className={`w-16 h-16 rounded-full ${step.color} flex items-center justify-center text-white font-bold text-xl`}>
+                                                    {count}
+                                                </div>
+                                                <span className="text-xs text-slate-400 mt-2 text-center max-w-[80px]">
+                                                    {step.label}
+                                                </span>
+                                            </div>
+                                            {i < arr.length - 1 && (
+                                                <div className="w-8 h-0.5 bg-slate-600" />
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
