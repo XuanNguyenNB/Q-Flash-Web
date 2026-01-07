@@ -33,16 +33,20 @@ export function DeviceSelector({ className, collapsed = false }: DeviceSelectorP
     const handleSelect = (chipsetId: string) => {
         const chipset = chipsets.find(c => c.id === chipsetId);
         if (chipset) {
+            // Determine auth method - LG uses 'standard', others use 'oppo_vip'
+            const authMethod = chipset.authMethod === 'standard' ? 'none' :
+                chipset.authMethod === 'oppo_vip' ? 'oppo_vip' : 'none';
+
             // Convert ChipsetEntry to DeviceProfile
             const profile: DeviceProfile = {
                 id: chipset.id,
-                brand: 'qualcomm',
+                brand: chipset.id.startsWith('LG_') ? 'lg' : 'qualcomm',
                 name: chipset.name,
                 codename: chipset.codename,
                 chipset: chipset.codename,
                 chipsetName: chipset.name,
                 chipsetFolder: chipset.codename,
-                authMethod: chipset.authMethod === 'oppo_vip' ? 'oppo_vip' : 'none',
+                authMethod: authMethod,
                 presetId: chipset.presetId || null,
                 status: 'tested',
                 firehoseUrls: {

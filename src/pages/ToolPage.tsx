@@ -12,8 +12,8 @@ import { useDeviceStore } from '@/stores/deviceStore';
 import { usePartitionStore } from '@/stores/partitionStore';
 import { useWebUSB } from '@/hooks';
 import { PartitionGrid } from '@/components/features/partition';
-import { ManualFirehoseLoader } from '@/components/features/firehose/ManualFirehoseLoader';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { ManualFirehoseLoader, BrandGroupSelector, type BrandGroup } from '@/components/features/firehose';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // Zadig slideshow images
@@ -28,6 +28,7 @@ export default function ToolPage() {
     const { currentMode, setMode, setConnected } = useDeviceStore();
     const { partitions, isLoading } = usePartitionStore();
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [selectedBrandGroup, setSelectedBrandGroup] = useState<BrandGroup>('oppo');
 
     // Get EDL connection state from WebUSB protocol (source of truth)
     const { isConnected: getIsConnected } = useWebUSB();
@@ -77,10 +78,10 @@ export default function ToolPage() {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">
-                            {t('tool.edl.title', 'Flash Tool -> EDL Mode')}
+                            {t('tool.edl.title', 'EDL Flash Tool')}
                         </h1>
                         <p className="text-muted-foreground text-sm">
-                            {t('tool.edl.subtitle', 'Select partitions to backup or write -> This mode can be used to unbrick devices, read user data, or manage partitions directly.')}
+                            {t('tool.edl.subtitle', 'Flash tool for Qualcomm EDL devices. Can unbrick devices, backup data, or manage partitions directly.')}
                         </p>
                     </div>
                 </div>
@@ -91,117 +92,127 @@ export default function ToolPage() {
                 {isEDLConnected ? (
                     <PartitionGrid isLoading={isLoading} />
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
-                        {/* No Device State - Connection Guide */}
-                        <div className="flex flex-col gap-6">
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold flex items-center gap-2">
-                                    <Plug className="h-5 w-5 text-primary" />
-                                    {t('tool.guide.title', 'Connection Guide')}
-                                </h3>
-
-                                <div className="prose prose-sm dark:prose-invert text-muted-foreground">
-                                    <p>
-                                        {t('tool.guide.intro', 'Để sử dụng chế độ EDL trên WEB, thiết bị phải được nhận diện là "Qualcomm HS-USB QDLoader 9008" hoặc "QUSB_BULK". Nếu chưa được phát hiện, hãy làm theo các bước sau:')}
-                                    </p>
-                                    <ol className="list-decimal pl-4 space-y-3 mt-3">
-                                        <li>
-                                            <span className="font-medium text-foreground">{t('tool.guide.step1.title', 'Bước 1: Tải về và mở Zadig')}</span>
-                                            <p className="text-xs mt-1">{t('tool.guide.step1.desc', 'Tải về và mở ứng dụng Zadig.exe')}</p>
-                                        </li>
-                                        <li>
-                                            <span className="font-medium text-foreground">{t('tool.guide.step2.title', 'Bước 2: Vào chế độ EDL')}</span>
-                                            <p className="text-xs mt-1">{t('tool.guide.step2.desc', 'Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi máy tính nhận (có tiếng kêu hoặc Device Manager hiển thị)')}</p>
-                                        </li>
-                                        <li>
-                                            <span className="font-medium text-foreground">{t('tool.guide.step3.title', 'Bước 3: Thay thế Driver')}</span>
-                                            <p className="text-xs mt-1">{t('tool.guide.step3.desc', 'Tiến hành tìm và thay thế driver như hình minh họa kế bên')}</p>
-                                        </li>
-                                        <li>
-                                            <span className="font-medium text-foreground">{t('tool.guide.step4.title', 'Bước 4: Kết nối lại')}</span>
-                                            <p className="text-xs mt-1">{t('tool.guide.step4.desc', 'Sau khi đã cài đặt, thiết bị có thể bị thoát khỏi EDL. Hãy ấn nút kết nối với thiết bị trên WEB này và tiến hành vào lại EDL bằng cách: Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi giao diện Chrome hiển thị thiết bị (dạng QUSB_BULK), chúng ta tiến hành chọn thiết bị đó, web sẽ tự vào EDL mode VIP')}</p>
-                                        </li>
-                                    </ol>
-                                </div>
-
-                                <div className="bg-muted/50 rounded-lg p-4 border border-border">
-                                    <h4 className="font-medium text-sm mb-2">{t('tool.guide.tip.title', 'Tip: Use Q-Flash Forge')}</h4>
-                                    <p className="text-xs text-muted-foreground mb-3">
-                                        {t('tool.guide.tip.desc', 'Use our Q-Flash Forge tool for automatic driver fixing and Zadig guidance.')}
-                                    </p>
-                                    <a
-                                        href="https://github.com/XuanNguyenNB/Q-FLASH-FORGE"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2 w-full")}
-                                    >
-                                        <ExternalLink className="h-4 w-4" />
-                                        {t('tool.guide.openForge', 'Open Q-Flash Forge Project')}
-                                    </a>
-                                </div>
-                            </div>
+                    <div className="space-y-8">
+                        {/* Brand Group Selector */}
+                        <div className="p-5 rounded-xl bg-gradient-to-br from-primary/5 to-muted/30 border border-border/50">
+                            <BrandGroupSelector
+                                selectedGroup={selectedBrandGroup}
+                                onGroupChange={setSelectedBrandGroup}
+                            />
                         </div>
 
-                        {/* Zadig Slideshow */}
-                        <div className="flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-xl p-4 bg-muted/20 min-h-[300px]">
-                            {/* Slide indicator */}
-                            <div className="flex items-center gap-2 mb-3">
-                                <span className="text-sm font-medium text-muted-foreground">
-                                    {t('tool.zadig.title', 'Driver Installation Guide')}
-                                </span>
-                                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                                    {currentSlide + 1} / {zadigSlides.length}
-                                </span>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* No Device State - Connection Guide */}
+                            <div className="flex flex-col gap-6">
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                                        <Plug className="h-5 w-5 text-primary" />
+                                        {t('tool.guide.title', 'Connection Guide')}
+                                    </h3>
+
+                                    <div className="prose prose-sm dark:prose-invert text-muted-foreground">
+                                        <p>
+                                            {t('tool.guide.intro', 'Để sử dụng chế độ EDL trên WEB, thiết bị phải được nhận diện là "Qualcomm HS-USB QDLoader 9008" hoặc "QUSB_BULK". Nếu chưa được phát hiện, hãy làm theo các bước sau:')}
+                                        </p>
+                                        <ol className="list-decimal pl-4 space-y-3 mt-3">
+                                            <li>
+                                                <span className="font-medium text-foreground">{t('tool.guide.step1.title', 'Bước 1: Tải về và mở Zadig')}</span>
+                                                <p className="text-xs mt-1">{t('tool.guide.step1.desc', 'Tải về và mở ứng dụng Zadig.exe')}</p>
+                                            </li>
+                                            <li>
+                                                <span className="font-medium text-foreground">{t('tool.guide.step2.title', 'Bước 2: Vào chế độ EDL')}</span>
+                                                <p className="text-xs mt-1">{t('tool.guide.step2.desc', 'Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi máy tính nhận (có tiếng kêu hoặc Device Manager hiển thị)')}</p>
+                                            </li>
+                                            <li>
+                                                <span className="font-medium text-foreground">{t('tool.guide.step3.title', 'Bước 3: Thay thế Driver')}</span>
+                                                <p className="text-xs mt-1">{t('tool.guide.step3.desc', 'Tiến hành tìm và thay thế driver như hình minh họa kế bên')}</p>
+                                            </li>
+                                            <li>
+                                                <span className="font-medium text-foreground">{t('tool.guide.step4.title', 'Bước 4: Kết nối lại')}</span>
+                                                <p className="text-xs mt-1">{t('tool.guide.step4.desc', 'Sau khi đã cài đặt, thiết bị có thể bị thoát khỏi EDL. Hãy ấn nút kết nối với thiết bị trên WEB này và tiến hành vào lại EDL bằng cách: Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi giao diện Chrome hiển thị thiết bị (dạng QUSB_BULK), chúng ta tiến hành chọn thiết bị đó, web sẽ tự vào EDL mode VIP')}</p>
+                                            </li>
+                                        </ol>
+                                    </div>
+
+                                    <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                                        <h4 className="font-medium text-sm mb-2">{t('tool.guide.tip.title', 'Tip: Use Q-Flash Forge')}</h4>
+                                        <p className="text-xs text-muted-foreground mb-3">
+                                            {t('tool.guide.tip.desc', 'Use our Q-Flash Forge tool for automatic driver fixing and Zadig guidance.')}
+                                        </p>
+                                        <a
+                                            href="https://github.com/XuanNguyenNB/Q-FLASH-FORGE"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2 w-full")}
+                                        >
+                                            <ExternalLink className="h-4 w-4" />
+                                            {t('tool.guide.openForge', 'Open Q-Flash Forge Project')}
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Slideshow */}
-                            <div className="relative w-full max-w-md">
-                                <img
-                                    src={zadigSlides[currentSlide].src}
-                                    alt={`Zadig step ${currentSlide + 1}`}
-                                    className="w-full h-auto rounded-lg border border-border shadow-md transition-opacity duration-300"
-                                />
+                            {/* Zadig Slideshow */}
+                            <div className="flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-xl p-4 bg-muted/20 min-h-[300px]">
+                                {/* Slide indicator */}
+                                <div className="flex items-center gap-2 mb-3">
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                        {t('tool.zadig.title', 'Driver Installation Guide')}
+                                    </span>
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                        {currentSlide + 1} / {zadigSlides.length}
+                                    </span>
+                                </div>
 
-                                {/* Navigation arrows */}
-                                <button
-                                    onClick={prevSlide}
-                                    className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background shadow-sm border border-border"
-                                >
-                                    <ChevronLeft className="h-4 w-4" />
-                                </button>
-                                <button
-                                    onClick={nextSlide}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background shadow-sm border border-border"
-                                >
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
-
-                            {/* Step description */}
-                            <p className="text-sm font-medium text-center mt-3">
-                                {t(zadigSlides[currentSlide].stepKey, `Step ${currentSlide + 1}`)}
-                            </p>
-
-                            {/* Dot indicators */}
-                            <div className="flex gap-1.5 mt-3">
-                                {zadigSlides.map((_, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setCurrentSlide(index)}
-                                        className={cn(
-                                            "w-2 h-2 rounded-full transition-colors",
-                                            index === currentSlide
-                                                ? "bg-primary"
-                                                : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                                        )}
+                                {/* Slideshow */}
+                                <div className="relative w-full max-w-md">
+                                    <img
+                                        src={zadigSlides[currentSlide].src}
+                                        alt={`Zadig step ${currentSlide + 1}`}
+                                        className="w-full h-auto rounded-lg border border-border shadow-md transition-opacity duration-300"
                                     />
-                                ))}
-                            </div>
-                        </div>
 
-                        {/* Manual Firehose Loader */}
-                        <div className="lg:col-span-2 mt-4">
-                            <ManualFirehoseLoader />
+                                    {/* Navigation arrows */}
+                                    <button
+                                        onClick={prevSlide}
+                                        className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background shadow-sm border border-border"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={nextSlide}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 hover:bg-background shadow-sm border border-border"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </button>
+                                </div>
+
+                                {/* Step description */}
+                                <p className="text-sm font-medium text-center mt-3">
+                                    {t(zadigSlides[currentSlide].stepKey, `Step ${currentSlide + 1}`)}
+                                </p>
+
+                                {/* Dot indicators */}
+                                <div className="flex gap-1.5 mt-3">
+                                    {zadigSlides.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setCurrentSlide(index)}
+                                            className={cn(
+                                                "w-2 h-2 rounded-full transition-colors",
+                                                index === currentSlide
+                                                    ? "bg-primary"
+                                                    : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                                            )}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Manual Firehose Loader */}
+                            <div className="lg:col-span-2 mt-4">
+                                <ManualFirehoseLoader brandGroup={selectedBrandGroup} />
+                            </div>
                         </div>
                     </div>
                 )}

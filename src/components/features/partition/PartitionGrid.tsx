@@ -82,7 +82,7 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
         setIsBackupDialogOpen(true);
     }, [selectedPartitions.size]);
 
-    const handleBackupConfirm = useCallback(async (directoryHandle: FileSystemDirectoryHandle) => {
+    const handleBackupConfirm = useCallback(async (directoryHandle: FileSystemDirectoryHandle, options: { includeGptBackup: boolean }) => {
         setIsBackupDialogOpen(false);
         const { log } = useTerminalStore.getState();
 
@@ -92,7 +92,7 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
             return;
         }
 
-        await startBackup(usb, selectedPartitionObjects, directoryHandle);
+        await startBackup(usb, selectedPartitionObjects, directoryHandle, options);
     }, [selectedPartitionObjects, getManager, startBackup]);
 
     const handleOpenFlashDialog = useCallback(() => {

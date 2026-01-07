@@ -15,6 +15,14 @@ import type { WebUSBManager } from '@/core/WebUSBManager';
 import type { PartitionInfo } from '@/types';
 
 /**
+ * Backup options
+ */
+export interface BackupOptions {
+    /** Include GPT backup and XML generation */
+    includeGptBackup?: boolean;
+}
+
+/**
  * Return type for useBackup hook.
  */
 export interface UseBackupReturn {
@@ -22,7 +30,8 @@ export interface UseBackupReturn {
     startBackup: (
         usb: WebUSBManager,
         partitions: PartitionInfo[],
-        directoryHandle: FileSystemDirectoryHandle
+        directoryHandle: FileSystemDirectoryHandle,
+        options?: BackupOptions
     ) => Promise<{ success: boolean; error?: string }>;
     /** Cancel ongoing backup operation */
     cancelBackup: () => void;
@@ -68,7 +77,7 @@ export function useBackup(): UseBackupReturn {
     const log = useTerminalStore((state) => state.log);
 
     // Get Firehose operations
-    const { readPartition, readPartitionStreamToFile } = useFirehose();
+    const { getInstance, readPartition, readPartitionStreamToFile } = useFirehose();
 
     // Threshold for switching to streaming mode (32MB)
     const STREAMING_THRESHOLD = 32 * 1024 * 1024;
@@ -79,20 +88,95 @@ export function useBackup(): UseBackupReturn {
     const startBackup = useCallback(async (
         usb: WebUSBManager,
         partitions: PartitionInfo[],
-        directoryHandle: FileSystemDirectoryHandle
+        directoryHandle: FileSystemDirectoryHandle,
+        options?: BackupOptions
     ): Promise<{ success: boolean; error?: string }> => {
         cancelledRef.current = false;
         const savePath = directoryHandle.name;
+        const includeGptBackup = options?.includeGptBackup ?? false;
 
         // Initialize backup state
         const totalBackupSize = partitions.reduce((sum, p) => sum + p.size, 0);
         startBackupStore(partitions.map(p => p.name), savePath, totalBackupSize);
         log('info', `Starting backup of ${partitions.length} partition(s) (${Math.ceil(totalBackupSize / 1024 / 1024)} MB)...`);
 
-        const metadataEntries: string[] = [];
+        // Group metadata entries by LUN for rawprogram{LUN}.xml format
+        const metadataByLun = new Map<number, Array<{
+            name: string;
+            startSector: bigint;
+            numSectors: bigint;
+            size: number;
+        }>>();
         let successCount = 0;
         let errorCount = 0;
         let accumulatedBytes = 0;
+
+        // Collect unique LUNs from partitions
+        const uniqueLuns = [...new Set(partitions.map(p => p.lun ?? 0))];
+
+        // Pre-backup GPT for all LUNs BEFORE partition backups (USB connection is fresh)
+        // Only if user selected the GPT backup option
+        const gptDataByLun = new Map<number, {
+            gptData?: Uint8Array;
+            backupGptData?: Uint8Array;
+            numDiskSectors?: bigint;
+            lastPartitionIndex?: number;
+            lastPartitionName?: string;
+            lastPartitionEndOffset?: number;
+            partitionArraySize?: number;
+        }>();
+
+        const firehose = getInstance(usb);
+
+        if (includeGptBackup) {
+            log('info', `Pre-reading GPT from ${uniqueLuns.length} LUN(s)...`);
+
+            // GPT read timeout - skip if device doesn't respond in 10 seconds
+            const GPT_READ_TIMEOUT = 10000;
+
+            for (const lun of uniqueLuns) {
+                try {
+                    log('info', `Reading GPT for LUN ${lun}...`);
+
+                    // Race between GPT read and timeout
+                    const gptPromise = firehose.getGptInfo(lun);
+                    const timeoutPromise = new Promise<{ success: false; error: string }>((resolve) =>
+                        setTimeout(() => resolve({ success: false, error: 'GPT read timeout (10s)' }), GPT_READ_TIMEOUT)
+                    );
+
+                    const gptInfo = await Promise.race([gptPromise, timeoutPromise]);
+
+                    if (gptInfo.success && gptInfo.gptData && gptInfo.numDiskSectors) {
+                        const lunData: typeof gptDataByLun extends Map<number, infer V> ? V : never = {
+                            gptData: gptInfo.gptData,
+                            numDiskSectors: gptInfo.numDiskSectors,
+                            lastPartitionIndex: gptInfo.lastPartitionIndex,
+                            lastPartitionName: gptInfo.lastPartitionName,
+                            lastPartitionEndOffset: gptInfo.lastPartitionEndOffset,
+                            partitionArraySize: gptInfo.partitionArraySize,
+                        };
+
+                        // Also read backup GPT (with timeout)
+                        const backupPromise = firehose.readBackupGpt(lun, gptInfo.numDiskSectors);
+                        const backupTimeoutPromise = new Promise<{ success: false }>((resolve) =>
+                            setTimeout(() => resolve({ success: false }), GPT_READ_TIMEOUT)
+                        );
+                        const backupGpt = await Promise.race([backupPromise, backupTimeoutPromise]);
+
+                        if (backupGpt.success && 'data' in backupGpt && backupGpt.data) {
+                            lunData.backupGptData = backupGpt.data;
+                        }
+
+                        gptDataByLun.set(lun, lunData);
+                        log('success', `GPT for LUN ${lun} read successfully`);
+                    } else {
+                        log('warning', `Could not read GPT for LUN ${lun}: ${gptInfo.error || 'Unknown error'}`);
+                    }
+                } catch (gptError) {
+                    log('warning', `GPT read error for LUN ${lun}: ${gptError}`);
+                }
+            }
+        } // End if (includeGptBackup)
 
         try {
             for (const partition of partitions) {
@@ -170,19 +254,17 @@ export function useBackup(): UseBackupReturn {
                     // Ensure detailed progress marks current partition as fully done in bytes
                     updateBackupProgress(partition.name, accumulatedBytes, totalBackupSize);
 
-                    // Add to metadata
-                    const sectorSize = 512;
-                    metadataEntries.push(
-                        `  <program SECTOR_SIZE_IN_BYTES="${sectorSize}" ` +
-                        `file_sector_offset="0" ` +
-                        `filename="${partition.name}.img" ` +
-                        `label="${partition.name}" ` +
-                        `num_partition_sectors="${numSectors}" ` +
-                        `physical_partition_number="0" ` +
-                        `size_in_KB="${Math.ceil(partition.size / 1024)}" ` +
-                        `sparse="false" ` +
-                        `start_sector="${partition.startSector}" />`
-                    );
+                    // Add to metadata grouped by LUN
+                    const lun = partition.lun ?? 0;
+                    if (!metadataByLun.has(lun)) {
+                        metadataByLun.set(lun, []);
+                    }
+                    metadataByLun.get(lun)!.push({
+                        name: partition.name,
+                        startSector: partition.startSector,
+                        numSectors: numSectors,
+                        size: partition.size,
+                    });
 
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -221,17 +303,172 @@ export function useBackup(): UseBackupReturn {
                 }
             }
 
-            // Generate metadata XML
-            if (metadataEntries.length > 0) {
-                const metadataXML = `<?xml version="1.0" ?>\n<data>\n${metadataEntries.join('\n')}\n</data>`;
-                const metadataHandle = await directoryHandle.getFileHandle(
-                    'rawprogram_backup.xml',
+            // Generate rawprogram{LUN}.xml and patch{LUN}.xml for each LUN
+            const sectorSize = 4096; // UFS standard
+            const createdFiles: string[] = [];
+
+            for (const [lun, entries] of metadataByLun) {
+                // Build program entries for this LUN
+                const programEntries = entries.map(entry => {
+                    const startByteHex = `0x${(entry.startSector * BigInt(sectorSize)).toString(16)}`;
+                    const sizeInKB = (entry.size / 1024).toFixed(1);
+                    return (
+                        `  <program SECTOR_SIZE_IN_BYTES="${sectorSize}" ` +
+                        `file_sector_offset="0" ` +
+                        `filename="${entry.name}.img" ` +
+                        `label="${entry.name}" ` +
+                        `num_partition_sectors="${entry.numSectors}" ` +
+                        `partofsingleimage="false" ` +
+                        `physical_partition_number="${lun}" ` +
+                        `readbackverify="false" ` +
+                        `size_in_KB="${sizeInKB}" ` +
+                        `sparse="false" ` +
+                        `start_byte_hex="${startByteHex}" ` +
+                        `start_sector="${entry.startSector}"/>`
+                    );
+                });
+
+                // Create rawprogram{LUN}.xml
+                const rawprogramXML =
+                    `<?xml version="1.0" ?>\n` +
+                    `<data>\n` +
+                    `  <!--NOTE: This is an ** Autogenerated file **-->\n` +
+                    `  <!--NOTE: Sector size is ${sectorSize}bytes-->\n` +
+                    `${programEntries.join('\n')}\n` +
+                    `</data>`;
+
+                const rawprogramHandle = await directoryHandle.getFileHandle(
+                    `rawprogram${lun}.xml`,
                     { create: true }
                 );
-                const metadataWritable = await metadataHandle.createWritable();
-                await metadataWritable.write(metadataXML);
-                await metadataWritable.close();
-                log('success', 'Metadata XML created: rawprogram_backup.xml');
+                const rawprogramWritable = await rawprogramHandle.createWritable();
+                await rawprogramWritable.write(rawprogramXML);
+                await rawprogramWritable.close();
+                createdFiles.push(`rawprogram${lun}.xml`);
+
+                // Use pre-read GPT data (read before partition backups when USB was fresh)
+                const preReadGpt = gptDataByLun.get(lun);
+
+                if (preReadGpt && preReadGpt.gptData && preReadGpt.numDiskSectors) {
+                    // Save gpt_main{LUN}.bin
+                    const gptMainHandle = await directoryHandle.getFileHandle(
+                        `gpt_main${lun}.bin`,
+                        { create: true }
+                    );
+                    const gptMainWritable = await gptMainHandle.createWritable();
+                    // Copy to standard ArrayBuffer for TS compatibility
+                    const gptMainBuffer = preReadGpt.gptData.buffer.slice(
+                        preReadGpt.gptData.byteOffset,
+                        preReadGpt.gptData.byteOffset + preReadGpt.gptData.byteLength
+                    ) as ArrayBuffer;
+                    await gptMainWritable.write(gptMainBuffer);
+                    await gptMainWritable.close();
+                    createdFiles.push(`gpt_main${lun}.bin`);
+                    log('success', `GPT saved: gpt_main${lun}.bin`);
+
+                    // Save backup GPT if available
+                    if (preReadGpt.backupGptData) {
+                        const gptBackupHandle = await directoryHandle.getFileHandle(
+                            `gpt_backup${lun}.bin`,
+                            { create: true }
+                        );
+                        const gptBackupWritable = await gptBackupHandle.createWritable();
+                        const gptBackupBuffer = preReadGpt.backupGptData.buffer.slice(
+                            preReadGpt.backupGptData.byteOffset,
+                            preReadGpt.backupGptData.byteOffset + preReadGpt.backupGptData.byteLength
+                        ) as ArrayBuffer;
+                        await gptBackupWritable.write(gptBackupBuffer);
+                        await gptBackupWritable.close();
+                        createdFiles.push(`gpt_backup${lun}.bin`);
+                        log('success', `Backup GPT saved: gpt_backup${lun}.bin`);
+                    }
+
+                    // Calculate partition array size and byte offset for last partition
+                    const lastPartIndex = preReadGpt.lastPartitionIndex ?? 0;
+                    const partArraySize = preReadGpt.partitionArraySize ?? 4096;
+                    const lastPartEndOffset = preReadGpt.lastPartitionEndOffset ?? 0;
+
+                    // Create patch{LUN}.xml with full GPT patching rules
+                    const patchEntries = [
+                        // Update last partition endLBA in Primary GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="${lastPartEndOffset}" filename="gpt_main${lun}.bin" physical_partition_number="${lun}" size_in_bytes="8" start_sector="2" value="NUM_DISK_SECTORS-6." what="Update last partition ${lastPartIndex} '${preReadGpt.lastPartitionName}' with actual size in Primary Header."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="${lastPartEndOffset}" filename="DISK" physical_partition_number="${lun}" size_in_bytes="8" start_sector="2" value="NUM_DISK_SECTORS-6." what="Update last partition ${lastPartIndex} '${preReadGpt.lastPartitionName}' with actual size in Primary Header."/>`,
+                        // Update last partition endLBA in Backup GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="${lastPartEndOffset}" filename="gpt_backup${lun}.bin" physical_partition_number="${lun}" size_in_bytes="8" start_sector="0" value="NUM_DISK_SECTORS-6." what="Update last partition ${lastPartIndex} '${preReadGpt.lastPartitionName}' with actual size in Backup Header."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="${lastPartEndOffset}" filename="DISK" physical_partition_number="${lun}" size_in_bytes="8" start_sector="NUM_DISK_SECTORS-5." value="NUM_DISK_SECTORS-6." what="Update last partition ${lastPartIndex} '${preReadGpt.lastPartitionName}' with actual size in Backup Header."/>`,
+                        // Update LastUsableLBA in Primary GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="48" filename="gpt_main${lun}.bin" physical_partition_number="${lun}" size_in_bytes="8" start_sector="1" value="NUM_DISK_SECTORS-6." what="Update Primary Header with LastUseableLBA."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="48" filename="DISK" physical_partition_number="${lun}" size_in_bytes="8" start_sector="1" value="NUM_DISK_SECTORS-6." what="Update Primary Header with LastUseableLBA."/>`,
+                        // Update LastUsableLBA in Backup GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="48" filename="gpt_backup${lun}.bin" physical_partition_number="${lun}" size_in_bytes="8" start_sector="4" value="NUM_DISK_SECTORS-6." what="Update Backup Header with LastUseableLBA."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="48" filename="DISK" physical_partition_number="${lun}" size_in_bytes="8" start_sector="NUM_DISK_SECTORS-1." value="NUM_DISK_SECTORS-6." what="Update Backup Header with LastUseableLBA."/>`,
+                        // Update BackupGPT Header Location in Primary GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="32" filename="gpt_main${lun}.bin" physical_partition_number="${lun}" size_in_bytes="8" start_sector="1" value="NUM_DISK_SECTORS-1." what="Update Primary Header with BackupGPT Header Location."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="32" filename="DISK" physical_partition_number="${lun}" size_in_bytes="8" start_sector="1" value="NUM_DISK_SECTORS-1." what="Update Primary Header with BackupGPT Header Location."/>`,
+                        // Update CurrentLBA in Backup GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="24" filename="gpt_backup${lun}.bin" physical_partition_number="${lun}" size_in_bytes="8" start_sector="4" value="NUM_DISK_SECTORS-1." what="Update Backup Header with CurrentLBA."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="24" filename="DISK" physical_partition_number="${lun}" size_in_bytes="8" start_sector="NUM_DISK_SECTORS-1." value="NUM_DISK_SECTORS-1." what="Update Backup Header with CurrentLBA."/>`,
+                        // Update Partition Array Location in Backup GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="72" filename="gpt_backup${lun}.bin" physical_partition_number="${lun}" size_in_bytes="8" start_sector="4" value="NUM_DISK_SECTORS-5." what="Update Backup Header with Partition Array Location."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="72" filename="DISK" physical_partition_number="${lun}" size_in_bytes="8" start_sector="NUM_DISK_SECTORS-1" value="NUM_DISK_SECTORS-5." what="Update Backup Header with Partition Array Location."/>`,
+                        // Update CRC of Partition Array in Primary GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="88" filename="gpt_main${lun}.bin" physical_partition_number="${lun}" size_in_bytes="4" start_sector="1" value="CRC32(2,${partArraySize})" what="Update Primary Header with CRC of Partition Array."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="88" filename="DISK" physical_partition_number="${lun}" size_in_bytes="4" start_sector="1" value="CRC32(2,${partArraySize})" what="Update Primary Header with CRC of Partition Array."/>`,
+                        // Update CRC of Partition Array in Backup GPT
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="88" filename="gpt_backup${lun}.bin" physical_partition_number="${lun}" size_in_bytes="4" start_sector="4" value="CRC32(0,${partArraySize})" what="Update Backup Header with CRC of Partition Array."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="88" filename="DISK" physical_partition_number="${lun}" size_in_bytes="4" start_sector="NUM_DISK_SECTORS-1." value="CRC32(NUM_DISK_SECTORS-5.,${partArraySize})" what="Update Backup Header with CRC of Partition Array."/>`,
+                        // Zero out and update CRC of Primary Header
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="16" filename="gpt_main${lun}.bin" physical_partition_number="${lun}" size_in_bytes="4" start_sector="1" value="0" what="Zero Out Header CRC in Primary Header."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="16" filename="gpt_main${lun}.bin" physical_partition_number="${lun}" size_in_bytes="4" start_sector="1" value="CRC32(1,92)" what="Update Primary Header with CRC of Primary Header."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="16" filename="DISK" physical_partition_number="${lun}" size_in_bytes="4" start_sector="1" value="0" what="Zero Out Header CRC in Primary Header."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="16" filename="DISK" physical_partition_number="${lun}" size_in_bytes="4" start_sector="1" value="CRC32(1,92)" what="Update Primary Header with CRC of Primary Header."/>`,
+                        // Zero out and update CRC of Backup Header
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="16" filename="gpt_backup${lun}.bin" physical_partition_number="${lun}" size_in_bytes="4" start_sector="4" value="0" what="Zero Out Header CRC in Backup Header."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="16" filename="gpt_backup${lun}.bin" physical_partition_number="${lun}" size_in_bytes="4" start_sector="4" value="CRC32(4,92)" what="Update Backup Header with CRC of Backup Header."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="16" filename="DISK" physical_partition_number="${lun}" size_in_bytes="4" start_sector="NUM_DISK_SECTORS-1." value="0" what="Zero Out Header CRC in Backup Header."/>`,
+                        `  <patch SECTOR_SIZE_IN_BYTES="${sectorSize}" byte_offset="16" filename="DISK" physical_partition_number="${lun}" size_in_bytes="4" start_sector="NUM_DISK_SECTORS-1." value="CRC32(NUM_DISK_SECTORS-1.,92)" what="Update Backup Header with CRC of Backup Header."/>`,
+                    ];
+
+                    const patchXML =
+                        `<?xml version="1.0" ?>\n` +
+                        `<patches>\n` +
+                        `  <!--NOTE: This is an ** Autogenerated file **-->\n` +
+                        `  <!--NOTE: Patching is in little endian format, i.e. 0xAABBCCDD will look like DD CC BB AA in the file or on disk-->\n` +
+                        `  <!--NOTE: This file is used by Trace32 - So make sure to add decimals, i.e. 0x10-10=0, *but* 0x10-10.=6.-->\n` +
+                        `${patchEntries.join('\n')}\n` +
+                        `</patches>`;
+
+                    const patchHandle = await directoryHandle.getFileHandle(
+                        `patch${lun}.xml`,
+                        { create: true }
+                    );
+                    const patchWritable = await patchHandle.createWritable();
+                    await patchWritable.write(patchXML);
+                    await patchWritable.close();
+                    createdFiles.push(`patch${lun}.xml`);
+                } else {
+                    // Fallback: Create empty patch file if GPT was not pre-read
+                    log('warning', `No pre-read GPT data for LUN ${lun}, creating empty patch file`);
+                    const patchXML =
+                        `<?xml version="1.0" ?>\n` +
+                        `<patches>\n` +
+                        `  <!--NOTE: This is an ** Autogenerated file **-->\n` +
+                        `  <!--NOTE: Empty patch file - GPT info not available-->\n` +
+                        `</patches>`;
+
+                    const patchHandle = await directoryHandle.getFileHandle(
+                        `patch${lun}.xml`,
+                        { create: true }
+                    );
+                    const patchWritable = await patchHandle.createWritable();
+                    await patchWritable.write(patchXML);
+                    await patchWritable.close();
+                    createdFiles.push(`patch${lun}.xml`);
+                }
+            }
+
+            if (createdFiles.length > 0) {
+                log('success', `Metadata XML created: ${createdFiles.join(', ')}`);
             }
 
             // Complete backup
@@ -257,6 +494,7 @@ export function useBackup(): UseBackupReturn {
         cancelBackupStore,
         resetBackup,
         log,
+        getInstance,
         readPartition,
         readPartitionStreamToFile,
     ]);

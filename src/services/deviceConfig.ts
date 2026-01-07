@@ -11,7 +11,7 @@ import { loadBinaryFile } from '../presets';
 // Types
 // ============================================================================
 
-export type BrandType = 'oppo' | 'oneplus' | 'realme' | 'qualcomm';
+export type BrandType = 'oppo' | 'oneplus' | 'realme' | 'qualcomm' | 'lg';
 export type DeviceStatus = 'tested' | 'beta' | 'coming';
 export type AuthMethod = 'oppo_vip' | 'oneplus_vip' | 'standard';
 
@@ -256,7 +256,10 @@ export async function loadFirehoseForDevice(
     const log = onLog || (() => { });
 
     // Check if firehose URLs are available
-    if (device.firehose?.programmerUrl && device.firehose?.digestUrl && device.firehose?.signatureUrl) {
+    if (device.firehose?.programmerUrl) {
+        // Check if device has VIP auth files (digest + signature)
+        const hasVipAuthFiles = device.firehose?.digestUrl && device.firehose?.signatureUrl;
+
         // Detect if local or remote
         const isLocal = device.firehose.programmerUrl.startsWith('/');
 
@@ -269,8 +272,6 @@ export async function loadFirehoseForDevice(
         try {
             // For remote GitHub URLs, convert to raw format
             const programmerUrl = isLocal ? device.firehose.programmerUrl : toRawGitHubUrl(device.firehose.programmerUrl);
-            const digestUrl = isLocal ? device.firehose.digestUrl : toRawGitHubUrl(device.firehose.digestUrl);
-            const signatureUrl = isLocal ? device.firehose.signatureUrl : toRawGitHubUrl(device.firehose.signatureUrl);
 
             // Load programmer
             log('Downloading programmer...', 'info');
@@ -279,19 +280,33 @@ export async function loadFirehoseForDevice(
             });
             log(`✓ Programmer: ${formatBytes(programmer.length)}`, 'success');
 
-            // Load digest
-            log('Downloading digest...', 'info');
-            const digest = await loadRemoteBinaryFile(digestUrl, (loaded, total) => {
-                onProgress?.({ file: 'digest', loaded, total });
-            });
-            log(`✓ Digest: ${formatBytes(digest.length)}`, 'success');
+            let digest: Uint8Array;
+            let signature: Uint8Array;
 
-            // Load signature
-            log('Downloading signature...', 'info');
-            const signature = await loadRemoteBinaryFile(signatureUrl, (loaded, total) => {
-                onProgress?.({ file: 'signature', loaded, total });
-            });
-            log(`✓ Signature: ${formatBytes(signature.length)}`, 'success');
+            if (hasVipAuthFiles) {
+                // Load VIP auth files for Oppo/OnePlus/Realme devices
+                const digestUrl = isLocal ? device.firehose.digestUrl! : toRawGitHubUrl(device.firehose.digestUrl!);
+                const signatureUrl = isLocal ? device.firehose.signatureUrl! : toRawGitHubUrl(device.firehose.signatureUrl!);
+
+                // Load digest
+                log('Downloading digest...', 'info');
+                digest = await loadRemoteBinaryFile(digestUrl, (loaded, total) => {
+                    onProgress?.({ file: 'digest', loaded, total });
+                });
+                log(`✓ Digest: ${formatBytes(digest.length)}`, 'success');
+
+                // Load signature
+                log('Downloading signature...', 'info');
+                signature = await loadRemoteBinaryFile(signatureUrl, (loaded, total) => {
+                    onProgress?.({ file: 'signature', loaded, total });
+                });
+                log(`✓ Signature: ${formatBytes(signature.length)}`, 'success');
+            } else {
+                // For devices without VIP auth (like LG), use empty digest/signature
+                log('ℹ️ No VIP auth required - using empty digest/signature', 'info');
+                digest = new Uint8Array(0);
+                signature = new Uint8Array(0);
+            }
 
             return {
                 success: true,

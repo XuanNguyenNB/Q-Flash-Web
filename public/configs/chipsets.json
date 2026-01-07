@@ -129,5 +129,66 @@
             "Realme C53/C55",
             "Oppo A78"
         ]
+    },
+    {
+        "id": "LG_SM8250",
+        "name": "Snapdragon 865 (LG)",
+        "codename": "SM8250",
+        "authMethod": "standard",
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog__ufs_firehose_sm8250_LGE_V60.elf"
+        },
+        "examples": [
+            "LG V60 ThinQ"
+        ]
+    },
+    {
+        "id": "LG_SM8150",
+        "name": "Snapdragon 855 (LG)",
+        "codename": "SM8150",
+        "authMethod": "standard",
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog_ufs_firehose_sm8150_LGE_V50.elf"
+        },
+        "examples": [
+            "LG V50 ThinQ"
+        ]
+    },
+    {
+        "id": "LG_SDM845",
+        "name": "Snapdragon 845 (LG)",
+        "codename": "SDM8450",
+        "authMethod": "standard",
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog_ufs_firehose_Sdm845__LGE_V40.elf"
+        },
+        "examples": [
+            "LG V40 ThinQ"
+        ]
+    },
+    {
+        "id": "LG_SM7250",
+        "name": "Snapdragon 765G (LG)",
+        "codename": "SM7250",
+        "authMethod": "standard",
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog_ufs_firehose_sm7250__LGE_VELVET_WING.elf"
+        },
+        "examples": [
+            "LG Velvet",
+            "LG Wing"
+        ]
+    },
+    {
+        "id": "LG_MSM8998",
+        "name": "Snapdragon 835 (LG)",
+        "codename": "MSM8998",
+        "authMethod": "standard",
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog_ufs_firehose_8998_LGE_V30.elf"
+        },
+        "examples": [
+            "LG V30"
+        ]
     }
 ]

@@ -7,8 +7,15 @@
         "waiting": "Waiting for device...",
         "waitingDesc": "Connect your device in EDL mode to load partition table.",
         "edl": {
-            "title": "EDL Flash (Oppo/Oneplus/Realme - Qualcomm)",
-            "subtitle": "Only for Oppo/Oneplus/Realme devices with Qualcomm chips. Can unbrick devices, read user data, or manage partitions directly."
+            "title": "EDL Flash Tool",
+            "subtitle": "Flash tool for Qualcomm EDL devices. Can unbrick devices, backup data, or manage partitions directly.",
+            "brandGroup": {
+                "title": "Select Brand Group",
+                "oppoGroup": "Oppo / OnePlus / Realme",
+                "oppoGroupDesc": "BBK devices with VIP authentication firehose",
+                "lgGroup": "LG",
+                "lgGroupDesc": "LG devices with dedicated firehose"
+            }
         },
         "guide": {
             "title": "EDL Connection Guide",
@@ -43,7 +50,7 @@
         }
     },
     "header": {
-        "title": "Q-Flash Tool (Oppo/Oneplus/Realme - Qualcomm)",
+        "title": "Q-Flash Tool",
         "showGuide": "Show Guide",
         "showGuideTooltip": "Show Setup Guide",
         "status": {
@@ -243,6 +250,8 @@
             "chooseLocation": "Choose Location",
             "selecting": "Selecting..."
         },
+        "includeGpt": "Include GPT & XML (for full restore)",
+        "includeGptDesc": "Creates rawprogram.xml, patch.xml and gpt_*.bin files",
         "progress": {
             "title": "Backup in Progress",
             "current": "Backing up: {{partition}}",
@@ -356,6 +365,17 @@
         "cancelled": {
             "title": "Flash Cancelled",
             "message": "Flash operation was cancelled"
+        },
+        "removeFRP": "Remove FRP",
+        "frp": {
+            "title": "Remove FRP (Factory Reset Protection)",
+            "description": "This will erase Google Account verification.",
+            "warning": "Device will no longer require previous Google Account after factory reset.",
+            "confirm": "Are you sure you want to continue?",
+            "removing": "Removing FRP...",
+            "success": "FRP removed successfully! Device will no longer require Google Account after factory reset.",
+            "notFound": "FRP partition not found on device",
+            "failed": "FRP removal failed"
         }
     },
     "superBuild": {
@@ -455,10 +475,10 @@
             "retry": "Retry"
         },
         "selector": {
-            "placeholder": "Select a device...",
-            "search": "Search devices...",
+            "placeholder": "Select Firehose...",
+            "search": "Search firehose...",
             "noResults": "No devices found",
-            "loading": "Loading devices...",
+            "loading": "Loading...",
             "empty": "No devices configured"
         },
         "deviceStatus": {

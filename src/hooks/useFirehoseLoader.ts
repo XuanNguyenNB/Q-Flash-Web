@@ -158,6 +158,7 @@ export function useFirehoseLoader(): UseFirehoseLoaderReturn {
         setProgress({ ...initialProgress, files: [] });
 
         const { programmerUrl, digestUrl, signatureUrl } = device.firehose;
+        const hasVipAuthFiles = digestUrl && signatureUrl;
 
         log('info', `Loading firehose files for ${device.name} (${device.chipsetName})...`);
 
@@ -181,30 +182,41 @@ export function useFirehoseLoader(): UseFirehoseLoaderReturn {
             }));
             log('success', `Downloaded programmer.melf (${(programmer.byteLength / 1024).toFixed(1)} KB)`);
 
-            // Fetch digest
-            setProgress(prev => ({ ...prev, currentFile: 'digest.elf' }));
-            log('info', `Downloading digest.elf...`);
-            const digest = await fetchFile(digestUrl, 'digest.elf');
-            completedFiles.push('digest.elf');
-            setProgress(prev => ({
-                ...prev,
-                loaded: 2,
-                files: [...completedFiles],
-            }));
-            log('success', `Downloaded digest.elf (${(digest.byteLength / 1024).toFixed(1)} KB)`);
+            let digest: ArrayBuffer;
+            let signature: ArrayBuffer;
 
-            // Fetch signature
-            setProgress(prev => ({ ...prev, currentFile: 'signature.bin' }));
-            log('info', `Downloading signature.bin...`);
-            const signature = await fetchFile(signatureUrl, 'signature.bin');
-            completedFiles.push('signature.bin');
+            if (hasVipAuthFiles) {
+                // Fetch digest
+                setProgress(prev => ({ ...prev, currentFile: 'digest.elf' }));
+                log('info', `Downloading digest.elf...`);
+                digest = await fetchFile(digestUrl, 'digest.elf');
+                completedFiles.push('digest.elf');
+                setProgress(prev => ({
+                    ...prev,
+                    loaded: 2,
+                    files: [...completedFiles],
+                }));
+                log('success', `Downloaded digest.elf (${(digest.byteLength / 1024).toFixed(1)} KB)`);
+
+                // Fetch signature
+                setProgress(prev => ({ ...prev, currentFile: 'signature.bin' }));
+                log('info', `Downloading signature.bin...`);
+                signature = await fetchFile(signatureUrl, 'signature.bin');
+                completedFiles.push('signature.bin');
+                log('success', `Downloaded signature.bin (${(signature.byteLength / 1024).toFixed(1)} KB)`);
+            } else {
+                // For devices without VIP auth (like LG), use empty digest/signature
+                log('info', `ℹ️ No VIP auth required for ${device.brand.toUpperCase()} device`);
+                digest = new ArrayBuffer(0);
+                signature = new ArrayBuffer(0);
+            }
+
             setProgress({
                 loaded: 3,
                 total: 3,
                 currentFile: '',
                 files: completedFiles,
             });
-            log('success', `Downloaded signature.bin (${(signature.byteLength / 1024).toFixed(1)} KB)`);
 
             // Create firehose files object
             const files: FirehoseFiles = { programmer, digest, signature };

@@ -241,15 +241,37 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             // CRITICAL: Wait for device to settle after Sahara
             // Device transitions from Sahara mode to Firehose mode
             log('info', '[USB] Waiting for device to settle...');
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s for mode transition
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s for mode transition
 
-            // Clear any stale data in USB buffer from Sahara protocol
-            log('info', '[USB] Clearing buffer...');
-            try {
-                await usbManager.clearBuffer();
-            } catch (error) {
-                log('info', `[USB] Buffer clear warning: ${error instanceof Error ? error.message : String(error)}`);
+            // Read and log any initial messages from device after Sahara
+            // LG and other devices often send INFO messages when entering Firehose mode
+            // Device sends ~20+ messages including: build date, serial, 14 supported functions, end marker
+            log('info', '[USB] Reading device startup messages...');
+            let messagesRead = 0;
+            let foundEndMarker = false;
+            for (let i = 0; i < 50; i++) {
+                try {
+                    const result = await usbManager.transferInQuick(4096, 100); // Fast 100ms timeout
+                    if (result.success && result.data && result.data.length > 0) {
+                        const text = new TextDecoder().decode(result.data);
+                        messagesRead++;
+                        log('info', `[Device] ${text.substring(0, 200)}${text.length > 200 ? '...' : ''}`);
+
+                        // Check for end marker
+                        if (text.includes('End of supported functions')) {
+                            foundEndMarker = true;
+                            log('info', '[USB] Device startup complete');
+                            break;
+                        }
+                    } else {
+                        // No more data - wait a bit and try one more time
+                        if (i > 3) break; // Only retry a few times at the start
+                    }
+                } catch {
+                    break;
+                }
             }
+            log('info', `[USB] Read ${messagesRead} startup messages${foundEndMarker ? ' (complete)' : ''}`);
 
             log('success', '[USB] Ready for Firehose protocol');
 

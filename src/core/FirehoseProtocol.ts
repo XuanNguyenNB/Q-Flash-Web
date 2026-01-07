@@ -17,6 +17,7 @@ const DEFAULT_CONFIG: FirehoseConfig = {
     memoryName: 'ufs',
     maxPayloadSizeToTargetInBytes: 1048576, // 1MB
     maxPayloadSizeFromTargetInBytes: 8192,
+    zlpAwareHost: true, // IMPORTANT: Match QFIL behavior - required for LG and other devices
 };
 
 // GPT constants
@@ -225,12 +226,258 @@ export class FirehoseProtocol {
     }
 
     /**
-     * Get partitions from all LUNs (0-5)
+     * Get GPT information including disk size for backup/patch generation
+     * Returns raw GPT data plus metadata needed for patch*.xml
+     * 
+     * @param lun - Physical partition number (LUN)
+     * @returns GPT data and disk metadata
+     */
+    async getGptInfo(lun: number): Promise<{
+        success: boolean;
+        gptData?: Uint8Array;
+        numDiskSectors?: bigint;
+        lastPartitionIndex?: number;
+        lastPartitionName?: string;
+        lastPartitionEndOffset?: number;
+        partitionArraySize?: number;
+        error?: string;
+    }> {
+        const sectorSize = this.getSectorSize();
+        const numSectors = 6;
+        const totalBytes = numSectors * sectorSize;
+
+        this.onLog(`Reading GPT info from LUN ${lun}...`);
+
+        // Create read command for GPT
+        const command = buildXmlCommand('read', {
+            SECTOR_SIZE_IN_BYTES: sectorSize,
+            filename: `gpt_main${lun}.bin`,
+            physical_partition_number: lun,
+            label: 'PrimaryGPT',
+            start_sector: 0,
+            num_partition_sectors: numSectors,
+        });
+
+        this.onLog(`TX: ${command}`, 'debug');
+
+        const sendResult = await this.usb.transferOut(stringToBytes(command));
+        if (!sendResult.success) {
+            return { success: false, error: sendResult.error };
+        }
+
+        // Wait for rawmode=true ACK (with timeout)
+        let gotRawModeTrue = false;
+        for (let attempts = 0; attempts < 10; attempts++) {
+            const result = await this.usb.transferInQuick(READ_BUFFER_SIZE, 10000);
+            if (!result.success || !result.data) break;
+
+            const chunk = bytesToString(result.data);
+            if (chunk.includes('NAK') || chunk.includes('Not Support')) {
+                return { success: false, error: 'Read command not supported' };
+            }
+            if (chunk.includes('rawmode="true"') || chunk.includes("rawmode='true'")) {
+                gotRawModeTrue = true;
+                break;
+            }
+        }
+
+        if (!gotRawModeTrue) {
+            return { success: false, error: 'Did not receive rawmode=true ACK' };
+        }
+
+        // Read binary GPT data (with timeout)
+        const gptChunks: Uint8Array[] = [];
+        let bytesRead = 0;
+
+        while (bytesRead < totalBytes) {
+            const readResult = await this.usb.transferInQuick(8192, 10000);
+            if (!readResult.success || !readResult.data || readResult.data.length === 0) break;
+
+            const text = bytesToString(readResult.data.slice(0, 50));
+            if (text.includes('rawmode="false"') || text.includes("rawmode='false'")) break;
+
+            gptChunks.push(readResult.data);
+            bytesRead += readResult.data.length;
+        }
+
+        // Read final ACK (with timeout)
+        await this.usb.transferInQuick(READ_BUFFER_SIZE, 5000);
+
+        if (gptChunks.length === 0 || bytesRead === 0) {
+            return { success: false, error: 'No GPT data received' };
+        }
+
+        // Combine GPT data
+        const gptData = new Uint8Array(bytesRead);
+        let offset = 0;
+        for (const chunk of gptChunks) {
+            gptData.set(chunk, offset);
+            offset += chunk.length;
+        }
+
+        // Parse GPT header to extract disk info
+        const headerOffset = sectorSize; // GPT header at LBA 1
+        const signature = bytesToString(gptData.slice(headerOffset, headerOffset + 8));
+
+        if (signature !== GPT_SIGNATURE) {
+            return { success: false, error: 'Invalid GPT signature' };
+        }
+
+        const headerView = new DataView(gptData.buffer, headerOffset);
+
+        // Extract disk size from backupLBA (offset 32)
+        // backupLBA = last sector = NUM_DISK_SECTORS - 1
+        const backupLBA = headerView.getBigUint64(32, true);
+        const numDiskSectors = backupLBA + 1n;
+
+        // Parse partition entries to find last partition
+        const partitionEntryLBA = headerView.getBigUint64(72, true);
+        const partitionEntryCount = headerView.getUint32(80, true);
+        const partitionEntrySize = headerView.getUint32(84, true);
+        const partitionArraySize = partitionEntryCount * partitionEntrySize;
+
+        const entriesOffset = Number(partitionEntryLBA) * sectorSize;
+        let lastPartitionIndex = 0;
+        let lastPartitionName = '';
+        let lastPartitionEndOffset = 0;
+
+        for (let i = 0; i < partitionEntryCount; i++) {
+            const entryOffset = entriesOffset + (i * partitionEntrySize);
+            if (entryOffset + partitionEntrySize > gptData.length) break;
+
+            // Check if partition type GUID is all zeros (empty entry)
+            const typeGuidBytes = gptData.slice(entryOffset, entryOffset + 16);
+            if (typeGuidBytes.every(b => b === 0)) continue;
+
+            // Parse partition name
+            const nameBytes = gptData.slice(entryOffset + 56, entryOffset + 128);
+            let name = '';
+            for (let j = 0; j < nameBytes.length; j += 2) {
+                const charCode = nameBytes[j] | (nameBytes[j + 1] << 8);
+                if (charCode === 0) break;
+                name += String.fromCharCode(charCode);
+            }
+
+            if (name) {
+                lastPartitionIndex = i;
+                lastPartitionName = name;
+                // Calculate byte offset for endLBA field (offset 40 within entry)
+                // This is the offset in partition array where we need to patch
+                lastPartitionEndOffset = (i * partitionEntrySize) + 40;
+            }
+        }
+
+        this.onLog(`GPT Info: ${numDiskSectors} sectors, last partition: ${lastPartitionName} (index ${lastPartitionIndex})`, 'debug');
+
+        return {
+            success: true,
+            gptData,
+            numDiskSectors,
+            lastPartitionIndex,
+            lastPartitionName,
+            lastPartitionEndOffset,
+            partitionArraySize,
+        };
+    }
+
+    /**
+     * Read backup GPT from end of disk
+     * Backup GPT is located at the last 5 sectors of the disk
+     * 
+     * @param lun - Physical partition number (LUN)
+     * @param numDiskSectors - Total number of sectors on the LUN (from getGptInfo)
+     * @returns Backup GPT data (5 sectors)
+     */
+    async readBackupGpt(lun: number, numDiskSectors: bigint): Promise<{
+        success: boolean;
+        data?: Uint8Array;
+        error?: string;
+    }> {
+        const sectorSize = this.getSectorSize();
+        const numSectors = 5; // Backup GPT is 5 sectors
+        const startSector = numDiskSectors - 5n; // Last 5 sectors
+        const totalBytes = numSectors * sectorSize;
+
+        this.onLog(`Reading backup GPT from LUN ${lun}, sector ${startSector}...`);
+
+        const command = buildXmlCommand('read', {
+            SECTOR_SIZE_IN_BYTES: sectorSize,
+            filename: `gpt_backup${lun}.bin`,
+            physical_partition_number: lun,
+            label: 'BackupGPT',
+            start_sector: startSector.toString(),
+            num_partition_sectors: numSectors,
+        });
+
+        this.onLog(`TX: ${command}`, 'debug');
+
+        const sendResult = await this.usb.transferOut(stringToBytes(command));
+        if (!sendResult.success) {
+            return { success: false, error: sendResult.error };
+        }
+
+        // Wait for rawmode=true ACK (with timeout)
+        let gotRawModeTrue = false;
+        for (let attempts = 0; attempts < 10; attempts++) {
+            const result = await this.usb.transferInQuick(READ_BUFFER_SIZE, 10000);
+            if (!result.success || !result.data) break;
+
+            const chunk = bytesToString(result.data);
+            if (chunk.includes('NAK') || chunk.includes('Not Support')) {
+                return { success: false, error: 'Read backup GPT not supported' };
+            }
+            if (chunk.includes('rawmode="true"') || chunk.includes("rawmode='true'")) {
+                gotRawModeTrue = true;
+                break;
+            }
+        }
+
+        if (!gotRawModeTrue) {
+            return { success: false, error: 'Did not receive rawmode=true ACK for backup GPT' };
+        }
+
+        // Read binary data (with timeout)
+        const chunks: Uint8Array[] = [];
+        let bytesRead = 0;
+
+        while (bytesRead < totalBytes) {
+            const readResult = await this.usb.transferInQuick(8192, 10000);
+            if (!readResult.success || !readResult.data || readResult.data.length === 0) break;
+
+            const text = bytesToString(readResult.data.slice(0, 50));
+            if (text.includes('rawmode="false"') || text.includes("rawmode='false'")) break;
+
+            chunks.push(readResult.data);
+            bytesRead += readResult.data.length;
+        }
+
+        // Read final ACK (with timeout)
+        await this.usb.transferInQuick(READ_BUFFER_SIZE, 5000);
+
+        if (chunks.length === 0 || bytesRead === 0) {
+            return { success: false, error: 'No backup GPT data received' };
+        }
+
+        // Combine data
+        const data = new Uint8Array(bytesRead);
+        let offset = 0;
+        for (const chunk of chunks) {
+            data.set(chunk, offset);
+            offset += chunk.length;
+        }
+
+        this.onLog(`Read ${bytesRead} bytes of backup GPT`, 'debug');
+
+        return { success: true, data };
+    }
+
+    /**
+     * Get partitions from all LUNs (0-6)
      * Reconfigures between each LUN to maintain connection
      */
     async getAllPartitions(): Promise<{ success: boolean; partitions?: PartitionInfo[]; error?: string }> {
         const allPartitions: PartitionInfo[] = [];
-        const NUM_LUNS = 6;
+        const NUM_LUNS = 7; // LG devices have FRP on LUN 6
 
         for (let lun = 0; lun < NUM_LUNS; lun++) {
             this.onLog(`Reading LUN ${lun}...`);
@@ -1696,23 +1943,31 @@ export class FirehoseProtocol {
         }
 
         // Read response(s)
-        // Increased retries for first configure after Sahara (device may be slow to respond)
+        // Use short timeout per read attempt to avoid long blocking
         let fullResponse = '';
-        const MAX_RETRIES = 50; // 50 * 100ms = 5 seconds max wait
-        const RETRY_DELAY = 100; // 100ms between retries
+        const MAX_RETRIES = 30; // 30 * 200ms delay = 6 seconds max wait per command
+        const READ_TIMEOUT = 200; // 200ms timeout per read attempt
 
         for (let i = 0; i < MAX_RETRIES; i++) {
-            const result = await this.usb.transferIn(READ_BUFFER_SIZE);
+            // Use transferInQuick with short timeout instead of blocking transferIn
+            const result = await this.usb.transferInQuick(READ_BUFFER_SIZE, READ_TIMEOUT);
+
             if (!result.success || !result.data || result.data.length === 0) {
-                // Log every 10 retries to show we're still waiting
-                if (i > 0 && i % 10 === 0) {
-                    this.onLog(`Waiting for response... (${i * RETRY_DELAY}ms)`, 'debug');
+                // Log every 20 retries to show we're still waiting
+                if (i > 0 && i % 20 === 0) {
+                    this.onLog(`Waiting for response... (${i * 100}ms)`, 'debug');
                 }
-                await this.delay(RETRY_DELAY);
+                await this.delay(100);
                 continue;
             }
 
-            fullResponse += bytesToString(result.data);
+            const chunk = bytesToString(result.data);
+            fullResponse += chunk;
+
+            // Log each chunk received for debugging (especially for LG devices)
+            if (chunk.length > 0) {
+                this.onLog(`RX chunk: ${chunk.substring(0, 200)}${chunk.length > 200 ? '...' : ''}`, 'debug');
+            }
 
             // Check if we have a complete response
             if (fullResponse.includes('ACK') || fullResponse.includes('NAK')) {
@@ -1720,7 +1975,7 @@ export class FirehoseProtocol {
             }
         }
 
-        this.onLog(`RX: ${fullResponse}`, 'debug');
+        this.onLog(`RX: ${fullResponse.substring(0, 300)}${fullResponse.length > 300 ? '...' : ''}`, 'debug');
 
         const parsed = parseXmlResponse(fullResponse);
         return {

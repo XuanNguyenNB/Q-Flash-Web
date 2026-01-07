@@ -36,6 +36,38 @@ export function isDangerousPartition(name: string): boolean {
 }
 
 /**
+ * FRP-related partition names.
+ * These partitions are related to Factory Reset Protection (Google account lock).
+ * Different OEMs use different partition names for FRP data.
+ */
+export const FRP_PARTITIONS = [
+    'frp',           // Standard Android FRP partition
+    'config',        // Some devices use 'config' for FRP
+    'persistent',    // LG uses 'persistent' for FRP data  
+    'laf',           // LG Advanced Flash - related to FRP bypass
+    'factory',       // Factory data
+    'devinfo',       // Device info (some contain FRP)
+    'fsg',           // Factory settings
+    'persist',       // Persist partition (can contain FRP data)
+] as const;
+
+/**
+ * Checks if a partition is FRP (Factory Reset Protection) related.
+ * 
+ * @param name - Partition name to check
+ * @returns true if partition is FRP-related
+ */
+export function isFrpPartition(name: string): boolean {
+    const lowerName = name.toLowerCase();
+    return FRP_PARTITIONS.some((frp_name) =>
+        lowerName === frp_name ||
+        lowerName.includes('frp') ||
+        lowerName === 'laf' ||
+        lowerName === 'persistent'
+    );
+}
+
+/**
  * Formats partition size in bytes to human-readable format.
  * 
  * @param bytes - Size in bytes

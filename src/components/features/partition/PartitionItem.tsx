@@ -5,11 +5,11 @@
  */
 
 import { useCallback } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Fingerprint } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@/components/ui/checkbox';
 import { usePartitionStore } from '@/stores/partitionStore';
-import { isDangerousPartition, formatPartitionSize } from '@/lib/partition-utils';
+import { isDangerousPartition, isFrpPartition, formatPartitionSize } from '@/lib/partition-utils';
 import { cn } from '@/lib/utils';
 import type { PartitionInfo } from '@/types';
 
@@ -26,6 +26,7 @@ export function PartitionItem({ partition, className }: PartitionItemProps) {
     // Derived state
     const isSelected = selectedPartitions.has(partition.name);
     const isDangerous = isDangerousPartition(partition.name);
+    const isFrp = isFrpPartition(partition.name);
 
     // Use pre-calculated size from PartitionInfo (correctly calculated by FirehoseProtocol with actual sector size)
     const formattedSize = formatPartitionSize(partition.size);
@@ -42,6 +43,8 @@ export function PartitionItem({ partition, className }: PartitionItemProps) {
                 'hover:bg-accent/50',
                 isSelected && 'bg-accent border-primary',
                 !isSelected && 'border-border',
+                isFrp && !isSelected && 'border-cyan-500/50 bg-cyan-500/5',
+                isFrp && isSelected && 'border-cyan-500 bg-cyan-500/20',
                 className
             )}
         >
@@ -53,10 +56,19 @@ export function PartitionItem({ partition, className }: PartitionItemProps) {
 
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm truncate">
+                    <span className={cn(
+                        'font-medium text-sm truncate',
+                        isFrp && 'text-cyan-500'
+                    )}>
                         {partition.name}
                     </span>
-                    {isDangerous && (
+                    {isFrp && (
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-cyan-500/20 text-cyan-500 font-medium">
+                            <Fingerprint className="w-3 h-3" />
+                            FRP
+                        </span>
+                    )}
+                    {isDangerous && !isFrp && (
                         <AlertTriangle
                             className="w-4 h-4 text-amber-500 flex-shrink-0"
                             aria-label={t('partition.item.dangerous')}

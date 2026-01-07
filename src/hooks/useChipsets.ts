@@ -15,8 +15,8 @@ export interface ChipsetEntry {
     presetId?: string | null;
     firehose: {
         programmerUrl: string;
-        digestUrl: string;
-        signatureUrl: string;
+        digestUrl?: string;
+        signatureUrl?: string;
     };
     examples: string[];
 }

@@ -31,13 +31,16 @@ import {
     FileUp,
     FileText,
     Zap,
+    Trash2,
 } from 'lucide-react';
 
 // Stores
 import { useDeviceStore } from '@/stores/deviceStore';
+import { usePartitionStore } from '@/stores/partitionStore';
+import { useTerminalStore } from '@/stores/terminalStore';
 
 // Hooks
-import { useWebUSB, useXMLBackup, useXMLFlash } from '@/hooks';
+import { useWebUSB, useXMLBackup, useXMLFlash, useFirehose } from '@/hooks';
 
 // Utils
 import { cn } from '@/lib/utils';
@@ -63,6 +66,12 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     const { getManager } = useWebUSB();
     const { startXMLBackup } = useXMLBackup();
     const { startXMLFlash } = useXMLFlash();
+    const { getInstance } = useFirehose();
+    const partitions = usePartitionStore((state) => state.partitions);
+    const log = useTerminalStore((state) => state.log);
+
+    // FRP Remove state
+    const [isRemovingFRP, setIsRemovingFRP] = useState(false);
 
     // Handle XML Backup
     const handleXMLBackupConfirm = async (xmlFile: File, outputDir: FileSystemDirectoryHandle) => {
@@ -77,6 +86,71 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
         const usbManager = getManager();
         if (usbManager) {
             await startXMLFlash(usbManager, xmlFile, imagesDir, selectedFilenames);
+        }
+    };
+
+    // Handle Remove FRP (Factory Reset Protection / Google Account)
+    const handleRemoveFRP = async () => {
+        const usbManager = getManager();
+        if (!usbManager) {
+            log('error', 'USB not connected');
+            return;
+        }
+
+        // Find frp partition
+        const frpPartition = partitions.find(p => p.name.toLowerCase() === 'frp');
+        if (!frpPartition) {
+            log('error', t('flash.frp.notFound'));
+            return;
+        }
+
+        // Confirm with user using i18n
+        const confirmed = window.confirm(
+            `${t('flash.frp.title')}\n\n` +
+            `${t('flash.frp.description')}\n` +
+            `${t('flash.frp.warning')}\n\n` +
+            `${t('flash.frp.confirm')}`
+        );
+        if (!confirmed) return;
+
+        setIsRemovingFRP(true);
+        log('info', t('flash.frp.removing'));
+
+        try {
+            const firehose = getInstance(usbManager);
+
+            // Configure firehose
+            const configResult = await firehose.configure();
+            if (!configResult.success) {
+                throw new Error('Failed to configure Firehose');
+            }
+
+            // Create empty FRP data (all zeros)
+            // FRP partition is typically 512KB - 1MB
+            const frpSize = frpPartition.size || 512 * 1024; // Default 512KB
+            const emptyFrpData = new Uint8Array(frpSize);
+
+            log('info', `Writing empty FRP data (${Math.ceil(frpSize / 1024)} KB)...`);
+
+            // Write empty data to FRP partition
+            const result = await firehose.writePartition(
+                frpPartition.lun || 0,
+                frpPartition.startSector,
+                frpPartition.sizeInSectors || BigInt(Math.ceil(frpSize / 4096)),
+                'frp',
+                emptyFrpData
+            );
+
+            if (result.success) {
+                log('success', t('flash.frp.success'));
+            } else {
+                throw new Error(result.error || 'Failed to write FRP partition');
+            }
+        } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : String(error);
+            log('error', `${t('flash.frp.failed')}: ${errorMsg}`);
+        } finally {
+            setIsRemovingFRP(false);
         }
     };
 
@@ -157,6 +231,18 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                                     >
                                         <Zap className="w-4 h-4" />
                                         {t('xml_flash.button')}
+                                    </Button>
+
+                                    {/* Remove FRP Button */}
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        className="w-full justify-start gap-2"
+                                        onClick={handleRemoveFRP}
+                                        disabled={isRemovingFRP}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        {isRemovingFRP ? 'Removing FRP...' : t('flash.removeFRP', 'Remove FRP')}
                                     </Button>
                                 </div>
                             )}

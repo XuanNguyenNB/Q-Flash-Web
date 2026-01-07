@@ -7,8 +7,15 @@
         "waiting": "Đang đợi thiết bị...",
         "waitingDesc": "Kết nối thiết bị ở chế độ EDL để tải bảng phân vùng.",
         "edl": {
-            "title": "Công cụ Flash EDL (Oppo/Oneplus/Realme - Qualcomm)",
-            "subtitle": "Chỉ hỗ trợ thiết bị Oppo/Oneplus/Realme với chip Qualcomm. Có thể cứu brick, sao lưu dữ liệu hoặc sửa lỗi phân vùng."
+            "title": "Công cụ Flash EDL",
+            "subtitle": "Hỗ trợ flash EDL cho các thiết bị Qualcomm. Có thể cứu brick, sao lưu dữ liệu hoặc sửa lỗi phân vùng.",
+            "brandGroup": {
+                "title": "Chọn nhóm hãng",
+                "oppoGroup": "Oppo / OnePlus / Realme",
+                "oppoGroupDesc": "Thiết bị BBK với firehose cần xác thực VIP",
+                "lgGroup": "LG",
+                "lgGroupDesc": "Thiết bị LG với firehose riêng"
+            }
         },
         "guide": {
             "title": "Hướng dẫn kết nối EDL",
@@ -43,7 +50,7 @@
         }
     },
     "header": {
-        "title": "Q-Flash Tool (Oppo/Oneplus/Realme - Qualcomm)",
+        "title": "Q-Flash Tool",
         "showGuide": "Hiển thị hướng dẫn",
         "showGuideTooltip": "Hiển thị hướng dẫn cài đặt",
         "status": {
@@ -366,6 +373,17 @@
         "cancelled": {
             "title": "Đã hủy Flash",
             "message": "Thao tác flash đã bị hủy"
+        },
+        "removeFRP": "Xóa FRP",
+        "frp": {
+            "title": "Xóa FRP (Khóa Google)",
+            "description": "Thao tác này sẽ xóa xác minh Tài khoản Google.",
+            "warning": "Sau khi khôi phục cài đặt gốc, thiết bị sẽ không còn yêu cầu đăng nhập Tài khoản Google cũ.",
+            "confirm": "Bạn có chắc chắn muốn tiếp tục?",
+            "removing": "Đang xóa FRP...",
+            "success": "Đã xóa FRP thành công! Thiết bị sẽ không còn yêu cầu Tài khoản Google sau khi khôi phục cài đặt gốc.",
+            "notFound": "Không tìm thấy phân vùng FRP trên thiết bị",
+            "failed": "Xóa FRP thất bại"
         }
     },
     "superBuild": {
@@ -465,10 +483,10 @@
             "retry": "Thử lại"
         },
         "selector": {
-            "placeholder": "Chọn thiết bị...",
-            "search": "Tìm kiếm thiết bị...",
+            "placeholder": "Chọn Firehose...",
+            "search": "Tìm kiếm Firehose...",
             "noResults": "Không tìm thấy thiết bị",
-            "loading": "Đang tải thiết bị...",
+            "loading": "Đang tải danh sách...",
             "empty": "Chưa cấu hình thiết bị"
         },
         "deviceStatus": {

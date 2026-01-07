@@ -12,18 +12,18 @@ import { useState, useEffect, useCallback } from 'react';
  */
 export interface DeviceEntry {
     id: string;
-    brand: 'oppo' | 'oneplus' | 'realme';
+    brand: 'oppo' | 'oneplus' | 'realme' | 'lg';
     name: string;
     codename: string;
     chipset: string;
     chipsetName: string;
     status: 'tested' | 'beta' | 'coming';
-    authMethod: 'oppo_vip' | null;
+    authMethod: 'oppo_vip' | 'standard' | null;
     presetId: string | null;
     firehose: {
         programmerUrl: string;
-        digestUrl: string;
-        signatureUrl: string;
+        digestUrl?: string;
+        signatureUrl?: string;
     };
 }
 
@@ -68,6 +68,11 @@ export function useDevices(): UseDevicesResult {
                     'Snapdragon 7+ Gen 3',
                     'Snapdragon 888',
                     'Snapdragon 870',
+                    'Snapdragon 865',
+                    'Snapdragon 855',
+                    'Snapdragon 845',
+                    'Snapdragon 835',
+                    'Snapdragon 765G',
                     'Snapdragon 695',
                     'Snapdragon 680',
                 ];

@@ -5,7 +5,7 @@
  * or when using an unsupported device.
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,20 +35,28 @@ interface FileStatus {
     required: boolean;
 }
 
+interface ManualFirehoseLoaderProps {
+    brandGroup?: 'oppo' | 'lg';
+}
+
 /**
  * ManualFirehoseLoader - UI for manually loading firehose files
  */
-export function ManualFirehoseLoader() {
+export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoaderProps) {
     const { t } = useTranslation();
     const log = useTerminalStore((state) => state.log);
     const setFirehoseLoaded = useDeviceStore((state) => state.setFirehoseLoaded);
     const firehoseLoaded = useDeviceStore((state) => state.firehoseLoaded);
     const { connect: flowConnect, status: flowStatus } = useConnectionFlow();
 
+    // For LG devices, only programmer is required
+    // For Oppo/OnePlus/Realme, all 3 files are required
+    const isLG = brandGroup === 'lg';
+
     const [files, setFiles] = useState<FileStatus[]>([
         { name: 'programmer', labelKey: 'firehose.manual.programmer', loaded: false, required: true },
-        { name: 'digest', labelKey: 'firehose.manual.digest', loaded: false, required: true },
-        { name: 'signature', labelKey: 'firehose.manual.signature', loaded: false, required: true },
+        { name: 'digest', labelKey: 'firehose.manual.digest', loaded: false, required: !isLG },
+        { name: 'signature', labelKey: 'firehose.manual.signature', loaded: false, required: !isLG },
     ]);
     const [isLoading, setIsLoading] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
@@ -56,6 +64,15 @@ export function ManualFirehoseLoader() {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentFileType, setCurrentFileType] = useState<string | null>(null);
+
+    // Update file requirements when brand group changes
+    useEffect(() => {
+        setFiles(prev => prev.map(f => ({
+            ...f,
+            required: f.name === 'programmer' ? true : !isLG
+        })));
+    }, [isLG]);
+
 
     /**
      * Handle file selection

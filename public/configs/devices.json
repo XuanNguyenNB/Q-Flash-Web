@@ -510,5 +510,75 @@
             "digestUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Digest.elf",
             "signatureUrl": "/firehose/SM8750_8Elite/OPPO_SM8750_Sign.bin"
         }
+    },
+    {
+        "id": "lg_v60",
+        "brand": "lg",
+        "name": "LG V60 ThinQ",
+        "codename": "LMV600",
+        "chipset": "SM8250",
+        "chipsetName": "Snapdragon 865",
+        "status": "tested",
+        "authMethod": "standard",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog__ufs_firehose_sm8250_LGE_V60.elf"
+        }
+    },
+    {
+        "id": "lg_v50",
+        "brand": "lg",
+        "name": "LG V50 ThinQ",
+        "codename": "LMV500",
+        "chipset": "SM8150",
+        "chipsetName": "Snapdragon 855",
+        "status": "tested",
+        "authMethod": "standard",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog_ufs_firehose_sm8150_LGE_V50.elf"
+        }
+    },
+    {
+        "id": "lg_v40",
+        "brand": "lg",
+        "name": "LG V40 ThinQ",
+        "codename": "LMV405",
+        "chipset": "SDM845",
+        "chipsetName": "Snapdragon 845",
+        "status": "tested",
+        "authMethod": "standard",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog_ufs_firehose_Sdm845__LGE_V40.elf"
+        }
+    },
+    {
+        "id": "lg_velvet",
+        "brand": "lg",
+        "name": "LG Velvet / Wing",
+        "codename": "LMG900",
+        "chipset": "SM7250",
+        "chipsetName": "Snapdragon 765G",
+        "status": "tested",
+        "authMethod": "standard",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog_ufs_firehose_sm7250__LGE_VELVET_WING.elf"
+        }
+    },
+    {
+        "id": "lg_v30",
+        "brand": "lg",
+        "name": "LG V30",
+        "codename": "H930",
+        "chipset": "MSM8998",
+        "chipsetName": "Snapdragon 835",
+        "status": "tested",
+        "authMethod": "standard",
+        "presetId": null,
+        "firehose": {
+            "programmerUrl": "/firehose/LG/prog_ufs_firehose_8998_LGE_V30.elf"
+        }
     }
 ]

@@ -238,7 +238,7 @@ export function BackupProgress({ onCancel, onClose }: BackupProgressProps) {
             )}
 
             {/* Partition status list */}
-            <ScrollArea className="max-h-40">
+            <ScrollArea className="h-auto max-h-[200px] overflow-auto border rounded-md p-1">
                 <div className="space-y-1">
                     {partitions.map(([name, status]) => (
                         <div
