@@ -82,7 +82,7 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
         setIsBackupDialogOpen(true);
     }, [selectedPartitions.size]);
 
-    const handleBackupConfirm = useCallback(async (directoryHandle: FileSystemDirectoryHandle, options: { includeGptBackup: boolean }) => {
+    const handleBackupConfirm = useCallback(async (directoryHandle: FileSystemDirectoryHandle) => {
         setIsBackupDialogOpen(false);
         const { log } = useTerminalStore.getState();
 
@@ -92,7 +92,7 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
             return;
         }
 
-        await startBackup(usb, selectedPartitionObjects, directoryHandle, options);
+        await startBackup(usb, selectedPartitionObjects, directoryHandle);
     }, [selectedPartitionObjects, getManager, startBackup]);
 
     const handleOpenFlashDialog = useCallback(() => {
@@ -475,7 +475,7 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
                         className="gap-2 ml-auto"
                     >
                         <RefreshCcw className="w-4 h-4" />
-                        Reboot Device
+                        {t('actions.reboot')}
                     </Button>
                 </div>
             </div>

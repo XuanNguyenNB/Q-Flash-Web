@@ -14,16 +14,23 @@ import { persist } from 'zustand/middleware';
 export type Language = 'en' | 'vi';
 
 /**
+ * Supported theme modes.
+ */
+export type Theme = 'light' | 'dark';
+
+/**
  * Settings store state interface.
  */
 export interface SettingsState {
     // State
     language: Language;
+    theme: Theme;
     showWizard: boolean;
     lastDeviceId: string | null;
 
     // Actions
     setLanguage: (language: Language) => void;
+    setTheme: (theme: Theme) => void;
     setShowWizard: (show: boolean) => void;
     setLastDeviceId: (id: string | null) => void;
     reset: () => void;
@@ -34,6 +41,7 @@ export interface SettingsState {
  */
 const initialState = {
     language: 'vi' as Language,
+    theme: 'light' as Theme,
     showWizard: true,
     lastDeviceId: null,
 };
@@ -52,6 +60,8 @@ export const useSettingsStore = create<SettingsState>()(
             // Actions
             setLanguage: (language) => set({ language }),
 
+            setTheme: (theme) => set({ theme }),
+
             setShowWizard: (show) => set({ showWizard: show }),
 
             setLastDeviceId: (id) => set({ lastDeviceId: id }),
@@ -63,6 +73,7 @@ export const useSettingsStore = create<SettingsState>()(
             partialize: (state) => ({
                 // Only persist these properties
                 language: state.language,
+                theme: state.theme,
                 showWizard: state.showWizard,
                 lastDeviceId: state.lastDeviceId,
             }),

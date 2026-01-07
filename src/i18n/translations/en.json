@@ -250,8 +250,6 @@
             "chooseLocation": "Choose Location",
             "selecting": "Selecting..."
         },
-        "includeGpt": "Include GPT & XML (for full restore)",
-        "includeGptDesc": "Creates rawprogram.xml, patch.xml and gpt_*.bin files",
         "progress": {
             "title": "Backup in Progress",
             "current": "Backing up: {{partition}}",
@@ -397,7 +395,7 @@
     },
     "aiPanel": {
         "title": "AI Assistant",
-        "welcome": "Hi! I can help you with Q-Flash WebUSB Tool for Oppo/Oneplus/Realme devices with Qualcomm chips. Ask me about EDL mode, partitions, flashing, or device recovery.",
+        "welcome": "Hi! I can help you with Q-Flash WebUSB Tool for Qualcomm devices (Oppo, OnePlus, Realme, LG, etc). Ask me about EDL mode, partitions, flashing, or device recovery.",
         "placeholder": "Ask a question...",
         "send": "Send",
         "settings": "Settings",

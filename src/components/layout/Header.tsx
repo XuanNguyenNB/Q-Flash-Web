@@ -9,14 +9,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 // Stores
-import { useSettingsStore, type Language } from '@/stores/settingsStore';
+import { useSettingsStore, type Language, type Theme } from '@/stores/settingsStore';
 
 // Components
 import { Button } from '@/components/ui/button';
 import { ModeSelector } from './ModeSelector';
 
 // Icons
-import { Globe } from 'lucide-react';
+import { Globe, Moon, Sun } from 'lucide-react';
 
 // Utils
 import { cn } from '@/lib/utils';
@@ -43,9 +43,11 @@ export function Header() {
     const { t } = useTranslation();
     const location = useLocation();
 
-    // Settings store for language
+    // Settings store for language and theme
     const language = useSettingsStore((state) => state.language);
     const setLanguage = useSettingsStore((state) => state.setLanguage);
+    const theme = useSettingsStore((state) => state.theme);
+    const setTheme = useSettingsStore((state) => state.setTheme);
 
     /**
      * Toggle between EN and VI languages
@@ -53,6 +55,14 @@ export function Header() {
     const handleLanguageToggle = () => {
         const newLang: Language = language === 'en' ? 'vi' : 'en';
         setLanguage(newLang);
+    };
+
+    /**
+     * Toggle between light and dark themes
+     */
+    const handleThemeToggle = () => {
+        const newTheme: Theme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
     };
 
     /**
@@ -119,6 +129,21 @@ export function Header() {
 
                 {/* Right Side: Actions */}
                 <div className="flex items-center gap-2">
+                    {/* Theme Toggle */}
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={handleThemeToggle}
+                        title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+                        className="text-muted-foreground hover:text-foreground"
+                    >
+                        {theme === 'light' ? (
+                            <Moon className="h-4 w-4" />
+                        ) : (
+                            <Sun className="h-4 w-4" />
+                        )}
+                    </Button>
+
                     {/* Language Toggle */}
                     <Button
                         variant="ghost"

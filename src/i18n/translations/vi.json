@@ -405,7 +405,7 @@
     },
     "aiPanel": {
         "title": "Trợ lý AI",
-        "welcome": "Xin chào! Tôi có thể giúp bạn với Q-Flash WebUSB Tool cho thiết bị Oppo/Oneplus/Realme dùng chip Qualcomm. Hỏi tôi về chế độ EDL, phân vùng, flash, hoặc khôi phục thiết bị.",
+        "welcome": "Xin chào! Tôi có thể giúp bạn với Q-Flash WebUSB Tool cho các thiết bị Qualcomm (Oppo, OnePlus, Realme, LG...). Hỏi tôi về chế độ EDL, phân vùng, flash, hoặc khôi phục thiết bị.",
         "placeholder": "Đặt câu hỏi...",
         "send": "Gửi",
         "settings": "Cài đặt",

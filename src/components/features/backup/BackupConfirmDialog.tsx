@@ -9,20 +9,14 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { formatBytes } from '@/lib/utils';
 import type { PartitionInfo } from '@/types';
-
-export interface BackupOptions {
-    includeGptBackup: boolean;
-}
 
 interface BackupConfirmDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     partitions: PartitionInfo[];
-    onConfirm: (directoryHandle: FileSystemDirectoryHandle, options: BackupOptions) => void;
+    onConfirm: (directoryHandle: FileSystemDirectoryHandle) => void;
 }
 
 export function BackupConfirmDialog({
@@ -33,7 +27,6 @@ export function BackupConfirmDialog({
 }: BackupConfirmDialogProps) {
     const { t } = useTranslation();
     const [isSelecting, setIsSelecting] = useState(false);
-    const [includeGptBackup, setIncludeGptBackup] = useState(false);
 
     // Calculate total backup size - use pre-calculated size from PartitionInfo
     const totalSize = partitions.reduce((sum, p) => {
@@ -50,8 +43,8 @@ export function BackupConfirmDialog({
                 startIn: 'downloads',
             });
 
-            // Call onConfirm with the directory handle and options
-            onConfirm(dirHandle, { includeGptBackup });
+            // Call onConfirm with the directory handle
+            onConfirm(dirHandle);
             onOpenChange(false);
         } catch (error: any) {
             // User cancelled the picker
@@ -107,26 +100,6 @@ export function BackupConfirmDialog({
                     </span>
                 </div>
 
-                {/* GPT Backup Option */}
-                <div className="flex items-start space-x-3 pt-2 border-t">
-                    <Checkbox
-                        id="gpt-backup"
-                        checked={includeGptBackup}
-                        onCheckedChange={(checked) => setIncludeGptBackup(checked === true)}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                        <Label
-                            htmlFor="gpt-backup"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        >
-                            {t('backup.includeGpt', 'Include GPT & XML (for full restore)')}
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                            {t('backup.includeGptDesc', 'Creates rawprogram.xml, patch.xml and gpt_*.bin files')}
-                        </p>
-                    </div>
-                </div>
-
                 <DialogFooter className="gap-2 sm:gap-0">
                     <Button
                         variant="outline"
@@ -154,4 +127,3 @@ export function BackupConfirmDialog({
         </Dialog>
     );
 }
-

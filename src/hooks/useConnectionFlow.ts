@@ -191,7 +191,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
     const connect = useCallback(async (): Promise<void> => {
         try {
             // Validate prerequisites - support manual mode
-            let firehoseFiles: { programmer: ArrayBuffer; digest: ArrayBuffer; signature: ArrayBuffer } | null = null;
+            let firehoseFiles: { programmer: ArrayBuffer; digest?: ArrayBuffer; signature?: ArrayBuffer } | null = null;
             let isManualMode = false;
 
             // Try to get firehose files from device preset first
@@ -278,11 +278,18 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             // Step 3: VIP Authentication (if needed)
             // CRITICAL: Must run BEFORE configure for OEM devices (Oppo/OnePlus/Realme)
             // Device will reject configure command if not authenticated first
-            // In manual mode, always enable VIP since user is likely using OEM firehose files
-            const needsVIP = isManualMode ? true : deviceNeedsVIP(selectedDevice);
+            // In manual mode, we check if digest/signature files are provided
+            const needsVIP = isManualMode
+                ? (!!firehoseFiles.digest && !!firehoseFiles.signature)
+                : deviceNeedsVIP(selectedDevice);
+
             log('info', `[VIP] Device: ${selectedDevice?.name ?? 'Manual Mode'}, Brand: ${selectedDevice?.brand ?? 'Unknown'}, AuthMethod: ${(selectedDevice as any)?.authMethod ?? 'manual'}, NeedsVIP: ${needsVIP}`);
 
             if (needsVIP) {
+                if (!firehoseFiles.digest || !firehoseFiles.signature) {
+                    throw new Error('VIP authentication required but digest/signature files are missing');
+                }
+
                 setStatus('authenticating');
                 log('info', '[VIP] Authenticating with OEM server...');
 

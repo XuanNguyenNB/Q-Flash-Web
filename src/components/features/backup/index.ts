@@ -1,3 +1,4 @@
-export { BackupConfirmDialog, type BackupOptions } from './BackupConfirmDialog';
+export { BackupConfirmDialog } from './BackupConfirmDialog';
 export { BackupProgress } from './BackupProgress';
 export { XMLBackupDialog } from './XMLBackupDialog';
+

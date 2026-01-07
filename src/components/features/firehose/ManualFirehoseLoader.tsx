@@ -315,12 +315,12 @@ export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoad
 /**
  * Get manually loaded firehose files from cache
  */
-export function getManualFirehose(): { programmer: ArrayBuffer; digest: ArrayBuffer; signature: ArrayBuffer } | null {
+export function getManualFirehose(): { programmer: ArrayBuffer; digest?: ArrayBuffer; signature?: ArrayBuffer } | null {
     const programmer = manualFirehoseCache.get('programmer');
     const digest = manualFirehoseCache.get('digest');
     const signature = manualFirehoseCache.get('signature');
 
-    if (programmer && digest && signature) {
+    if (programmer) {
         return { programmer, digest, signature };
     }
     return null;

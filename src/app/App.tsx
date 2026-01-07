@@ -18,6 +18,7 @@ import { AppRoutes } from './routes';
 // Hooks
 import { useLanguageSync } from '../hooks/useLanguageSync';
 import { useModeRedirect } from '../hooks/useModeRedirect';
+import { useThemeSync } from '../hooks/useThemeSync';
 
 // Toast notifications
 import { Toaster } from 'sonner';
@@ -29,6 +30,9 @@ import { Toaster } from 'sonner';
 function AppContent() {
     // Sync i18next language with settings store
     useLanguageSync();
+
+    // Sync theme class with settings store
+    useThemeSync();
 
     // Redirect to correct page based on persisted device mode
     useModeRedirect();
