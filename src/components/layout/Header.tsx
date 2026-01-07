@@ -85,7 +85,7 @@ export function Header() {
                         <img
                             src="/icon.png"
                             alt="Q-Flash"
-                            className="h-8 w-8"
+                            className="h-8 w-8 rounded-lg"
                         />
                         <span className="text-lg font-bold text-foreground hidden sm:inline">
                             Q-Flash
