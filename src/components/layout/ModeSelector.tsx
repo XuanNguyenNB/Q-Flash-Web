@@ -7,7 +7,7 @@
 
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Zap, Smartphone, Wrench } from 'lucide-react';
+import { Zap, Smartphone, Wrench, Workflow } from 'lucide-react';
 import { trackEvent } from '@/services/analytics';
 
 // Stores
@@ -30,6 +30,7 @@ const modes: ModeConfig[] = [
     { id: 'edl', labelKey: 'mode.edl', icon: Zap, path: '/edl' },
     { id: 'adb', labelKey: 'mode.adb', icon: Smartphone, path: '/adb' },
     { id: 'fastboot', labelKey: 'mode.fastboot', icon: Wrench, path: '/fastboot' },
+    { id: 'automation', labelKey: 'nav.automation', icon: Workflow, path: '/automation' },
 ];
 
 /**

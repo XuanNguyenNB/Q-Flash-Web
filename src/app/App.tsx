@@ -1,6 +1,6 @@
 /**
  * Q-Flash-Web Root Component
- * 
+ *
  * Main React application component with routing, i18n, and app shell layout.
  */
 
@@ -14,6 +14,9 @@ import { AppLayout } from '@/components/layout';
 
 // Routes
 import { AppRoutes } from './routes';
+
+// Contexts
+import { ScrcpyProvider } from '@/contexts/ScrcpyContext';
 
 // Hooks
 import { useLanguageSync } from '../hooks/useLanguageSync';
@@ -39,11 +42,13 @@ function AppContent() {
 
     return (
         <>
-            <AppLayout>
-                <AppRoutes />
-            </AppLayout>
+            <ScrcpyProvider>
+                <AppLayout>
+                    <AppRoutes />
+                </AppLayout>
+            </ScrcpyProvider>
             <Toaster
-                position="bottom-right"
+                position="top-right"
                 toastOptions={{
                     duration: 4000,
                     classNames: {

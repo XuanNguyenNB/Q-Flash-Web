@@ -15,7 +15,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { AlertTriangle, Usb, Terminal, X } from 'lucide-react';
+import { AlertTriangle, Usb, Terminal, X, Play, ExternalLink } from 'lucide-react';
 
 interface DeviceInUseDialogProps {
     open: boolean;
@@ -93,6 +93,18 @@ export function DeviceInUseDialog({ open, onClose }: DeviceInUseDialogProps) {
                             </p>
                         </div>
                     </div>
+
+                    {/* Video Guide */}
+                    <a
+                        href="https://youtu.be/gIHdkzgA3_c"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 p-3 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 transition-colors text-primary"
+                    >
+                        <Play className="w-4 h-4" />
+                        <span className="font-medium text-sm">Xem video hướng dẫn chi tiết</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                 </div>
 
                 <AlertDialogFooter>

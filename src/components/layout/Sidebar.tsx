@@ -9,11 +9,12 @@
  * Updated: Story X.X - Added XML Backup feature
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // Components
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DevicePanel } from '@/components/features/device/DevicePanel';
 import { DeviceCard } from '@/components/features/device/DeviceCard';
 import { ConnectionProgress } from '@/components/features/device/ConnectionProgress';
@@ -32,12 +33,18 @@ import {
     FileText,
     Zap,
     Trash2,
+    Smartphone,
+    Check,
 } from 'lucide-react';
 
 // Stores
 import { useDeviceStore } from '@/stores/deviceStore';
 import { usePartitionStore } from '@/stores/partitionStore';
 import { useTerminalStore } from '@/stores/terminalStore';
+import { useWorkflowStore } from '@/stores/workflowStore';
+
+// Data
+import { BRAND_OPTIONS } from '@/data/workflowPresets';
 
 // Hooks
 import { useWebUSB, useXMLBackup, useXMLFlash, useFirehose } from '@/hooks';
@@ -77,6 +84,40 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
 
     // FRP Remove state
     const [isRemovingFRP, setIsRemovingFRP] = useState(false);
+
+    // Automation mode - device selection state
+    const { deviceFilter, setDeviceFilter } = useWorkflowStore();
+    const [tempBrand, setTempBrand] = useState<string>(deviceFilter.brand || '');
+    const [tempModel, setTempModel] = useState<string>(deviceFilter.model || '');
+    const [tempOS, setTempOS] = useState<string>(deviceFilter.osVersion || '');
+
+    // Get selected brand/model data for dropdowns
+    const selectedBrandData = BRAND_OPTIONS.find((b) => b.id === tempBrand);
+    const models = selectedBrandData?.models || [];
+    const selectedModelData = models.find((m) => m.id === tempModel);
+    const osVersions = selectedModelData?.osVersions || [];
+
+    const canConfirmDevice = tempBrand && tempModel && tempOS;
+    const isDeviceConfirmed = deviceFilter.brand === tempBrand && deviceFilter.model === tempModel && deviceFilter.osVersion === tempOS && deviceFilter.brand !== '';
+
+    const handleBrandChange = (brandId: string) => {
+        setTempBrand(brandId);
+        setTempModel('');
+        setTempOS('');
+    };
+
+    const handleModelChange = (modelId: string) => {
+        setTempModel(modelId);
+        setTempOS('');
+    };
+
+    const handleConfirmDevice = () => {
+        setDeviceFilter({
+            brand: tempBrand,
+            model: tempModel,
+            osVersion: tempOS,
+        });
+    };
 
     // Handle XML Backup
     const handleXMLBackupConfirm = async (xmlFile: File, outputDir: FileSystemDirectoryHandle) => {
@@ -190,6 +231,87 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                         <>
                             {!collapsed && <FastbootConnectionStatus variant="card" />}
                             {!collapsed && <FastbootDeviceInfo className="border-0 shadow-none p-0 bg-transparent" />}
+                        </>
+                    )}
+
+                    {/* Automation Mode - ADB Connection + Device Selection */}
+                    {currentMode === 'automation' && (
+                        <>
+                            {!collapsed && <ADBConnectionStatus variant="card" />}
+                            {!collapsed && (
+                                <div className="space-y-3 mt-3">
+                                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                        <Smartphone className="w-3.5 h-3.5" />
+                                        Chọn Thiết Bị
+                                    </p>
+
+                                    {/* Brand */}
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-medium text-muted-foreground">Hãng</label>
+                                        <Select value={tempBrand} onValueChange={handleBrandChange}>
+                                            <SelectTrigger className="h-8 text-xs">
+                                                <SelectValue placeholder="Chọn hãng..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {BRAND_OPTIONS.map((brand) => (
+                                                    <SelectItem key={brand.id} value={brand.id} className="text-xs">
+                                                        {brand.icon} {brand.nameVi}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {/* Model */}
+                                    {tempBrand && (
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-medium text-muted-foreground">Model</label>
+                                            <Select value={tempModel} onValueChange={handleModelChange}>
+                                                <SelectTrigger className="h-8 text-xs">
+                                                    <SelectValue placeholder="Chọn model..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {models.map((model) => (
+                                                        <SelectItem key={model.id} value={model.id} className="text-xs">
+                                                            {model.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
+
+                                    {/* OS Version */}
+                                    {tempModel && (
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-medium text-muted-foreground">Hệ điều hành</label>
+                                            <Select value={tempOS} onValueChange={setTempOS}>
+                                                <SelectTrigger className="h-8 text-xs">
+                                                    <SelectValue placeholder="Chọn OS..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {osVersions.map((os) => (
+                                                        <SelectItem key={os.id} value={os.id} className="text-xs">
+                                                            {os.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
+
+                                    {/* Confirm Button */}
+                                    <Button
+                                        onClick={handleConfirmDevice}
+                                        disabled={!canConfirmDevice}
+                                        className={cn('w-full gap-1.5 h-8 text-xs', isDeviceConfirmed && 'bg-green-600 hover:bg-green-700')}
+                                        size="sm"
+                                    >
+                                        {isDeviceConfirmed && <Check className="w-3 h-3" />}
+                                        {isDeviceConfirmed ? 'Đã xác nhận' : 'Xác nhận'}
+                                    </Button>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>

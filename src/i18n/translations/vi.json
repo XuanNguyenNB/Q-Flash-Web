@@ -1698,5 +1698,66 @@
             "reason3_desc": "Nếu thiết bị hiển thị \"Qualcomm HS-USB QDLoader 9008\" trong Device Manager, hãy chuyển driver sang WinUSB thủ công hoặc bằng Zadig.",
             "help_text": "Xem hướng dẫn chi tiết tại trang Support của Q-Flash"
         }
+    },
+    "automation": {
+        "title": "Tự động hóa",
+        "subtitle": "Quy trình tự động cho thiết bị Android",
+        "desktopOnly": "Chức năng chỉ khả dụng trên Desktop",
+        "desktopOnlyDesc": "Tính năng Tự động hóa yêu cầu màn hình lớn để hiển thị đầy đủ giao diện điều khiển, màn hình thiết bị và AI Assistant. Vui lòng sử dụng máy tính để truy cập.",
+        "selectDevice": "Chọn thiết bị",
+        "availableWorkflows": "Quy trình khả dụng",
+        "noWorkflows": "Không tìm thấy quy trình nào",
+        "noWorkflowsDesc": "Vui lòng chọn thiết bị từ danh sách bên trái",
+        "noWorkflowSelected": "Chưa chọn quy trình",
+        "noWorkflowSelectedDesc": "Vui lòng chọn một quy trình từ danh sách bên trái để bắt đầu",
+        "steps": "bước",
+        "minutes": "phút",
+        "official": "Chính thức",
+        "difficulty": {
+            "easy": "Dễ",
+            "medium": "Trung bình",
+            "hard": "Khó"
+        },
+        "status": {
+            "idle": "Chờ",
+            "running": "Đang chạy",
+            "paused": "Tạm dừng",
+            "completed": "Hoàn thành",
+            "error": "Lỗi"
+        },
+        "controls": {
+            "start": "Bắt đầu",
+            "pause": "Tạm dừng",
+            "resume": "Tiếp tục",
+            "stop": "Dừng",
+            "next": "Tiếp theo",
+            "previous": "Trước"
+        },
+        "progress": {
+            "title": "Tiến độ",
+            "steps": "{{completed}}/{{total}} bước ({{percentage}}%)"
+        },
+        "deviceScreen": "Màn hình thiết bị",
+        "aiAssistant": "AI Assistant",
+        "aiEnabled": "Bật",
+        "aiDisabled": "Tắt",
+        "aiOffline": "AI Assistant đang tắt",
+        "aiOfflineDesc": "Bật để nhận hỗ trợ từ AI",
+        "aiGreeting": "Xin chào! Tôi là AI Assistant. Hỏi tôi bất cứ điều gì về workflow này.",
+        "aiSuggestions": "Gợi ý",
+        "aiPlaceholder": "Hỏi AI Assistant...",
+        "stepCanSkip": "Có thể bỏ qua",
+        "stepNumber": "Bước {{number}}"
+    },
+    "nav": {
+        "home": "Trang chủ",
+        "edl": "EDL",
+        "adb": "ADB",
+        "fastboot": "Fastboot",
+        "automation": "Tự động hóa",
+        "guide": "Hướng dẫn",
+        "downloads": "Tải xuống",
+        "support": "Hỗ trợ",
+        "donate": "Ủng hộ"
     }
 }

@@ -9,9 +9,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 /**
- * Device mode type - EDL, ADB, or Fastboot
+ * Device mode type - EDL, ADB, Fastboot, or Automation
  */
-export type DeviceMode = 'edl' | 'adb' | 'fastboot';
+export type DeviceMode = 'edl' | 'adb' | 'fastboot' | 'automation';
 
 /**
  * Device profile interface representing a supported Qualcomm device.
@@ -42,6 +42,7 @@ interface ModeConnectionStates {
     edl: boolean;
     adb: boolean;
     fastboot: boolean;
+    automation: boolean;
 }
 
 /**
@@ -85,6 +86,7 @@ const initialState = {
         edl: false,
         adb: false,
         fastboot: false,
+        automation: false,
     },
 };
 

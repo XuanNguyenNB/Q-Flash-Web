@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -26,6 +26,9 @@ import { useADB } from '@/hooks/useADB';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useADBStore } from '@/stores/adbStore';
 import { trackEvent } from '@/services/analytics';
+
+// Scrcpy Context for AI Automation
+import { useScrcpy } from '@/contexts/ScrcpyContext';
 
 // Scrcpy Dependencies
 import {
@@ -70,6 +73,9 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
     const deviceInfo = useADBStore((state) => state.deviceInfo); // Get device info from store
     const isDeviceReady = useADBStore((state) => state.isDeviceReady); // Check if device is ready for scrcpy
 
+    // Scrcpy Context - for AI Automation access
+    const scrcpyContext = useScrcpy();
+
     // State
     const [isStreaming, setIsStreaming] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
@@ -84,6 +90,24 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const clientRef = useRef<any | null>(null); // AdbScrcpyClient
     const decoderRef = useRef<any>(null); // Decoder instance
+
+    // Register canvas with context when it changes
+    useEffect(() => {
+        scrcpyContext.setCanvas(canvasRef.current);
+        return () => {
+            scrcpyContext.setCanvas(null);
+        };
+    }, [canvasRef.current]);
+
+    // Register streaming state with context
+    useEffect(() => {
+        scrcpyContext.setIsStreaming(isStreaming);
+        if (isStreaming && clientRef.current?.controller) {
+            scrcpyContext.setController(clientRef.current.controller);
+        } else {
+            scrcpyContext.setController(null);
+        }
+    }, [isStreaming]);
 
     /**
      * Cleanup Function
@@ -549,8 +573,8 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
     };
 
     return (
-        // Outer Dashboard Frame - Prevent scroll propagation
-        <div className="h-full w-full bg-background rounded-xl border border-border shadow-inner p-6 flex items-center justify-center overflow-hidden outline-none relative"
+        // Outer Container - No border, transparent
+        <div className="h-full w-full bg-transparent flex items-center justify-center overflow-hidden outline-none relative"
             tabIndex={0}
             onKeyDown={handleKeyDown}
             onMouseEnter={() => setIsHovered(true)} // Track hover state
@@ -562,7 +586,7 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
             style={{ touchAction: 'none' }} // Prevent touch scroll
         >
             {/* Use fixed container for transitions */}
-            <div className={`relative transition-all duration-500 ease-in-out ${isStreaming ? 'w-[95%] h-[95%]' : 'w-full max-w-lg'}`}>
+            <div className={`relative transition-all duration-500 ease-in-out ${isStreaming ? 'w-full h-full' : 'w-full max-w-lg'}`}>
 
                 {/* --- SETUP PANEL (Visible when NOT streaming) --- */}
                 {!isStreaming && !isStarting && (
@@ -649,7 +673,7 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
 
                 {/* --- STREAMING UI (Sidebar + Canvas) --- */}
                 {isStreaming && (
-                    <div className="relative flex flex-row h-full w-full bg-background rounded-xl border-[4px] border-border overflow-hidden shadow-2xl ring-1 ring-border animate-in fade-in zoom-in-95 duration-500">
+                    <div className="relative flex flex-row h-full w-full bg-transparent overflow-hidden animate-in fade-in zoom-in-95 duration-500">
 
                         {/* --- SIDEBAR --- */}
                         <div className="w-14 bg-card/90 backdrop-blur-md border-r border-border flex flex-col items-center py-5 gap-4 z-20 shrink-0">
@@ -699,10 +723,10 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
                         </div>
 
                         {/* --- DISPLAY AREA --- */}
-                        <div className="relative bg-background flex justify-center items-center py-2 flex-1">
+                        <div className="relative bg-transparent flex justify-center items-center flex-1">
                             <canvas
                                 ref={canvasRef}
-                                className="block max-h-[85vh] w-auto h-auto object-contain cursor-crosshair touch-none select-none outline-none"
+                                className="block max-h-full w-auto h-auto object-contain cursor-crosshair touch-none select-none outline-none"
                                 onPointerDown={handlePointerDown}
                                 onPointerMove={handlePointerMove}
                                 onPointerUp={handlePointerUp}
@@ -711,12 +735,6 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
                                     sendKey(KEYCODES.BACK); // Right click as Back
                                 }}
                             />
-
-                            {/* Status Dot */}
-                            <div className="absolute top-4 right-4 flex items-center gap-1.5 pointer-events-none bg-background/40 px-2 py-0.5 rounded-full backdrop-blur-md border border-green-500/20 animate-in fade-in duration-1000">
-                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-                                <span className="text-[10px] font-medium text-muted-foreground">LIVE • {resolution}p</span>
-                            </div>
 
                             {/* Error Layer (Overlay) */}
                             {error && (
