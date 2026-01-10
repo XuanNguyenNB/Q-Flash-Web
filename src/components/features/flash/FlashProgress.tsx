@@ -1,12 +1,12 @@
 /**
  * FlashProgress Component
- * 
+ *
  * Progress display for flash operations with ETA, partition status, and cancellation.
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock, Loader2, CheckCircle2, XCircle, AlertTriangle, X, ChevronDown, ChevronUp, RefreshCcw, Smartphone } from 'lucide-react';
+import { Clock, Loader2, CheckCircle2, XCircle, AlertTriangle, X, ChevronDown, ChevronUp, RefreshCcw, Smartphone, FileCode } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -21,6 +21,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useFlashStore } from '@/stores/flashStore';
+import { useRomStore } from '@/stores/romStore';
 import type { PartitionStatus } from '@/stores/flashStore';
 import { cn } from '@/lib/utils';
 
@@ -95,6 +96,9 @@ interface FlashProgressProps {
 export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
     const { t } = useTranslation();
     const [isMinimized, setIsMinimized] = useState(false);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const partitionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+    const lastInProgressPartition = useRef<string | null>(null);
 
     // Get flash state from store
     const {
@@ -104,6 +108,7 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
         flashBytesWritten,
         flashTotalBytes,
         flashPartitionStatuses,
+        flashPartitionProgress,
         flashETA,
         rebootCallback,
         executeReboot,
@@ -125,6 +130,38 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
     const canReboot = isComplete && !hasErrors && rebootCallback !== null;
     const [isRebooting, setIsRebooting] = useState(false);
     const [showRebootDialog, setShowRebootDialog] = useState(false);
+
+    // Auto-hide dialog after 10 seconds when completed successfully (no errors)
+    useEffect(() => {
+        if (isComplete && !hasErrors && onClose) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [isComplete, hasErrors, onClose]);
+
+    // Auto-scroll to current partition when it changes or completes
+    useEffect(() => {
+        if (currentFlashPartition && currentFlashPartition !== lastInProgressPartition.current) {
+            lastInProgressPartition.current = currentFlashPartition;
+            const ref = partitionRefs.current.get(currentFlashPartition);
+            if (ref) {
+                ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }, [currentFlashPartition]);
+
+    // Also scroll when a partition is completed (to show the next one)
+    useEffect(() => {
+        const inProgressPartition = partitions.find(([, status]) => status === 'in-progress');
+        if (inProgressPartition) {
+            const ref = partitionRefs.current.get(inProgressPartition[0]);
+            if (ref) {
+                ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }, [flashPartitionStatuses]);
 
     // Don't render if idle
     if (flashWriteStatus === 'idle') {
@@ -240,63 +277,83 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
                 </div>
             </div>
 
-            {/* Current partition */}
-            {isActive && currentFlashPartition && (
-                <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                            {t('flash.progress.current', { partition: currentFlashPartition })}
-                        </span>
-                        <span className="text-sm font-medium">
-                            {formatBytes(flashBytesWritten)} / {formatBytes(flashTotalBytes)}
-                        </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                        {t('flash.progress.currentPartitionProgress', `Flashing ${currentFlashPartition}...`)}
-                    </div>
-                </div>
-            )}
-
             {/* Partition status list */}
-            <ScrollArea className="h-48 rounded-md border p-2">
+            <ScrollArea className="h-48 rounded-md border p-2" ref={scrollAreaRef}>
                 <div className="space-y-1">
-                    {partitions.map(([name, status]) => (
-                        <div
-                            key={name}
-                            className={cn(
-                                "flex items-center justify-between text-sm py-2 px-3 rounded transition-all",
-                                status === 'in-progress' && "bg-violet-500/10 ring-2 ring-violet-500/30 shadow-sm",
-                                status === 'done' && "bg-green-500/5",
-                                status === 'error' && "bg-red-500/10"
-                            )}
-                        >
-                            <span className="flex items-center gap-2">
-                                <StatusIcon status={status} />
-                                <span className={cn(
-                                    "font-medium",
-                                    status === 'in-progress' && "text-violet-500 animate-pulse",
-                                    status === 'done' && "text-muted-foreground",
-                                    status === 'error' && "text-red-500"
-                                )}>
-                                    {name}
-                                </span>
-                                {status === 'in-progress' && (
-                                    <span className="text-xs text-violet-500 ml-1">
-                                        {t('flash.progress.flashing', 'Flashing...')}
-                                    </span>
+                    {partitions.map(([name, status]) => {
+                        const progress = flashPartitionProgress.get(name);
+                        const isPatchFile = name.startsWith('patch') && name.endsWith('.xml');
+                        const partitionPercent = progress && progress.totalBytes > 0
+                            ? Math.floor((progress.bytesWritten / progress.totalBytes) * 100)
+                            : 0;
+
+                        return (
+                            <div
+                                key={name}
+                                ref={(el) => {
+                                    if (el) partitionRefs.current.set(name, el);
+                                }}
+                                className={cn(
+                                    "text-sm py-2 px-3 rounded transition-all",
+                                    status === 'in-progress' && "bg-violet-500/10 ring-2 ring-violet-500/30 shadow-sm",
+                                    status === 'done' && "bg-green-500/5",
+                                    status === 'error' && "bg-red-500/10"
                                 )}
-                            </span>
-                            <span className={cn(
-                                "text-xs font-medium",
-                                status === 'in-progress' && "text-violet-500",
-                                status === 'done' && "text-green-500",
-                                status === 'error' && "text-red-500",
-                                status === 'pending' && "text-muted-foreground"
-                            )}>
-                                {t(`flash.status.${status}`, status)}
-                            </span>
-                        </div>
-                    ))}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <span className="flex items-center gap-2">
+                                        {isPatchFile ? (
+                                            <FileCode className={cn(
+                                                "h-4 w-4",
+                                                status === 'pending' && "text-muted-foreground",
+                                                status === 'in-progress' && "text-violet-500",
+                                                status === 'done' && "text-green-500",
+                                                status === 'error' && "text-red-500"
+                                            )} />
+                                        ) : (
+                                            <StatusIcon status={status} />
+                                        )}
+                                        <span className={cn(
+                                            "font-medium",
+                                            status === 'in-progress' && "text-violet-500 animate-pulse",
+                                            status === 'done' && "text-muted-foreground",
+                                            status === 'error' && "text-red-500"
+                                        )}>
+                                            {name}
+                                        </span>
+                                    </span>
+                                    <span className="flex items-center gap-2">
+                                        {/* Show progress for partition */}
+                                        {progress && progress.totalBytes > 0 && (
+                                            <span className={cn(
+                                                "text-xs",
+                                                status === 'in-progress' && "text-violet-500",
+                                                status === 'done' && "text-green-500",
+                                                status === 'pending' && "text-muted-foreground"
+                                            )}>
+                                                {formatBytes(progress.bytesWritten)} / {formatBytes(progress.totalBytes)}
+                                            </span>
+                                        )}
+                                        <span className={cn(
+                                            "text-xs font-medium min-w-[60px] text-right",
+                                            status === 'in-progress' && "text-violet-500",
+                                            status === 'done' && "text-green-500",
+                                            status === 'error' && "text-red-500",
+                                            status === 'pending' && "text-muted-foreground"
+                                        )}>
+                                            {t(`flash.status.${status}`, status)}
+                                        </span>
+                                    </span>
+                                </div>
+                                {/* Per-partition progress bar when in progress */}
+                                {status === 'in-progress' && progress && progress.totalBytes > 0 && (
+                                    <div className="mt-2">
+                                        <Progress value={partitionPercent} className="h-1.5" />
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             </ScrollArea>
 
@@ -360,6 +417,8 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
                                         setIsRebooting(true);
                                         try {
                                             await executeReboot();
+                                            // Clear ROM store after reboot since device will disconnect
+                                            useRomStore.getState().clearRom();
                                         } finally {
                                             setIsRebooting(false);
                                         }

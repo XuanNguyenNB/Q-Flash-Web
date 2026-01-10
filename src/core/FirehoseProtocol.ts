@@ -1518,6 +1518,13 @@ export class FirehoseProtocol {
                         };
                     }
                     chunkOffset = usbEnd;
+
+                    // Update progress after each 32MB USB transfer for smooth progress display
+                    if (onProgress) {
+                        const currentBytes = bytesWritten + Math.min(chunkOffset, chunkBytes);
+                        const percent = Math.min(100, Math.round((currentBytes / totalBytes) * 100));
+                        onProgress(percent);
+                    }
                 }
 
                 // Wait for ACK

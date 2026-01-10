@@ -444,63 +444,36 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
         const canvas = canvasRef.current;
         if (!canvas || !isStreaming) return;
 
-        const handleNativeWheel = (e: WheelEvent) => {
+        const handleNativeWheel = async (e: WheelEvent) => {
             e.preventDefault();
             e.stopPropagation();
 
             if (!clientRef.current?.controller) return;
 
-            // Get center of viewport for swipe
-            const centerX = canvas.width / 2;
-            const startY = canvas.height / 2;
-
-            // Scroll sensitivity - very low for smooth, controlled scrolling
-            const scrollAmount = e.deltaY * 0.15; // Increased for noticeable movement
-            const endY = startY - scrollAmount;
-
             const controller = clientRef.current.controller;
-            const pointerId = -2n;
+
+            // Get pointer position relative to canvas
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const pointerX = (e.clientX - rect.left) * scaleX;
+            const pointerY = (e.clientY - rect.top) * scaleY;
+
+            // Normalize scroll values - scrollX and scrollY are expected as float values
+            // deltaY positive = scroll down, negative = scroll up
+            // For Android: negative scrollY = scroll down (content moves up)
+            const scrollX = 0;
+            const scrollY = -e.deltaY / 100; // Normalize and invert for natural scrolling
 
             try {
-                // Simulate swipe with multiple MOVE events to ensure it's recognized as swipe, not tap
-                controller.injectTouch({
-                    action: 0, // ACTION_DOWN
-                    pointerId,
-                    pointerX: centerX,
-                    pointerY: startY,
+                // Use native injectScroll method for proper scroll handling
+                await controller.injectScroll({
+                    pointerX,
+                    pointerY,
                     videoWidth: canvas.width,
                     videoHeight: canvas.height,
-                    pressure: 1,
-                    actionButton: 0,
-                    buttons: 0
-                });
-
-                // Multiple intermediate MOVE events for smooth swipe
-                const steps = 5;
-                for (let i = 1; i <= steps; i++) {
-                    const currentY = startY - (scrollAmount * i / steps);
-                    controller.injectTouch({
-                        action: 2, // ACTION_MOVE
-                        pointerId,
-                        pointerX: centerX,
-                        pointerY: currentY,
-                        videoWidth: canvas.width,
-                        videoHeight: canvas.height,
-                        pressure: 1,
-                        actionButton: 0,
-                        buttons: 0
-                    });
-                }
-
-                controller.injectTouch({
-                    action: 1, // ACTION_UP
-                    pointerId,
-                    pointerX: centerX,
-                    pointerY: endY,
-                    videoWidth: canvas.width,
-                    videoHeight: canvas.height,
-                    pressure: 0,
-                    actionButton: 0,
+                    scrollX,
+                    scrollY,
                     buttons: 0
                 });
             } catch (err) {

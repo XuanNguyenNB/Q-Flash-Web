@@ -1,12 +1,13 @@
 /**
  * FlashConfirmDialog Component
- * 
+ *
  * Confirmation dialog for flash operations with critical partition warnings.
  * Uses shadcn/ui AlertDialog for dangerous action pattern (ADR-005).
  */
 
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Zap } from 'lucide-react';
+import { AlertTriangle, Zap, RefreshCcw } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,6 +19,8 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
 /**
@@ -36,7 +39,7 @@ interface FlashConfirmDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     partitions: PartitionInfo[];
-    onConfirm: () => void;
+    onConfirm: (autoReboot: boolean) => void;
 }
 
 /**
@@ -81,12 +84,22 @@ export function FlashConfirmDialog({
     onConfirm
 }: FlashConfirmDialogProps) {
     const { t } = useTranslation();
+    const [autoReboot, setAutoReboot] = useState(() => {
+        // Load from localStorage, default to false
+        const saved = localStorage.getItem('flash_auto_reboot');
+        return saved === 'true';
+    });
 
     // Calculate total size
     const totalSize = partitions.reduce((sum, p) => sum + p.size, 0);
 
     // Count critical partitions
     const criticalCount = partitions.filter(p => isCritical(p.name)).length;
+
+    const handleAutoRebootChange = (checked: boolean) => {
+        setAutoReboot(checked);
+        localStorage.setItem('flash_auto_reboot', String(checked));
+    };
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -153,6 +166,22 @@ export function FlashConfirmDialog({
                     <div className="text-xs text-muted-foreground bg-yellow-500/10 p-2 rounded">
                         ⚠️ {t('flash.confirm.warning', 'This action cannot be undone. Make sure you have selected the correct partitions.')}
                     </div>
+
+                    {/* Auto reboot option */}
+                    <div className="flex items-center gap-2 p-2 rounded bg-muted/50">
+                        <Checkbox
+                            id="auto-reboot"
+                            checked={autoReboot}
+                            onCheckedChange={handleAutoRebootChange}
+                        />
+                        <Label
+                            htmlFor="auto-reboot"
+                            className="text-sm font-normal cursor-pointer flex items-center gap-2"
+                        >
+                            <RefreshCcw className="h-4 w-4 text-muted-foreground" />
+                            {t('flash.confirm.autoReboot', 'Tự động khởi động lại sau khi flash')}
+                        </Label>
+                    </div>
                 </div>
 
                 <AlertDialogFooter>
@@ -160,7 +189,7 @@ export function FlashConfirmDialog({
                         {t('common.cancel', 'Cancel')}
                     </AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={onConfirm}
+                        onClick={() => onConfirm(autoReboot)}
                         className="bg-red-600 hover:bg-red-700 text-white"
                     >
                         <Zap className="h-4 w-4 mr-2" />

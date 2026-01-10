@@ -360,15 +360,18 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
 
             // Step 5: Read Partition Table
             setStatus('reading-partitions');
+            usePartitionStore.getState().setLoading(true); // Show loading spinner in UI
             log('info', '[Partitions] Reading partition table...');
 
             const partitionResult = await readPartitionTable(usbManager);
 
             if (!partitionResult.success || !partitionResult.partitions) {
+                usePartitionStore.getState().setLoading(false);
                 throw new Error(partitionResult.error || 'Failed to read partition table');
             }
 
             setPartitions(partitionResult.partitions);
+            usePartitionStore.getState().setLoading(false); // Hide loading spinner
             log('success', `[Partitions] Found ${partitionResult.partitions.length} partitions`);
             toast.success(`Found ${partitionResult.partitions.length} partitions`);
 
@@ -380,6 +383,9 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             trackEvent('edl', 'connection_complete', selectedDevice?.name || 'manual', partitionResult.partitions.length);
 
         } catch (err) {
+            // Ensure loading state is cleared on any error
+            usePartitionStore.getState().setLoading(false);
+
             // Use statusRef.current to get the latest status value
             const connectionError = parseError(err, statusRef.current);
             setStatus('error');

@@ -47,6 +47,14 @@ export interface AppError {
 }
 
 /**
+ * Per-partition progress tracking
+ */
+export interface PartitionProgress {
+    bytesWritten: number;
+    totalBytes: number;
+}
+
+/**
  * Flash store state interface.
  */
 export interface FlashState {
@@ -65,6 +73,7 @@ export interface FlashState {
     flashBytesWritten: number;
     flashTotalBytes: number;
     flashPartitionStatuses: Map<string, PartitionStatus>;
+    flashPartitionProgress: Map<string, PartitionProgress>; // Per-partition progress
     flashError: AppError | null;
     flashStartTime: number | null;
     flashETA: number | null; // seconds remaining
@@ -96,8 +105,9 @@ export interface FlashState {
     reset: () => void;
 
     // Flash write actions
-    startFlashWrite: (partitions: string[], totalBytes: number) => void;
+    startFlashWrite: (partitions: string[], totalBytes: number, partitionSizes?: Map<string, number>) => void;
     updateFlashWriteProgress: (partition: string, bytesWritten: number, totalBytes: number) => void;
+    updatePartitionProgress: (partition: string, bytesWritten: number, totalBytes: number) => void;
     setFlashWritePartitionStatus: (partition: string, status: PartitionStatus) => void;
     completeFlashWrite: () => void;
     cancelFlashWrite: () => void;
@@ -134,6 +144,7 @@ const initialState = {
     flashBytesWritten: 0,
     flashTotalBytes: 0,
     flashPartitionStatuses: new Map<string, PartitionStatus>(),
+    flashPartitionProgress: new Map<string, PartitionProgress>(),
     flashError: null as AppError | null,
     flashStartTime: null as number | null,
     flashETA: null as number | null,
@@ -192,13 +203,19 @@ export const useFlashStore = create<FlashState>()((set, get) => ({
     }),
 
     // Flash write actions
-    startFlashWrite: (partitions, totalBytes) => {
+    startFlashWrite: (partitions, totalBytes, partitionSizes) => {
         const statuses = new Map<string, PartitionStatus>();
-        partitions.forEach(p => statuses.set(p, 'pending'));
+        const partitionProgress = new Map<string, PartitionProgress>();
+        partitions.forEach(p => {
+            statuses.set(p, 'pending');
+            const size = partitionSizes?.get(p) || 0;
+            partitionProgress.set(p, { bytesWritten: 0, totalBytes: size });
+        });
 
         set({
             flashWriteStatus: 'flashing',
             flashPartitionStatuses: statuses,
+            flashPartitionProgress: partitionProgress,
             flashTotalBytes: totalBytes,
             flashProgress: 0,
             flashBytesWritten: 0,
@@ -275,6 +292,13 @@ export const useFlashStore = create<FlashState>()((set, get) => ({
         set({ flashPartitionStatuses: newStatuses });
     },
 
+    updatePartitionProgress: (partition, bytesWritten, totalBytes) => {
+        const { flashPartitionProgress } = get();
+        const newProgress = new Map(flashPartitionProgress);
+        newProgress.set(partition, { bytesWritten, totalBytes });
+        set({ flashPartitionProgress: newProgress });
+    },
+
     completeFlashWrite: () => set({ flashWriteStatus: 'success' }),
 
     cancelFlashWrite: () => set({ flashWriteStatus: 'cancelled' }),
@@ -291,6 +315,7 @@ export const useFlashStore = create<FlashState>()((set, get) => ({
         flashBytesWritten: 0,
         flashTotalBytes: 0,
         flashPartitionStatuses: new Map(),
+        flashPartitionProgress: new Map(),
         flashError: null,
         flashStartTime: null,
         flashETA: null,

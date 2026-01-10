@@ -46,6 +46,7 @@ export function useFlash() {
     const {
         startFlashWrite,
         updateFlashWriteProgress,
+        updatePartitionProgress,
         setFlashWritePartitionStatus,
         completeFlashWrite,
         cancelFlashWrite,
@@ -120,10 +121,35 @@ export function useFlash() {
             return sum + (file ? file.size : 0);
         }, 0);
 
+        // Create partition sizes map for per-partition progress tracking
+        const partitionSizes = new Map<string, number>();
+        partitions.forEach(p => {
+            const file = getRomFile(p.name);
+            if (file) {
+                partitionSizes.set(p.name, file.size);
+            }
+        });
+
+        // Get patch files to include in the progress list
+        const { patchFiles } = useRomStore.getState();
+        const allPartitionNames = partitions.map(p => p.name);
+
+        // Add patch files to the list if they exist
+        if (patchFiles && patchFiles.length > 0) {
+            const sortedPatches = [...patchFiles].sort((a, b) =>
+                a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+            );
+            sortedPatches.forEach(patch => {
+                allPartitionNames.push(patch.name);
+                // Patch files are small XML, set size to 0 (instant)
+                partitionSizes.set(patch.name, 0);
+            });
+        }
+
         log('info', `Starting flash of ${partitions.length} partition(s) (${formatBytes(totalBytes)})...`);
 
-        // Initialize store state
-        startFlashWrite(partitions.map(p => p.name), totalBytes);
+        // Initialize store state with partition sizes for per-partition progress
+        startFlashWrite(allPartitionNames, totalBytes, partitionSizes);
 
         let successCount = 0;
         let errorCount = 0;
@@ -197,6 +223,9 @@ export function useFlash() {
                                 const written = Math.floor((percent / 100) * romFile.size);
                                 const total = romFile.size;
 
+                                // Update per-partition progress
+                                updatePartitionProgress(partition.name, written, total);
+
                                 // Update overall progress
                                 const currentTotalWritten = partitionStartBytes + written;
                                 updateFlashWriteProgress(partition.name, currentTotalWritten, total);
@@ -220,6 +249,9 @@ export function useFlash() {
                                 if (cancelledRef.current) {
                                     throw new Error('Cancelled');
                                 }
+
+                                // Update per-partition progress
+                                updatePartitionProgress(partition.name, written, total);
 
                                 // Update overall progress
                                 const currentTotalWritten = partitionStartBytes + written;
@@ -268,32 +300,38 @@ export function useFlash() {
 
             // Apply Patches (patch0.xml, etc.) AFTER re-configuring device
             if (errorCount === 0 && firehoseProtocol.applyPatch) {
-                const { patchFiles } = useRomStore.getState();
+                const { patchFiles: patchFilesForApply } = useRomStore.getState();
 
-                if (patchFiles && patchFiles.length > 0) {
-                    log('info', `Found ${patchFiles.length} patch file(s). Applying...`);
+                if (patchFilesForApply && patchFilesForApply.length > 0) {
+                    log('info', `Found ${patchFilesForApply.length} patch file(s). Applying...`);
 
                     // Sort patches by name (patch0.xml, patch1.xml, ...)
-                    const sortedPatches = [...patchFiles].sort((a, b) =>
+                    const sortedPatchesForApply = [...patchFilesForApply].sort((a, b) =>
                         a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
                     );
 
-                    for (const patchFile of sortedPatches) {
+                    for (const patchFile of sortedPatchesForApply) {
+                        // Set patch status to in-progress
+                        setFlashWritePartitionStatus(patchFile.name, 'in-progress');
+
                         try {
                             log('info', `Applying patch: ${patchFile.name}...`);
                             const file = await patchFile.handle.getFile();
                             const content = await file.text();
 
-                            const success = await firehoseProtocol.applyPatch(content);
-                            if (success) {
+                            const patchSuccess = await firehoseProtocol.applyPatch(content);
+                            if (patchSuccess) {
                                 log('success', `Patch applied: ${patchFile.name}`);
+                                setFlashWritePartitionStatus(patchFile.name, 'done');
                             } else {
                                 log('error', `Failed to apply patch: ${patchFile.name}`);
+                                setFlashWritePartitionStatus(patchFile.name, 'error');
                                 errorCount++;
                                 toast.error(`Failed to apply patch: ${patchFile.name}`);
                             }
                         } catch (e) {
                             log('error', `Error reading patch ${patchFile.name}: ${e}`);
+                            setFlashWritePartitionStatus(patchFile.name, 'error');
                             errorCount++;
                         }
                     }
@@ -374,6 +412,7 @@ export function useFlash() {
         log,
         startFlashWrite,
         updateFlashWriteProgress,
+        updatePartitionProgress,
         setFlashWritePartitionStatus,
         completeFlashWrite,
         cancelFlashWrite,

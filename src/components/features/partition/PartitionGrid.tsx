@@ -101,7 +101,7 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
         }
     }, [selectedPartitions.size]);
 
-    const handleFlashConfirm = useCallback(async () => {
+    const handleFlashConfirm = useCallback(async (autoReboot: boolean = false) => {
         setIsFlashDialogOpen(false);
 
         const { log } = useTerminalStore.getState();
@@ -225,7 +225,23 @@ export function PartitionGrid({ className, isLoading }: PartitionGridProps) {
             }
         };
 
-        await startFlash(partitionsWithFiles, combinedFilesMap, firehoseWrapper);
+        const flashSuccess = await startFlash(partitionsWithFiles, combinedFilesMap, firehoseWrapper);
+
+        // Auto reboot if option enabled and flash was successful
+        if (autoReboot && flashSuccess) {
+            log('info', '🔄 Auto-reboot enabled. Rebooting device in 2 seconds...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const { rebootCallback, executeReboot } = useFlashStore.getState();
+            if (rebootCallback) {
+                try {
+                    await executeReboot();
+                    log('success', '✅ Device rebooted successfully!');
+                } catch (e) {
+                    log('error', `Failed to reboot: ${e}`);
+                }
+            }
+        }
     }, [selectedPartitionObjects, startFlash, getManager, getFirehose, romStore.romEntries, manualFiles]);
 
     const handleFlashCancel = useCallback(() => {
