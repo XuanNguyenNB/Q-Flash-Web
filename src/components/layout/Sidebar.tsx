@@ -68,7 +68,12 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     const { startXMLFlash } = useXMLFlash();
     const { getInstance } = useFirehose();
     const partitions = usePartitionStore((state) => state.partitions);
+    const isLoadingPartitions = usePartitionStore((state) => state.isLoading);
     const log = useTerminalStore((state) => state.log);
+
+    // Check if partitions are loaded
+    const hasPartitions = partitions.length > 0;
+    const canUseQuickActions = hasPartitions && !isLoadingPartitions;
 
     // FRP Remove state
     const [isRemovingFRP, setIsRemovingFRP] = useState(false);
@@ -209,7 +214,7 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                             {isConnected && currentMode === 'edl' && (
                                 <div className="space-y-2">
                                     {/* Flash Domestic ROM (RomLoader) */}
-                                    <RomLoader compact />
+                                    <RomLoader compact disabled={!canUseQuickActions} />
 
                                     {/* Backup by XML Button */}
                                     <Button
@@ -217,6 +222,7 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                                         size="sm"
                                         className="w-full justify-start gap-2"
                                         onClick={() => setShowXMLBackupDialog(true)}
+                                        disabled={!canUseQuickActions}
                                     >
                                         <FileText className="w-4 h-4" />
                                         {t('xml_backup.button')}
@@ -228,6 +234,7 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                                         size="sm"
                                         className="w-full justify-start gap-2"
                                         onClick={() => setShowXMLFlashDialog(true)}
+                                        disabled={!canUseQuickActions}
                                     >
                                         <Zap className="w-4 h-4" />
                                         {t('xml_flash.button')}
@@ -239,7 +246,7 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                                         size="sm"
                                         className="w-full justify-start gap-2"
                                         onClick={handleRemoveFRP}
-                                        disabled={isRemovingFRP}
+                                        disabled={!canUseQuickActions || isRemovingFRP}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                         {isRemovingFRP ? 'Removing FRP...' : t('flash.removeFRP', 'Remove FRP')}

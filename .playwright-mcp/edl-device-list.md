@@ -1,0 +1,209 @@
+### New console messages
+- [LOG] [Analytics] Initialized {visitorId: fbb932cc-0208-4d70-adc6-4753f4fa86df, sessionId: 31cf97d3-...
+- [LOG] [Analytics] Event queued: edl device_selected Snapdragon 8 Gen 3 @ http://localhost:5173/src/s...
+- [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3001/api/analytics/e...
+- [ERROR] [Analytics] Event flush failed: TypeError: Failed to fetch
+    at AnalyticsService.send (htt...
+- [LOG] [Analytics] Event queued: edl connection_error USB_ERROR @ http://localhost:5173/src/services/...
+- [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3001/api/analytics/b...
+- [ERROR] [Analytics] Event flush failed: TypeError: Failed to fetch
+    at AnalyticsService.send (htt...
+
+### Page state
+- Page URL: http://localhost:5173/edl
+- Page Title: Q-Flash - Universal Qualcomm EDL Flash Tool
+- Page Snapshot:
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - link "Q-Flash Q-Flash" [ref=e7] [cursor=pointer]:
+            - /url: /
+            - img "Q-Flash" [ref=e8]
+            - generic [ref=e9]: Q-Flash
+          - generic [ref=e10]:
+            - button "EDL" [ref=e11]:
+              - img [ref=e12]
+              - generic [ref=e14]: EDL
+            - button "ADB" [ref=e15]:
+              - img [ref=e16]
+              - generic [ref=e18]: ADB
+            - button "Fastboot" [ref=e19]:
+              - img [ref=e20]
+              - generic [ref=e22]: Fastboot
+          - navigation [ref=e23]:
+            - link "Hướng dẫn" [ref=e24] [cursor=pointer]:
+              - /url: /guide
+            - link "Tải xuống" [ref=e25] [cursor=pointer]:
+              - /url: /downloads
+            - link "Hỗ trợ" [ref=e26] [cursor=pointer]:
+              - /url: /support
+            - link "❤ Ủng hộ Tôi" [ref=e27] [cursor=pointer]:
+              - /url: /donate
+              - generic [ref=e28]: ❤
+              - text: Ủng hộ Tôi
+        - generic [ref=e29]:
+          - button "Dark mode" [ref=e30]:
+            - img
+          - button "vi" [ref=e31]:
+            - img
+            - generic [ref=e32]: vi
+    - complementary [ref=e33]:
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - combobox [ref=e36]:
+            - generic [ref=e37]:
+              - img [ref=e38]
+              - generic [ref=e269]: Snapdragon 8 Gen 3
+            - img [ref=e44]
+          - generic [ref=e270]:
+            - img [ref=e271]
+            - generic [ref=e275]: Đã tải Firehose
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - 'generic "Connection status: error" [ref=e276]'
+            - generic [ref=e277]: Lỗi kết nối
+          - generic [ref=e278]:
+            - img [ref=e280]
+            - generic [ref=e282]:
+              - paragraph [ref=e283]: Snapdragon 8 Gen 3
+              - paragraph [ref=e284]: "Chipset: SM8650"
+          - paragraph [ref=e286]: Không tìm thấy thiết bị. Đảm bảo thiết bị ở chế độ EDL và đã cài driver WinUSB qua Zadig.
+          - button "Thử kết nối lại" [ref=e287]:
+            - img
+            - text: Thử kết nối lại
+        - generic [ref=e288]:
+          - generic [ref=e290]:
+            - generic [ref=e291]: Tiến trình kết nối
+            - generic [ref=e292]: 0%
+          - generic [ref=e294]:
+            - generic [ref=e295]:
+              - img [ref=e297]
+              - generic [ref=e299]: Kết nối USB
+            - generic [ref=e300]:
+              - img [ref=e302]
+              - generic [ref=e305]: Bắt tay Sahara
+            - generic [ref=e306]:
+              - img [ref=e308]
+              - generic [ref=e311]: Cài đặt Firehose
+            - generic [ref=e312]:
+              - img [ref=e314]
+              - generic [ref=e316]: Xác thực VIP
+            - generic [ref=e317]:
+              - img [ref=e319]
+              - generic [ref=e321]: Đọc phân vùng
+      - generic [ref=e55]:
+        - paragraph [ref=e56]: Thao tác nhanh
+        - generic [ref=e57]: Kết nối thiết bị trước
+      - button "Thu gọn" [ref=e59]:
+        - img
+        - generic [ref=e60]: Thu gọn
+    - complementary [ref=e61]:
+      - button [ref=e64]:
+        - img
+    - button "Expand console" [ref=e65]:
+      - img [ref=e66]
+      - generic [ref=e68]: Bảng điều khiển
+      - img [ref=e69]
+    - main [ref=e71]:
+      - generic [ref=e73]:
+        - generic [ref=e75]:
+          - img [ref=e77]
+          - generic [ref=e79]:
+            - heading "Công cụ Flash EDL" [level=1] [ref=e80]
+            - paragraph [ref=e81]: Hỗ trợ flash EDL cho các thiết bị Qualcomm. Có thể cứu brick, sao lưu dữ liệu hoặc sửa lỗi phân vùng.
+        - main [ref=e82]:
+          - generic [ref=e83]:
+            - generic [ref=e85]:
+              - heading "Chọn nhóm hãng" [level=3] [ref=e86]
+              - generic [ref=e87]:
+                - button "Oppo / OnePlus / Realme Thiết bị BBK với firehose cần xác thực VIP" [ref=e88]:
+                  - img [ref=e90]
+                  - generic [ref=e92]:
+                    - paragraph [ref=e93]: Oppo / OnePlus / Realme
+                    - paragraph [ref=e94]: Thiết bị BBK với firehose cần xác thực VIP
+                - button "LG Thiết bị LG với firehose riêng" [ref=e97]:
+                  - img [ref=e99]
+                  - generic [ref=e101]:
+                    - paragraph [ref=e102]: LG
+                    - paragraph [ref=e103]: Thiết bị LG với firehose riêng
+            - generic [ref=e104]:
+              - generic [ref=e106]:
+                - heading "Hướng dẫn kết nối EDL" [level=3] [ref=e107]:
+                  - img [ref=e108]
+                  - text: Hướng dẫn kết nối EDL
+                - generic [ref=e110]:
+                  - paragraph [ref=e111]: "Để sử dụng chế độ EDL trên WEB, thiết bị phải được nhận diện là \"QUSB_BULK\" hoặc \"Qualcomm HS-USB QDLoader 9008\" thông qua WinUSB. Hãy làm theo các bước sau để chuyển đổi:"
+                  - list [ref=e112]:
+                    - listitem [ref=e113]:
+                      - text: Tải về và mở Zadig
+                      - paragraph [ref=e114]: Tải về và mở ứng dụng Zadig.exe
+                    - listitem [ref=e115]:
+                      - text: Vào chế độ EDL
+                      - paragraph [ref=e116]: Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi máy tính nhận (có tiếng kêu hoặc Device Manager hiển thị)
+                    - listitem [ref=e117]:
+                      - text: Thay thế Driver
+                      - paragraph [ref=e118]: Tiến hành tìm và thay thế driver như hình minh họa kế bên
+                    - listitem [ref=e119]:
+                      - text: Kết nối lại
+                      - paragraph [ref=e120]: "Sau khi đã cài đặt, thiết bị có thể bị thoát khỏi EDL. Hãy ấn nút kết nối với thiết bị trên WEB này và tiến hành vào lại EDL bằng cách: Cắm cáp USB và Giữ Tăng âm + Giảm âm + Nguồn cùng lúc tới khi giao diện Chrome hiển thị thiết bị (dạng QUSB_BULK), chúng ta tiến hành chọn thiết bị đó, web sẽ tự vào EDL mode VIP"
+                - generic [ref=e121]:
+                  - 'heading "Mẹo: Dùng Q-Flash Forge" [level=4] [ref=e122]'
+                  - paragraph [ref=e123]: Dùng công cụ Q-Flash Forge để tự động sửa driver và hướng dẫn Zadig.
+                  - link "Mở dự án Q-Flash Forge" [ref=e124] [cursor=pointer]:
+                    - /url: https://github.com/XuanNguyenNB/Q-FLASH-FORGE
+                    - img
+                    - text: Mở dự án Q-Flash Forge
+              - generic [ref=e125]:
+                - generic [ref=e126]:
+                  - generic [ref=e127]: Hướng dẫn cài Driver
+                  - generic [ref=e128]: 2 / 3
+                - generic [ref=e129]:
+                  - img "Zadig step 2" [ref=e322]
+                  - button [ref=e131]:
+                    - img [ref=e132]
+                  - button [ref=e134]:
+                    - img [ref=e135]
+                - paragraph [ref=e137]: "Bước 2: Chọn 'WinUSB' làm driver đích"
+                - generic [ref=e138]:
+                  - button [ref=e139]
+                  - button [ref=e140]
+                  - button [ref=e141]
+              - generic [ref=e143]:
+                - generic [ref=e144]:
+                  - generic [ref=e145]:
+                    - img [ref=e146]
+                    - text: Tải Firehose thủ công
+                  - generic [ref=e149]: Tải tệp firehose thủ công cho thiết bị không hỗ trợ hoặc khi tự động phát hiện thất bại.
+                - generic [ref=e150]:
+                  - generic [ref=e151]:
+                    - generic [ref=e152]:
+                      - generic [ref=e153]:
+                        - img [ref=e155]
+                        - paragraph [ref=e161]: Programmer (.melf/.mbn)
+                      - button "Chọn" [ref=e162]:
+                        - img
+                        - text: Chọn
+                    - generic [ref=e163]:
+                      - generic [ref=e164]:
+                        - img [ref=e166]
+                        - paragraph [ref=e172]: Digest (.elf)
+                      - button "Chọn" [ref=e173]:
+                        - img
+                        - text: Chọn
+                    - generic [ref=e174]:
+                      - generic [ref=e175]:
+                        - img [ref=e177]
+                        - paragraph [ref=e183]: Signature (.bin)
+                      - button "Chọn" [ref=e184]:
+                        - img
+                        - text: Chọn
+                  - generic [ref=e185]:
+                    - button "Xóa tất cả" [disabled]:
+                      - img
+                      - text: Xóa tất cả
+                  - paragraph [ref=e186]: Các tệp firehose là dành riêng cho thiết bị. Lấy chúng từ nhà sản xuất hoặc nguồn ROM đáng tin cậy.
+  - region "Notifications alt+T"
+```

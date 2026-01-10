@@ -81,6 +81,7 @@
         "expand": "Mở rộng"
     },
     "firehose": {
+        "success": "Đã tải Firehose",
         "manual": {
             "title": "Tải Firehose thủ công",
             "description": "Tải tệp firehose thủ công cho thiết bị không hỗ trợ hoặc khi tự động phát hiện thất bại.",
@@ -94,7 +95,7 @@
             "help": "Các tệp firehose là dành riêng cho thiết bị. Lấy chúng từ nhà sản xuất hoặc nguồn ROM đáng tin cậy.",
             "loading": "Đang tải",
             "loaded": "Đã tải",
-            "allLoaded": "Tất cả tệp firehose đã tải thành công!",
+            "allLoaded": "Đã tải tất cả tệp Firehose thành công!",
             "loadError": "Không thể tải tệp",
             "cleared": "Đã xóa tất cả tệp firehose thủ công",
             "connect": "Kết nối thiết bị",
@@ -496,20 +497,35 @@
         }
     },
     "connection": {
+        "flowProgress": "Tiến trình kết nối",
+        "progress": "Đang kết nối...",
+        "step": {
+            "usb": "Kết nối USB",
+            "sahara": "Bắt tay Sahara",
+            "firehose": "Cài đặt Firehose",
+            "auth": "Xác thực VIP",
+            "partitions": "Đọc phân vùng"
+        },
         "flow": {
-            "connecting": "Đang kết nối thiết bị...",
-            "sahara": "Bắt tay Sahara...",
-            "uploading": "Đang tải firehose...",
-            "authenticating": "Xác thực VIP...",
-            "reading": "Đang đọc phân vùng...",
+            "connecting": "Đang kết nối thiết bị USB...",
+            "sahara": "Đang tải programmer...",
+            "firehose": "Đang cấu hình giao thức Firehose...",
+            "auth": "Đang xác thực với máy chủ OEM...",
+            "reading": "Đang đọc bảng phân vùng...",
             "connected": "Thiết bị đã sẵn sàng"
         },
         "error": {
             "usb": "Kết nối USB thất bại",
+            "usbDetail": "Không thể kết nối với thiết bị qua USB. Kiểm tra kết nối cáp và driver WinUSB.",
+            "deviceNotFound": "Không tìm thấy thiết bị. Đảm bảo thiết bị ở chế độ EDL và đã cài driver WinUSB qua Zadig.",
             "sahara": "Bắt tay Sahara thất bại",
+            "saharaDetail": "Không thể thiết lập giao thức Sahara. Thiết bị có thể không ở chế độ EDL hoặc cần khởi động lại.",
             "firehose": "Tải firehose thất bại",
+            "firehoseDetail": "Không thể tải file programmer firehose lên thiết bị. File có thể không tương thích.",
             "vip": "Xác thực VIP thất bại",
-            "partition": "Đọc phân vùng thất bại"
+            "vipDetail": "Xác thực VIP cho thiết bị Oppo/OnePlus/Realme thất bại. Kiểm tra file digest và signature.",
+            "partition": "Đọc phân vùng thất bại",
+            "partitionDetail": "Không thể đọc bảng phân vùng từ thiết bị. Thử kết nối lại."
         },
         "action": {
             "retry": "Thử kết nối lại"
@@ -644,17 +660,17 @@
             "connectionFailed": "Kết nối thất bại: {{message}}",
             "disconnectFailed": "Ngắt kết nối thất bại: {{message}}",
             "rebootEDLSuccess": "Đã gửi lệnh: Khởi động lại vào EDL",
-            "rebootEDLFailed": "Lỗi khởi động lại vào EDL",
+            "rebootEDLFailed": "Lỗi khởi động lại vào EDL: {{message}}",
             "rebootBootloaderSuccess": "Đã gửi lệnh: Khởi động lại vào Bootloader",
-            "rebootBootloaderFailed": "Lỗi khởi động lại vào Bootloader",
+            "rebootBootloaderFailed": "Lỗi khởi động lại vào Bootloader: {{message}}",
             "rebootFastbootDSuccess": "Đã gửi lệnh: Khởi động lại vào FastbootD",
-            "rebootFastbootDFailed": "Lỗi khởi động lại vào FastbootD",
+            "rebootFastbootDFailed": "Lỗi khởi động lại vào FastbootD: {{message}}",
             "rebootRecoverySuccess": "Đã gửi lệnh: Khởi động lại vào Recovery",
-            "rebootRecoveryFailed": "Lỗi khởi động lại vào Recovery",
+            "rebootRecoveryFailed": "Lỗi khởi động lại vào Recovery: {{message}}",
             "rebootSystemSuccess": "Đã gửi lệnh: Khởi động lại vào System",
-            "rebootSystemFailed": "Lỗi khởi động lại vào System",
+            "rebootSystemFailed": "Lỗi khởi động lại vào System: {{message}}",
             "shutdownSuccess": "Đã gửi lệnh: Tắt nguồn",
-            "shutdownFailed": "Lỗi tắt nguồn",
+            "shutdownFailed": "Lỗi tắt nguồn: {{message}}",
             "actionFailed": "Thao tác thất bại: {{message}}",
             "deviceInUse": {
                 "title": "Thiết bị đang được sử dụng",
@@ -725,6 +741,18 @@
         "shutdown": {
             "title": "Tắt nguồn thiết bị?",
             "description": "Bạn có chắc chắn muốn tắt nguồn thiết bị? Bạn sẽ cần bật lại thủ công."
+        },
+        "rebootEDL": {
+            "title": "Khởi động lại vào chế độ EDL?",
+            "description": "Thao tác này sẽ khởi động lại thiết bị vào chế độ EDL (Emergency Download). Sau khi khởi động lại, bạn cần kết nối lại thiết bị ở chế độ EDL để tiếp tục flash.",
+            "rebooting": "Đang khởi động lại...",
+            "executing": "Đang gửi lệnh khởi động lại tới thiết bị. Vui lòng đợi..."
+        },
+        "rebootFastboot": {
+            "title": "Khởi động lại vào chế độ Fastboot?",
+            "description": "Thao tác này sẽ khởi động lại thiết bị vào chế độ Fastboot. Ứng dụng sẽ tự động chuyển sang trang Fastboot sau khi khởi động lại.",
+            "rebooting": "Đang khởi động lại...",
+            "executing": "Đang gửi lệnh khởi động lại tới thiết bị. Vui lòng đợi..."
         },
         "guide": {
             "title": "Bật Gỡ lỗi USB",
@@ -976,7 +1004,7 @@
         "toast": {
             "connected": "Đã kết nối thiết bị Fastboot",
             "disconnected": "Đã ngắt kết nối thiết bị Fastboot",
-            "connectionFailed": "Kết nối thất bại. Đảm bảo thiết bị ở chế độ Fastboot."
+            "connectionFailed": "Kết nối thất bại: {{message}}. Đảm bảo thiết bị ở chế độ Fastboot."
         },
         "bootloader": {
             "unlocked": "Bootloader ĐÃ MỞ KHÓA",

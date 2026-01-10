@@ -81,6 +81,7 @@
         "expand": "Expand"
     },
     "firehose": {
+        "success": "Firehose loaded",
         "manual": {
             "title": "Manual Firehose Loader",
             "description": "Load firehose files manually for unsupported devices or when auto-detection fails.",
@@ -486,20 +487,35 @@
         }
     },
     "connection": {
+        "flowProgress": "Connection Progress",
+        "progress": "Connecting...",
+        "step": {
+            "usb": "USB Connect",
+            "sahara": "Sahara Handshake",
+            "firehose": "Firehose Setup",
+            "auth": "VIP Auth",
+            "partitions": "Read Partitions"
+        },
         "flow": {
-            "connecting": "Connecting to device...",
-            "sahara": "Sahara handshake...",
-            "uploading": "Uploading firehose...",
-            "authenticating": "VIP authentication...",
-            "reading": "Reading partitions...",
+            "connecting": "Connecting to USB device...",
+            "sahara": "Uploading programmer...",
+            "firehose": "Configuring Firehose protocol...",
+            "auth": "Authenticating with OEM server...",
+            "reading": "Reading partition table...",
             "connected": "Device ready"
         },
         "error": {
             "usb": "USB connection failed",
+            "usbDetail": "Failed to connect to device via USB. Check cable connection and WinUSB driver.",
+            "deviceNotFound": "Device not found. Ensure device is in EDL mode and WinUSB driver is installed via Zadig.",
             "sahara": "Sahara handshake failed",
+            "saharaDetail": "Failed to establish Sahara protocol. Device may not be in EDL mode or needs restart.",
             "firehose": "Firehose upload failed",
+            "firehoseDetail": "Failed to upload programmer firehose file to device. File may be incompatible.",
             "vip": "VIP authentication failed",
-            "partition": "Failed to read partitions"
+            "vipDetail": "VIP authentication for Oppo/OnePlus/Realme device failed. Check digest and signature files.",
+            "partition": "Failed to read partitions",
+            "partitionDetail": "Failed to read partition table from device. Try reconnecting."
         },
         "action": {
             "retry": "Retry Connection"
@@ -635,17 +651,17 @@
             "connectionFailed": "Connection failed: {{message}}",
             "disconnectFailed": "Disconnect failed: {{message}}",
             "rebootEDLSuccess": "Command sent: Reboot to EDL",
-            "rebootEDLFailed": "Failed to reboot to EDL",
+            "rebootEDLFailed": "Failed to reboot to EDL: {{message}}",
             "rebootBootloaderSuccess": "Command sent: Reboot to Bootloader",
-            "rebootBootloaderFailed": "Failed to reboot to Bootloader",
+            "rebootBootloaderFailed": "Failed to reboot to Bootloader: {{message}}",
             "rebootFastbootDSuccess": "Command sent: Reboot to FastbootD",
-            "rebootFastbootDFailed": "Failed to reboot to FastbootD",
+            "rebootFastbootDFailed": "Failed to reboot to FastbootD: {{message}}",
             "rebootRecoverySuccess": "Command sent: Reboot to Recovery",
-            "rebootRecoveryFailed": "Failed to reboot to Recovery",
+            "rebootRecoveryFailed": "Failed to reboot to Recovery: {{message}}",
             "rebootSystemSuccess": "Command sent: Reboot to System",
-            "rebootSystemFailed": "Failed to reboot to System",
+            "rebootSystemFailed": "Failed to reboot to System: {{message}}",
             "shutdownSuccess": "Command sent: Power Off",
-            "shutdownFailed": "Failed to power off",
+            "shutdownFailed": "Failed to power off: {{message}}",
             "actionFailed": "Action failed: {{message}}",
             "deviceInUse": {
                 "title": "Device is being used",
@@ -716,6 +732,18 @@
         "shutdown": {
             "title": "Power Off Device?",
             "description": "Are you sure you want to power off the device? You will need to manually turn it back on."
+        },
+        "rebootEDL": {
+            "title": "Reboot to EDL Mode?",
+            "description": "This will reboot your device into EDL (Emergency Download) mode. You will need to reconnect the device in EDL mode to continue flashing.",
+            "rebooting": "Rebooting...",
+            "executing": "Sending reboot command to device. Please wait..."
+        },
+        "rebootFastboot": {
+            "title": "Reboot to Fastboot Mode?",
+            "description": "This will reboot your device into Fastboot mode. The app will automatically switch to Fastboot page after rebooting.",
+            "rebooting": "Rebooting...",
+            "executing": "Sending reboot command to device. Please wait..."
         },
         "guide": {
             "title": "Enable USB Debugging",
@@ -960,7 +988,7 @@
             "toast": {
                 "connected": "Fastboot device connected",
                 "disconnected": "Fastboot device disconnected",
-                "connectionFailed": "Failed to connect. Ensure device is in Fastboot mode."
+                "connectionFailed": "Connection failed: {{message}}. Ensure device is in Fastboot mode."
             },
             "bootloader": {
                 "unlocked": "Bootloader is UNLOCKED",

@@ -103,13 +103,13 @@ export function FastbootConnectionStatus({ className, variant = 'default' }: Fas
         try {
             const success = await connect();
             if (success) {
-                toast.success(t('fastboot.toast.connected', 'Fastboot device connected'));
+                toast.success(t('fastboot.toast.connected', 'Fastboot device connected'), { duration: 5000 });
             } else {
-                toast.error(t('fastboot.toast.connectionFailed', 'Failed to connect. Ensure device is in Fastboot mode.'));
+                toast.error(t('fastboot.toast.connectionFailed', 'Failed to connect. Ensure device is in Fastboot mode.'), { duration: 5000 });
             }
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            toast.error(message);
+            toast.error(message, { duration: 5000 });
         }
     }, [connect, t]);
 
@@ -119,10 +119,10 @@ export function FastbootConnectionStatus({ className, variant = 'default' }: Fas
     const handleDisconnect = useCallback(async () => {
         try {
             await disconnect();
-            toast.info(t('fastboot.toast.disconnected', 'Fastboot device disconnected'));
+            toast.info(t('fastboot.toast.disconnected', 'Fastboot device disconnected'), { duration: 5000 });
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            toast.error(message);
+            toast.error(message, { duration: 5000 });
         }
     }, [disconnect, t]);
 

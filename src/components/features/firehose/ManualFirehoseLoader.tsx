@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { useDeviceStore } from '@/stores/deviceStore';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useConnectionFlow } from '@/hooks/useConnectionFlow';
+import { useEDLConnectionStore, type BrandGroup } from '@/stores/edlConnectionStore';
+import { toast } from 'sonner';
 import {
     Upload,
     FileCode,
@@ -24,9 +26,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Module-level cache for manual firehose
-const manualFirehoseCache = new Map<string, ArrayBuffer>();
-
 interface FileStatus {
     name: string;
     labelKey: string;
@@ -36,7 +35,7 @@ interface FileStatus {
 }
 
 interface ManualFirehoseLoaderProps {
-    brandGroup?: 'oppo' | 'lg';
+    brandGroup?: BrandGroup;
 }
 
 /**
@@ -45,18 +44,44 @@ interface ManualFirehoseLoaderProps {
 export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoaderProps) {
     const { t } = useTranslation();
     const log = useTerminalStore((state) => state.log);
-    const setFirehoseLoaded = useDeviceStore((state) => state.setFirehoseLoaded);
-    const firehoseLoaded = useDeviceStore((state) => state.firehoseLoaded);
     const { connect: flowConnect, status: flowStatus } = useConnectionFlow();
+
+    // Use EDL store for persistence across tab switches
+    const {
+        manualFirehoseFiles,
+        setManualFirehoseFile,
+        clearManualFirehoseFiles,
+        setFirehoseLoaded,
+        firehoseLoaded,
+    } = useEDLConnectionStore();
 
     // For LG devices, only programmer is required
     // For Oppo/OnePlus/Realme, all 3 files are required
     const isLG = brandGroup === 'lg';
 
+    // Sync local state with store on mount and when store changes
     const [files, setFiles] = useState<FileStatus[]>([
-        { name: 'programmer', labelKey: 'firehose.manual.programmer', loaded: false, required: true },
-        { name: 'digest', labelKey: 'firehose.manual.digest', loaded: false, required: !isLG },
-        { name: 'signature', labelKey: 'firehose.manual.signature', loaded: false, required: !isLG },
+        {
+            name: 'programmer',
+            labelKey: 'firehose.manual.programmer',
+            loaded: manualFirehoseFiles.programmer !== null,
+            size: manualFirehoseFiles.programmer?.size,
+            required: true
+        },
+        {
+            name: 'digest',
+            labelKey: 'firehose.manual.digest',
+            loaded: manualFirehoseFiles.digest !== null,
+            size: manualFirehoseFiles.digest?.size,
+            required: !isLG
+        },
+        {
+            name: 'signature',
+            labelKey: 'firehose.manual.signature',
+            loaded: manualFirehoseFiles.signature !== null,
+            size: manualFirehoseFiles.signature?.size,
+            required: !isLG
+        },
     ]);
     const [isLoading, setIsLoading] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
@@ -65,6 +90,33 @@ export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoad
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [currentFileType, setCurrentFileType] = useState<string | null>(null);
 
+    // Sync local file state with store
+    useEffect(() => {
+        setFiles([
+            {
+                name: 'programmer',
+                labelKey: 'firehose.manual.programmer',
+                loaded: manualFirehoseFiles.programmer !== null,
+                size: manualFirehoseFiles.programmer?.size,
+                required: true
+            },
+            {
+                name: 'digest',
+                labelKey: 'firehose.manual.digest',
+                loaded: manualFirehoseFiles.digest !== null,
+                size: manualFirehoseFiles.digest?.size,
+                required: !isLG
+            },
+            {
+                name: 'signature',
+                labelKey: 'firehose.manual.signature',
+                loaded: manualFirehoseFiles.signature !== null,
+                size: manualFirehoseFiles.signature?.size,
+                required: !isLG
+            },
+        ]);
+    }, [manualFirehoseFiles, isLG]);
+
     // Update file requirements when brand group changes
     useEffect(() => {
         setFiles(prev => prev.map(f => ({
@@ -72,6 +124,12 @@ export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoad
             required: f.name === 'programmer' ? true : !isLG
         })));
     }, [isLG]);
+
+    // Re-evaluate firehoseLoaded when brand group or files change
+    useEffect(() => {
+        const allRequiredLoaded = files.filter(f => f.required).every(f => f.loaded);
+        setFirehoseLoaded(allRequiredLoaded);
+    }, [files, setFirehoseLoaded]);
 
 
     /**
@@ -89,17 +147,13 @@ export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoad
 
             const arrayBuffer = await file.arrayBuffer();
 
-            // Cache the file
-            manualFirehoseCache.set(fileType, arrayBuffer);
+            // Store the file in EDL store (persists across tab switches)
+            setManualFirehoseFile(fileType as 'programmer' | 'digest' | 'signature', arrayBuffer, arrayBuffer.byteLength);
 
-            // Update file status
-            setFiles(prev => prev.map(f =>
-                f.name === fileType
-                    ? { ...f, loaded: true, size: arrayBuffer.byteLength }
-                    : f
-            ));
-
-            log('success', `${t('firehose.manual.loaded', 'Loaded')}: ${file.name} (${(arrayBuffer.byteLength / 1024).toFixed(1)} KB)`);
+            const sizeKB = (arrayBuffer.byteLength / 1024).toFixed(1);
+            const successMsg = `${t('firehose.manual.loaded', 'Loaded')}: ${file.name} (${sizeKB} KB)`;
+            log('success', successMsg);
+            toast.success(successMsg);
 
             // Check if all required files are loaded
             const updatedFiles = files.map(f =>
@@ -109,18 +163,21 @@ export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoad
 
             if (allLoaded) {
                 setFirehoseLoaded(true);
-                log('success', t('firehose.manual.allLoaded', 'All firehose files loaded successfully!'));
+                const allLoadedMsg = t('firehose.manual.allLoaded', 'All firehose files loaded successfully!');
+                log('success', allLoadedMsg);
+                toast.success(allLoadedMsg);
             }
 
         } catch (err) {
             const msg = err instanceof Error ? err.message : t('firehose.manual.loadError', 'Failed to load file');
             setError(msg);
             log('error', `${t('firehose.manual.loadError', 'Failed to load')}: ${msg}`);
+            toast.error(msg);
         } finally {
             setIsLoading(false);
             setCurrentFileType(null);
         }
-    }, [files, log, setFirehoseLoaded, t]);
+    }, [files, log, setFirehoseLoaded, setManualFirehoseFile, t]);
 
     /**
      * Open file picker for a specific file type
@@ -148,12 +205,10 @@ export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoad
      * Clear all loaded files
      */
     const clearAll = useCallback(() => {
-        manualFirehoseCache.clear();
-        setFiles(prev => prev.map(f => ({ ...f, loaded: false, size: undefined })));
-        setFirehoseLoaded(false);
+        clearManualFirehoseFiles();
         setError(null);
         log('info', t('firehose.manual.cleared', 'Cleared all manually loaded firehose files'));
-    }, [log, setFirehoseLoaded, t]);
+    }, [log, clearManualFirehoseFiles, t]);
 
     /**
      * Handle connect button
@@ -313,15 +368,17 @@ export function ManualFirehoseLoader({ brandGroup = 'oppo' }: ManualFirehoseLoad
 }
 
 /**
- * Get manually loaded firehose files from cache
+ * Get manually loaded firehose files from store
  */
 export function getManualFirehose(): { programmer: ArrayBuffer; digest?: ArrayBuffer; signature?: ArrayBuffer } | null {
-    const programmer = manualFirehoseCache.get('programmer');
-    const digest = manualFirehoseCache.get('digest');
-    const signature = manualFirehoseCache.get('signature');
+    const { manualFirehoseFiles } = useEDLConnectionStore.getState();
 
-    if (programmer) {
-        return { programmer, digest, signature };
+    if (manualFirehoseFiles.programmer) {
+        return {
+            programmer: manualFirehoseFiles.programmer.data,
+            digest: manualFirehoseFiles.digest?.data,
+            signature: manualFirehoseFiles.signature?.data,
+        };
     }
     return null;
 }

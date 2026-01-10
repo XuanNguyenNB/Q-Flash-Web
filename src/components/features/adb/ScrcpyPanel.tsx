@@ -74,6 +74,7 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
     const [isStreaming, setIsStreaming] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isHovered, setIsHovered] = useState(false); // Track if cursor is over scrcpy panel
 
     // Stream Settings
     const [resolution, setResolution] = useState<number>(1024); // Default 1024px
@@ -422,8 +423,99 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
         };
     }, [isStreaming]);
 
+    // Block page scroll when hovering over scrcpy panel
+    useEffect(() => {
+        if (!isHovered) return;
+
+        const preventScroll = (e: WheelEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // Add passive: false to allow preventDefault
+        document.body.addEventListener('wheel', preventScroll, { passive: false });
+        return () => {
+            document.body.removeEventListener('wheel', preventScroll);
+        };
+    }, [isHovered]);
+
+    // Add native wheel handler to canvas for device scrolling
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || !isStreaming) return;
+
+        const handleNativeWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!clientRef.current?.controller) return;
+
+            // Get center of viewport for swipe
+            const centerX = canvas.width / 2;
+            const startY = canvas.height / 2;
+
+            // Scroll sensitivity - very low for smooth, controlled scrolling
+            const scrollAmount = e.deltaY * 0.15; // Increased for noticeable movement
+            const endY = startY - scrollAmount;
+
+            const controller = clientRef.current.controller;
+            const pointerId = -2n;
+
+            try {
+                // Simulate swipe with multiple MOVE events to ensure it's recognized as swipe, not tap
+                controller.injectTouch({
+                    action: 0, // ACTION_DOWN
+                    pointerId,
+                    pointerX: centerX,
+                    pointerY: startY,
+                    videoWidth: canvas.width,
+                    videoHeight: canvas.height,
+                    pressure: 1,
+                    actionButton: 0,
+                    buttons: 0
+                });
+
+                // Multiple intermediate MOVE events for smooth swipe
+                const steps = 5;
+                for (let i = 1; i <= steps; i++) {
+                    const currentY = startY - (scrollAmount * i / steps);
+                    controller.injectTouch({
+                        action: 2, // ACTION_MOVE
+                        pointerId,
+                        pointerX: centerX,
+                        pointerY: currentY,
+                        videoWidth: canvas.width,
+                        videoHeight: canvas.height,
+                        pressure: 1,
+                        actionButton: 0,
+                        buttons: 0
+                    });
+                }
+
+                controller.injectTouch({
+                    action: 1, // ACTION_UP
+                    pointerId,
+                    pointerX: centerX,
+                    pointerY: endY,
+                    videoWidth: canvas.width,
+                    videoHeight: canvas.height,
+                    pressure: 0,
+                    actionButton: 0,
+                    buttons: 0
+                });
+            } catch (err) {
+                console.error("Scroll injection failed:", err);
+            }
+        };
+
+        canvas.addEventListener('wheel', handleNativeWheel, { passive: false });
+        return () => {
+            canvas.removeEventListener('wheel', handleNativeWheel);
+        };
+    }, [isStreaming]);
+
     /**
-     * Handle Layout KeyDown
+     * Handle Layout KeyDown with optimized text input
      */
     const handleKeyDown = async (e: React.KeyboardEvent) => {
         if (!isStreaming || !clientRef.current?.controller) return;
@@ -436,14 +528,17 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
         // Nav Keys
         const keyCode = KEY_MAP[e.key];
         if (keyCode) {
-            // e.preventDefault(); // Moved up
+            e.preventDefault();
+            // Send key down and up immediately for better responsiveness
             await clientRef.current.controller.injectKeyCode({ action: 0, keyCode, repeat: 0, metaState: 0 });
             await clientRef.current.controller.injectKeyCode({ action: 1, keyCode, repeat: 0, metaState: 0 });
             return;
         }
 
-        // Text Input
+        // Text Input - batched for performance
         if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            e.preventDefault();
+            // Use injectText which is more efficient than individual key events
             await clientRef.current.controller.injectText(e.key);
         }
     };
@@ -481,43 +576,50 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
     };
 
     return (
-        // Outer Dashboard Frame
-        <div className="h-full w-full bg-gray-950 rounded-xl border border-gray-800/60 shadow-inner p-6 flex items-center justify-center overflow-hidden outline-none relative"
+        // Outer Dashboard Frame - Prevent scroll propagation
+        <div className="h-full w-full bg-background rounded-xl border border-border shadow-inner p-6 flex items-center justify-center overflow-hidden outline-none relative"
             tabIndex={0}
             onKeyDown={handleKeyDown}
+            onMouseEnter={() => setIsHovered(true)} // Track hover state
+            onMouseLeave={() => setIsHovered(false)}
+            onWheel={(e) => {
+                e.preventDefault(); // CRITICAL: Block page scroll
+                e.stopPropagation();
+            }}
+            style={{ touchAction: 'none' }} // Prevent touch scroll
         >
             {/* Use fixed container for transitions */}
             <div className={`relative transition-all duration-500 ease-in-out ${isStreaming ? 'w-[95%] h-[95%]' : 'w-full max-w-lg'}`}>
 
                 {/* --- SETUP PANEL (Visible when NOT streaming) --- */}
                 {!isStreaming && !isStarting && (
-                    <div className="w-full bg-black/40 backdrop-blur-xl border border-gray-800 rounded-3xl p-8 shadow-2xl flex flex-col gap-6 animate-in fade-in zoom-in-95 duration-300">
+                    <div className="w-full bg-card/40 backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl flex flex-col gap-6 animate-in fade-in zoom-in-95 duration-300">
 
                         <div className="text-center space-y-2">
-                            <div className="w-16 h-16 bg-blue-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-blue-500/50 shadow-[0_0_30px_rgba(37,99,235,0.2)]">
-                                <Smartphone className="w-8 h-8 text-blue-500" />
+                            <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-primary/50 shadow-lg">
+                                <Smartphone className="w-8 h-8 text-primary" />
                             </div>
-                            <h2 className="text-2xl font-bold text-white tracking-tight">{t('scrcpy.title')}</h2>
-                            <p className="text-gray-400 text-sm">{t('scrcpy.subtitle')}</p>
+                            <h2 className="text-2xl font-bold text-foreground tracking-tight">{t('scrcpy.title')}</h2>
+                            <p className="text-muted-foreground text-sm">{t('scrcpy.subtitle')}</p>
                         </div>
 
                         {/* Settings Grid */}
                         <div className="grid grid-cols-2 gap-4">
                             {/* Resolution */}
                             <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1">{t('scrcpy.resolution_label')}</label>
+                                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider ml-1">{t('scrcpy.resolution_label')}</label>
                                 <div className="flex flex-col gap-2">
                                     {[720, 1024, 1600].map((res) => (
                                         <button
                                             key={res}
                                             onClick={() => setResolution(res)}
                                             className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex justify-between items-center ${resolution === res
-                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                                                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                                                ? 'bg-primary text-primary-foreground shadow-lg'
+                                                : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                                                 }`}
                                         >
                                             {res >= 1080 ? 'FHD+' : res >= 1024 ? 'HD+' : 'HD'} ({res}p)
-                                            {resolution === res && <div className="w-2 h-2 bg-white rounded-full" />}
+                                            {resolution === res && <div className="w-2 h-2 bg-primary-foreground rounded-full" />}
                                         </button>
                                     ))}
                                 </div>
@@ -525,19 +627,19 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
 
                             {/* Bitrate */}
                             <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider ml-1">{t('scrcpy.bitrate_label')}</label>
+                                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider ml-1">{t('scrcpy.bitrate_label')}</label>
                                 <div className="flex flex-col gap-2">
                                     {[2000000, 4000000, 8000000].map((br) => (
                                         <button
                                             key={br}
                                             onClick={() => setBitrate(br)}
                                             className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left flex justify-between items-center ${bitrate === br
-                                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20'
-                                                : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                                                ? 'bg-primary text-primary-foreground shadow-lg'
+                                                : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                                                 }`}
                                         >
                                             {br / 1000000} Mbps
-                                            {bitrate === br && <div className="w-2 h-2 bg-white rounded-full" />}
+                                            {bitrate === br && <div className="w-2 h-2 bg-primary-foreground rounded-full" />}
                                         </button>
                                     ))}
                                 </div>
@@ -548,14 +650,14 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
                         <button
                             onClick={startStreaming}
                             disabled={!deviceInfo}
-                            className="w-full py-4 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-900/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                            className="w-full py-4 mt-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-bold text-lg shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
                         >
-                            <Play className="w-6 h-6 fill-white/20 group-hover:fill-white transition-colors" />
+                            <Play className="w-6 h-6 fill-primary-foreground/20 group-hover:fill-primary-foreground transition-colors" />
                             {t('scrcpy.start_stream')}
                         </button>
 
                         {error && (
-                            <div className="text-red-400 text-xs text-center bg-red-900/20 p-2 rounded-lg border border-red-500/20">
+                            <div className="text-destructive text-xs text-center bg-destructive/10 p-2 rounded-lg border border-destructive/20">
                                 {error}
                             </div>
                         )}
@@ -565,66 +667,66 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
 
                 {/* --- LOADING STATE --- */}
                 {isStarting && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md rounded-3xl border border-white/5 z-50 animate-in fade-in duration-500">
-                        <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
-                        <span className="text-blue-400/80 text-lg font-medium animate-pulse">{t('scrcpy.initializing')}</span>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md rounded-3xl border border-border z-50 animate-in fade-in duration-500">
+                        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                        <span className="text-primary/80 text-lg font-medium animate-pulse">{t('scrcpy.initializing')}</span>
                     </div>
                 )}
 
 
                 {/* --- STREAMING UI (Sidebar + Canvas) --- */}
                 {isStreaming && (
-                    <div className="relative flex flex-row h-full w-full bg-black rounded-xl border-[4px] border-gray-800 overflow-hidden shadow-2xl ring-1 ring-white/10 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="relative flex flex-row h-full w-full bg-background rounded-xl border-[4px] border-border overflow-hidden shadow-2xl ring-1 ring-border animate-in fade-in zoom-in-95 duration-500">
 
                         {/* --- SIDEBAR --- */}
-                        <div className="w-14 bg-gray-900/90 backdrop-blur-md border-r border-gray-800 flex flex-col items-center py-5 gap-4 z-20 shrink-0">
+                        <div className="w-14 bg-card/90 backdrop-blur-md border-r border-border flex flex-col items-center py-5 gap-4 z-20 shrink-0">
                             {/* Connection Control */}
                             <div className="flex flex-col gap-2 w-full px-2">
                                 <button
                                     title="Stop Stream"
                                     onClick={cleanup}
-                                    className="p-2.5 rounded-2xl transition-all active:scale-95 flex justify-center shadow-lg bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                                    className="p-2.5 rounded-2xl transition-all active:scale-95 flex justify-center shadow-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
                                 >
                                     <Square className="w-4 h-4 fill-current" />
                                 </button>
                             </div>
 
-                            <div className="w-8 h-px bg-gray-700/50" />
+                            <div className="w-8 h-px bg-border" />
 
                             {/* Nav Keys */}
-                            <button title="Back" onClick={() => sendKey(KEYCODES.BACK)} className="p-2.5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-all active:scale-90">
+                            <button title="Back" onClick={() => sendKey(KEYCODES.BACK)} className="p-2.5 hover:bg-accent rounded-xl text-muted-foreground hover:text-foreground transition-all active:scale-90">
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
-                            <button title="Home" onClick={() => sendKey(KEYCODES.HOME)} className="p-2.5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-all active:scale-90">
+                            <button title="Home" onClick={() => sendKey(KEYCODES.HOME)} className="p-2.5 hover:bg-accent rounded-xl text-muted-foreground hover:text-foreground transition-all active:scale-90">
                                 <Circle className="w-4 h-4" />
                             </button>
-                            <button title="Recent" onClick={() => sendKey(KEYCODES.APP_SWITCH)} className="p-2.5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-all active:scale-90">
+                            <button title="Recent" onClick={() => sendKey(KEYCODES.APP_SWITCH)} className="p-2.5 hover:bg-accent rounded-xl text-muted-foreground hover:text-foreground transition-all active:scale-90">
                                 <Square className="w-4 h-4" />
                             </button>
 
-                            <div className="w-8 h-px bg-gray-700/50" />
+                            <div className="w-8 h-px bg-border" />
 
                             {/* Volume & Power */}
-                            <button title="Vol Up" onClick={() => sendKey(KEYCODES.VOLUME_UP)} className="p-2.5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-all active:scale-90">
+                            <button title="Vol Up" onClick={() => sendKey(KEYCODES.VOLUME_UP)} className="p-2.5 hover:bg-accent rounded-xl text-muted-foreground hover:text-foreground transition-all active:scale-90">
                                 <Volume2 className="w-5 h-5" />
                             </button>
-                            <button title="Vol Down" onClick={() => sendKey(KEYCODES.VOLUME_DOWN)} className="p-2.5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-all active:scale-90">
+                            <button title="Vol Down" onClick={() => sendKey(KEYCODES.VOLUME_DOWN)} className="p-2.5 hover:bg-accent rounded-xl text-muted-foreground hover:text-foreground transition-all active:scale-90">
                                 <Volume1 className="w-5 h-5" />
                             </button>
                             <button title="Power" onClick={() => sendKey(KEYCODES.POWER)} className="p-2.5 hover:bg-amber-500/10 rounded-xl text-amber-500/80 hover:text-amber-400 transition-all active:scale-90 mt-1">
                                 <Power className="w-5 h-5" />
                             </button>
 
-                            <div className="w-8 h-px bg-gray-700/50" />
+                            <div className="w-8 h-px bg-border" />
 
                             {/* Tools */}
-                            <button title="Paste (Ctrl+V)" onClick={pasteClipboard} className="p-2.5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-all active:scale-90">
+                            <button title="Paste (Ctrl+V)" onClick={pasteClipboard} className="p-2.5 hover:bg-accent rounded-xl text-muted-foreground hover:text-foreground transition-all active:scale-90">
                                 <ClipboardIcon className="w-5 h-5" />
                             </button>
                         </div>
 
                         {/* --- DISPLAY AREA --- */}
-                        <div className="relative bg-black flex justify-center items-center py-2 flex-1">
+                        <div className="relative bg-background flex justify-center items-center py-2 flex-1">
                             <canvas
                                 ref={canvasRef}
                                 className="block max-h-[85vh] w-auto h-auto object-contain cursor-crosshair touch-none select-none outline-none"
@@ -638,14 +740,14 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
                             />
 
                             {/* Status Dot */}
-                            <div className="absolute top-4 right-4 flex items-center gap-1.5 pointer-events-none bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-md border border-white/5 animate-in fade-in duration-1000">
+                            <div className="absolute top-4 right-4 flex items-center gap-1.5 pointer-events-none bg-background/40 px-2 py-0.5 rounded-full backdrop-blur-md border border-green-500/20 animate-in fade-in duration-1000">
                                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-                                <span className="text-[10px] font-medium text-white/40">LIVE • {resolution}p</span>
+                                <span className="text-[10px] font-medium text-muted-foreground">LIVE • {resolution}p</span>
                             </div>
 
                             {/* Error Layer (Overlay) */}
                             {error && (
-                                <div className="absolute top-10 left-10 right-10 p-4 bg-red-900/90 text-white rounded-xl text-sm border border-red-500/30 text-center shadow-lg">
+                                <div className="absolute top-10 left-10 right-10 p-4 bg-destructive/90 text-destructive-foreground rounded-xl text-sm border border-destructive/30 text-center shadow-lg">
                                     {error}
                                 </div>
                             )}

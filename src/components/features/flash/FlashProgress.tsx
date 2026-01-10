@@ -242,11 +242,18 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
 
             {/* Current partition */}
             {isActive && currentFlashPartition && (
-                <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                        {t('flash.progress.current', { partition: currentFlashPartition })}
-                    </span>
-                    {/* ETA removed as per user request */}
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">
+                            {t('flash.progress.current', { partition: currentFlashPartition })}
+                        </span>
+                        <span className="text-sm font-medium">
+                            {formatBytes(flashBytesWritten)} / {formatBytes(flashTotalBytes)}
+                        </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                        {t('flash.progress.currentPartitionProgress', `Flashing ${currentFlashPartition}...`)}
+                    </div>
                 </div>
             )}
 
@@ -257,8 +264,8 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
                         <div
                             key={name}
                             className={cn(
-                                "flex items-center justify-between text-sm py-1 px-2 rounded",
-                                status === 'in-progress' && "bg-violet-500/10",
+                                "flex items-center justify-between text-sm py-2 px-3 rounded transition-all",
+                                status === 'in-progress' && "bg-violet-500/10 ring-2 ring-violet-500/30 shadow-sm",
                                 status === 'done' && "bg-green-500/5",
                                 status === 'error' && "bg-red-500/10"
                             )}
@@ -266,14 +273,26 @@ export function FlashProgress({ onCancel, onClose }: FlashProgressProps) {
                             <span className="flex items-center gap-2">
                                 <StatusIcon status={status} />
                                 <span className={cn(
-                                    status === 'in-progress' && "font-medium text-violet-500",
+                                    "font-medium",
+                                    status === 'in-progress' && "text-violet-500 animate-pulse",
                                     status === 'done' && "text-muted-foreground",
                                     status === 'error' && "text-red-500"
                                 )}>
                                     {name}
                                 </span>
+                                {status === 'in-progress' && (
+                                    <span className="text-xs text-violet-500 ml-1">
+                                        {t('flash.progress.flashing', 'Flashing...')}
+                                    </span>
+                                )}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className={cn(
+                                "text-xs font-medium",
+                                status === 'in-progress' && "text-violet-500",
+                                status === 'done' && "text-green-500",
+                                status === 'error' && "text-red-500",
+                                status === 'pending' && "text-muted-foreground"
+                            )}>
                                 {t(`flash.status.${status}`, status)}
                             </span>
                         </div>

@@ -52,6 +52,8 @@ export function ADBQuickActions({ className }: ADBQuickActionsProps) {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [showShutdownConfirm, setShowShutdownConfirm] = useState(false);
+    const [showEDLConfirm, setShowEDLConfirm] = useState(false);
+    const [showFastbootConfirm, setShowFastbootConfirm] = useState(false);
 
     // Store state
     const { isConnected } = useDeviceStore();
@@ -91,6 +93,16 @@ export function ADBQuickActions({ className }: ADBQuickActionsProps) {
         handleAction(shutdown, 'shutdown');
     };
 
+    const confirmRebootEDL = () => {
+        setShowEDLConfirm(false);
+        handleAction(rebootToEDL, 'rebootEDL', '/edl');
+    };
+
+    const confirmRebootFastboot = () => {
+        setShowFastbootConfirm(false);
+        handleAction(rebootToBootloader, 'rebootBootloader', '/fastboot');
+    };
+
     return (
         <>
             <Card className={cn("h-full", className)}>
@@ -106,7 +118,7 @@ export function ADBQuickActions({ className }: ADBQuickActionsProps) {
                         variant="outline"
                         className="w-full justify-start gap-3 h-11"
                         disabled={!isConnected || !!pendingOperation}
-                        onClick={() => handleAction(rebootToEDL, 'rebootEDL', '/edl')}
+                        onClick={() => setShowEDLConfirm(true)}
                     >
                         {pendingOperation === 'rebootToEDL' ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -121,7 +133,7 @@ export function ADBQuickActions({ className }: ADBQuickActionsProps) {
                         variant="outline"
                         className="w-full justify-start gap-3 h-11"
                         disabled={!isConnected || !!pendingOperation}
-                        onClick={() => handleAction(rebootToBootloader, 'rebootBootloader', '/fastboot')}
+                        onClick={() => setShowFastbootConfirm(true)}
                     >
                         {pendingOperation === 'rebootToBootloader' ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -214,6 +226,42 @@ export function ADBQuickActions({ className }: ADBQuickActionsProps) {
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                             {t('adb.actions.powerOff', 'Power Off')}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Reboot to EDL Confirmation Dialog */}
+            <AlertDialog open={showEDLConfirm} onOpenChange={setShowEDLConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('adb.rebootEDL.title', 'Reboot to EDL Mode?')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('adb.rebootEDL.description', 'This will reboot your device into EDL (Emergency Download) mode. You will need to reconnect the device in EDL mode to continue flashing.')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmRebootEDL}>
+                            {t('common.confirm', 'Confirm')}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Reboot to Fastboot Confirmation Dialog */}
+            <AlertDialog open={showFastbootConfirm} onOpenChange={setShowFastbootConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('adb.rebootFastboot.title', 'Reboot to Fastboot Mode?')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('adb.rebootFastboot.description', 'This will reboot your device into Fastboot mode. The app will automatically switch to Fastboot page after rebooting.')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmRebootFastboot}>
+                            {t('common.confirm', 'Confirm')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

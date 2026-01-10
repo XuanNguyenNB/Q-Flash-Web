@@ -172,6 +172,8 @@ export function useFastboot(): UseFastbootReturn {
         try {
             fastbootStore.setConnecting(true);
             fastbootStore.setPendingOperation('Connecting to Fastboot device...');
+            // Clear manual disconnect flag when user explicitly connects
+            fastbootStore.setManuallyDisconnected(false);
 
             const success = await protocol.connect();
 
@@ -209,11 +211,15 @@ export function useFastboot(): UseFastbootReturn {
 
         try {
             fastbootStore.setPendingOperation('Disconnecting...');
+            // Set flag to prevent auto-reconnect
+            fastbootStore.setManuallyDisconnected(true);
             await protocol.disconnect();
 
             // Reset all state
             deviceStore.setConnected(false);
             fastbootStore.reset();
+            // Restore the flag after reset
+            fastbootStore.setManuallyDisconnected(true);
 
             logToTerminal('Fastboot device disconnected', 'info');
 

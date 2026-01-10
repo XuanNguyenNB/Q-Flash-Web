@@ -33,7 +33,7 @@ export default function FastbootPage() {
 
     // Store state
     const { setConnected, setMode } = useDeviceStore();
-    const { deviceInfo } = useFastbootStore();
+    const { deviceInfo, manuallyDisconnected } = useFastbootStore();
 
     // Fastboot hook
     const { connect, getDeviceInfo, getInstance } = useFastboot();
@@ -93,6 +93,12 @@ export default function FastbootPage() {
 
     // Auto-connect on page load if Fastboot device is available
     useEffect(() => {
+        // Skip if manually disconnected
+        if (manuallyDisconnected) {
+            console.log('[FastbootPage] Skipping auto-connect: user manually disconnected');
+            return;
+        }
+
         // Skip if already connected (check both store and protocol)
         const protocol = getInstance();
         if (isFastbootConnected) {
@@ -105,7 +111,7 @@ export default function FastbootPage() {
             await new Promise(resolve => setTimeout(resolve, 100));
 
             // Check again after delay
-            if (isFastbootConnected) return;
+            if (isFastbootConnected || manuallyDisconnected) return;
 
             try {
                 // Check if there are any previously paired Fastboot devices
@@ -139,7 +145,7 @@ export default function FastbootPage() {
         };
 
         tryAutoConnect();
-    }, [connect, getDeviceInfo, isFastbootConnected]);
+    }, [connect, getDeviceInfo, isFastbootConnected, manuallyDisconnected]);
 
     // Fallback: If connected but no deviceInfo, try to fetch it (only once)
     const hasTriedFallbackFetch = useRef(false);

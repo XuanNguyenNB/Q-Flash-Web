@@ -10,6 +10,7 @@
  */
 
 import { useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useWebUSB } from './useWebUSB';
 import { useSahara } from './useSahara';
 import { useFirehose } from './useFirehose';
@@ -21,6 +22,7 @@ import { usePartitionStore } from '@/stores/partitionStore';
 import { useTerminalStore } from '@/stores/terminalStore';
 import { useEDLConnectionStore } from '@/stores/edlConnectionStore';
 import { trackEvent } from '@/services/analytics';
+import { toast } from 'sonner';
 
 /**
  * Connection flow state machine.
@@ -112,6 +114,8 @@ function deviceNeedsVIP(device: DeviceProfile | null): boolean {
  * ```
  */
 export function useConnectionFlow(): UseConnectionFlowReturn {
+    const { t } = useTranslation();
+
     // Protocol hooks
     const { connect: usbConnect, disconnect: usbDisconnect, getManager: getUSBManager } = useWebUSB();
     const { uploadProgrammer } = useSahara();
@@ -186,6 +190,32 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
     }, []);
 
     /**
+     * Translate error message based on error code and message content
+     */
+    const translateError = useCallback((errorCode: string, errorMessage: string): string => {
+        // Check for specific error messages
+        if (errorMessage.includes('Device not found')) {
+            return t('connection.error.deviceNotFound', 'Device not found. Ensure device is in EDL mode and WinUSB driver is installed via Zadig.');
+        }
+
+        // Check by error code
+        switch (errorCode) {
+            case 'USB_ERROR':
+                return t('connection.error.usb', 'USB connection failed');
+            case 'SAHARA_ERROR':
+                return t('connection.error.sahara', 'Sahara handshake failed');
+            case 'FIREHOSE_ERROR':
+                return t('connection.error.firehose', 'Firehose upload failed');
+            case 'VIP_ERROR':
+                return t('connection.error.vip', 'VIP authentication failed');
+            case 'PARTITION_ERROR':
+                return t('connection.error.partition', 'Failed to read partitions');
+            default:
+                return errorMessage;
+        }
+    }, [t]);
+
+    /**
      * Execute the complete connection flow.
      */
     const connect = useCallback(async (): Promise<void> => {
@@ -236,6 +266,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             }
 
             log('success', '[Sahara] Handshake complete');
+            toast.success('Sahara handshake complete');
             trackEvent('edl', 'connection_step', 'sahara_complete');
 
             // CRITICAL: Wait for device to settle after Sahara
@@ -307,6 +338,7 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
                 }
 
                 log('success', '[VIP] Authentication successful');
+                toast.success('VIP authentication successful');
                 trackEvent('edl', 'connection_step', 'vip_authenticated');
             } else {
                 log('info', '[VIP] Not required for this device');
@@ -338,11 +370,13 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
 
             setPartitions(partitionResult.partitions);
             log('success', `[Partitions] Found ${partitionResult.partitions.length} partitions`);
+            toast.success(`Found ${partitionResult.partitions.length} partitions`);
 
             // Complete!
             setStatus('connected');
             setConnected(true);
             log('success', '[Connection] Device ready for operations');
+            toast.success('Device ready for operations');
             trackEvent('edl', 'connection_complete', selectedDevice?.name || 'manual', partitionResult.partitions.length);
 
         } catch (err) {
@@ -350,7 +384,12 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
             const connectionError = parseError(err, statusRef.current);
             setStatus('error');
             setError(connectionError);
+
+            // Translate error message for display
+            const translatedError = translateError(connectionError.code, connectionError.message);
+
             log('error', `[ERROR] ${connectionError.code}: ${connectionError.message}`);
+            toast.error(translatedError);
             trackEvent('edl', 'connection_error', connectionError.code);
             setConnected(false);
             throw err;
@@ -369,8 +408,10 @@ export function useConnectionFlow(): UseConnectionFlowReturn {
         setConnected,
         log,
         parseError,
+        translateError,
         setStatus,
         setError,
+        t,
     ]);
 
     /**

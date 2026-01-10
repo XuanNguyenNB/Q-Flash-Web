@@ -46,6 +46,7 @@ import { cn } from '@/lib/utils';
 interface RomLoaderProps {
     className?: string;
     compact?: boolean;
+    disabled?: boolean; // Add disabled prop
 }
 
 /**
@@ -64,7 +65,7 @@ function formatBytes(bytes: number): string {
 /**
  * ROM Loader component for selecting and loading ROM folders
  */
-export function RomLoader({ className, compact = false }: RomLoaderProps) {
+export function RomLoader({ className, compact = false, disabled = false }: RomLoaderProps) {
     const { t } = useTranslation();
     const { loadRomFromDirectory, isSupported } = useRomLoader();
     const {
@@ -152,6 +153,7 @@ export function RomLoader({ className, compact = false }: RomLoaderProps) {
                             variant="outline"
                             size="sm"
                             className="flex-1 justify-start text-xs h-8 overflow-hidden"
+                            disabled={disabled}
                         >
                             <FolderOpen className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
                             <span className="truncate">{t('rom.domesticFlash', 'Flash theo ROM gốc')}</span>

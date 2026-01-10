@@ -1,11 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useADB } from '@/hooks/useADB';
 import { useDeviceStore } from '@/stores/deviceStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Terminal, Send, Trash2, Smartphone } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Terminal, Send, Trash2, Smartphone, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface TerminalLine {
@@ -16,6 +27,7 @@ interface TerminalLine {
 
 export function ADBTerminal() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const { runCommand, pendingOperation } = useADB();
     const { isConnected } = useDeviceStore();
 
@@ -23,6 +35,10 @@ export function ADBTerminal() {
     const [history, setHistory] = useState<TerminalLine[]>([]);
     const [cmdHistory, setCmdHistory] = useState<string[]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
+    const [showFastbootConfirm, setShowFastbootConfirm] = useState(false);
+    const [showEDLConfirm, setShowEDLConfirm] = useState(false);
+    const [pendingCommand, setPendingCommand] = useState<string | null>(null);
+    const [isExecutingReboot, setIsExecutingReboot] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // Auto scroll to bottom
@@ -36,6 +52,29 @@ export function ADBTerminal() {
         if (!input.trim() || !isConnected) return;
 
         const cmd = input.trim();
+
+        // Check if command is reboot to bootloader/fastboot
+        const isRebootBootloader = /^(adb\s+)?reboot\s+(bootloader|fastboot)$/i.test(cmd);
+        const isRebootEDL = /^(adb\s+)?reboot\s+edl$/i.test(cmd);
+
+        // If reboot command, show confirmation dialog
+        if (isRebootBootloader) {
+            setPendingCommand(cmd);
+            setShowFastbootConfirm(true);
+            return;
+        }
+
+        if (isRebootEDL) {
+            setPendingCommand(cmd);
+            setShowEDLConfirm(true);
+            return;
+        }
+
+        // Execute command normally
+        await executeCommand(cmd);
+    };
+
+    const executeCommand = async (cmd: string) => {
         setInput('');
         setHistoryIndex(-1);
         setCmdHistory(prev => [cmd, ...prev]);
@@ -48,15 +87,6 @@ export function ADBTerminal() {
         }]);
 
         try {
-            // Run command via ADB shell
-            // Note: runCommand wrap calls with simple shell execution usually
-            // We'll treat this as raw shell command
-
-            // If the user types 'adb shell ls', strip 'adb shell'? 
-            // Our runCommand usually executes `shell <cmd>`.
-            // Let's assume input is purely what goes after `adb shell`.
-            // User might type 'ls -la', 'pm list packages', etc.
-
             const result = await runCommand(cmd);
 
             if (result !== null) {
@@ -73,6 +103,38 @@ export function ADBTerminal() {
                 timestamp: new Date()
             }]);
         }
+    };
+
+    const confirmRebootFastboot = async () => {
+        if (pendingCommand) {
+            setIsExecutingReboot(true);
+            await executeCommand(pendingCommand);
+            setPendingCommand(null);
+            setIsExecutingReboot(false);
+            setShowFastbootConfirm(false);
+            // Navigate to Fastboot page after short delay
+            setTimeout(() => navigate('/fastboot'), 500);
+        }
+    };
+
+    const confirmRebootEDL = async () => {
+        if (pendingCommand) {
+            setIsExecutingReboot(true);
+            await executeCommand(pendingCommand);
+            setPendingCommand(null);
+            setIsExecutingReboot(false);
+            setShowEDLConfirm(false);
+            // Navigate to EDL page after short delay
+            setTimeout(() => navigate('/edl'), 500);
+        }
+    };
+
+    const cancelReboot = () => {
+        setShowFastbootConfirm(false);
+        setShowEDLConfirm(false);
+        setPendingCommand(null);
+        setIsExecutingReboot(false);
+        setInput(''); // Clear input
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -174,6 +236,72 @@ export function ADBTerminal() {
                     </Button>
                 </div>
             </CardContent>
+
+            {/* Reboot to Fastboot Confirmation Dialog */}
+            <AlertDialog open={showFastbootConfirm} onOpenChange={setShowFastbootConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {isExecutingReboot ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    {t('adb.rebootFastboot.rebooting', 'Rebooting...')}
+                                </span>
+                            ) : (
+                                t('adb.rebootFastboot.title', 'Reboot to Fastboot Mode?')
+                            )}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {isExecutingReboot ? (
+                                t('adb.rebootFastboot.executing', 'Sending reboot command to device. Please wait...')
+                            ) : (
+                                t('adb.rebootFastboot.description', 'This will reboot your device into Fastboot mode. The app will automatically switch to Fastboot page after rebooting.')
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    {!isExecutingReboot && (
+                        <AlertDialogFooter>
+                            <AlertDialogCancel onClick={cancelReboot}>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
+                            <AlertDialogAction onClick={confirmRebootFastboot}>
+                                {t('common.confirm', 'Confirm')}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    )}
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Reboot to EDL Confirmation Dialog */}
+            <AlertDialog open={showEDLConfirm} onOpenChange={setShowEDLConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {isExecutingReboot ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    {t('adb.rebootEDL.rebooting', 'Rebooting...')}
+                                </span>
+                            ) : (
+                                t('adb.rebootEDL.title', 'Reboot to EDL Mode?')
+                            )}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {isExecutingReboot ? (
+                                t('adb.rebootEDL.executing', 'Sending reboot command to device. Please wait...')
+                            ) : (
+                                t('adb.rebootEDL.description', 'This will reboot your device into EDL (Emergency Download) mode. You will need to reconnect the device in EDL mode to continue flashing.')
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    {!isExecutingReboot && (
+                        <AlertDialogFooter>
+                            <AlertDialogCancel onClick={cancelReboot}>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
+                            <AlertDialogAction onClick={confirmRebootEDL}>
+                                {t('common.confirm', 'Confirm')}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    )}
+                </AlertDialogContent>
+            </AlertDialog>
         </Card>
     );
 }

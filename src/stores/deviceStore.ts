@@ -101,14 +101,20 @@ export const useDeviceStore = create<DeviceState>()(
 
             // Mode actions
             setMode: (mode) => {
-                const currentModeConnection = get().modeConnections[mode];
+                const currentState = get();
+                // Only update if mode actually changed
+                if (currentState.currentMode === mode) {
+                    return;
+                }
+
+                const currentModeConnection = currentState.modeConnections[mode];
                 set({
                     currentMode: mode,
                     // Restore per-mode connection state
                     isConnected: currentModeConnection,
                     connectionError: null,
-                    firehoseLoaded: false,
-                    selectedDevice: null,
+                    // Keep EDL-specific state (selectedDevice, firehoseLoaded) when switching modes
+                    // This allows users to switch to ADB/Fastboot and back without losing EDL config
                 });
             },
 

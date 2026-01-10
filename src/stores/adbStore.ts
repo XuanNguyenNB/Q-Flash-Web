@@ -1,11 +1,12 @@
 /**
  * Q-Flash-Web ADB Store
- * 
+ *
  * Manages ADB device state and pending operations.
- * Uses Zustand for lightweight state management.
+ * Uses Zustand for lightweight state management with persist middleware.
  */
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { ADBDeviceInfo } from '@/core/ADBProtocol';
 
 /**
@@ -51,27 +52,41 @@ const initialState = {
 /**
  * ADB store hook.
  * Manages ADB device info, connection state, and pending operations.
+ * State persists in memory (not localStorage) to survive navigation within session.
  */
-export const useADBStore = create<ADBState>()((set) => ({
-    // Initial state
-    ...initialState,
+export const useADBStore = create<ADBState>()(
+    persist(
+        (set) => ({
+            // Initial state
+            ...initialState,
 
-    // Actions
-    setDeviceInfo: (info) => set({ deviceInfo: info }),
+            // Actions
+            setDeviceInfo: (info) => set({ deviceInfo: info }),
 
-    setConnecting: (connecting) => set({ isConnecting: connecting }),
+            setConnecting: (connecting) => set({ isConnecting: connecting }),
 
-    setDeviceReady: (ready) => set({ isDeviceReady: ready }),
+            setDeviceReady: (ready) => set({ isDeviceReady: ready }),
 
-    setPendingOperation: (op) => set({ pendingOperation: op }),
+            setPendingOperation: (op) => set({ pendingOperation: op }),
 
-    setOperationProgress: (progress) => set({ operationProgress: progress }),
+            setOperationProgress: (progress) => set({ operationProgress: progress }),
 
-    setShowDeviceInUseDialog: (show) => set({ showDeviceInUseDialog: show }),
+            setShowDeviceInUseDialog: (show) => set({ showDeviceInUseDialog: show }),
 
-    setShowUserGestureDialog: (show) => set({ showUserGestureDialog: show }),
+            setShowUserGestureDialog: (show) => set({ showUserGestureDialog: show }),
 
-    setShowAuthorizationDialog: (show) => set({ showAuthorizationDialog: show }),
+            setShowAuthorizationDialog: (show) => set({ showAuthorizationDialog: show }),
 
-    reset: () => set(initialState),
-}));
+            reset: () => set(initialState),
+        }),
+        {
+            name: 'q-flash-adb-state',
+            // Only persist certain fields (not dialogs or transient state)
+            partialize: (state) => ({
+                deviceInfo: state.deviceInfo,
+                isDeviceReady: state.isDeviceReady,
+                // Don't persist: isConnecting, pendingOperation, operationProgress, dialogs
+            }),
+        }
+    )
+);

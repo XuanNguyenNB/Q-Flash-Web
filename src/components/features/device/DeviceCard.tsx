@@ -28,6 +28,33 @@ import { Smartphone, Wifi, WifiOff } from 'lucide-react';
 
 // Utils
 import { cn } from '@/lib/utils';
+import type { TFunction } from 'i18next';
+
+/**
+ * Translate error message based on error code and message content
+ */
+function translateErrorMessage(errorCode: string, errorMessage: string, t: TFunction): string {
+    // Check for specific error messages
+    if (errorMessage.includes('Device not found')) {
+        return t('connection.error.deviceNotFound', 'Device not found. Ensure device is in EDL mode and WinUSB driver is installed via Zadig.');
+    }
+
+    // Check by error code
+    switch (errorCode) {
+        case 'USB_ERROR':
+            return t('connection.error.usb', 'USB connection failed');
+        case 'SAHARA_ERROR':
+            return t('connection.error.sahara', 'Sahara handshake failed');
+        case 'FIREHOSE_ERROR':
+            return t('connection.error.firehose', 'Firehose upload failed');
+        case 'VIP_ERROR':
+            return t('connection.error.vip', 'VIP authentication failed');
+        case 'PARTITION_ERROR':
+            return t('connection.error.partition', 'Failed to read partitions');
+        default:
+            return errorMessage;
+    }
+}
 
 /**
  * Map ConnectionFlowState to ConnectionStatus for the status dot
@@ -75,6 +102,9 @@ export function DeviceCard({ className }: DeviceCardProps) {
     // Troubleshoot dialog state
     const [showTroubleshoot, setShowTroubleshoot] = useState(false);
 
+    // Translate error message for display
+    const translatedError = flowError ? translateErrorMessage(flowError.code, flowError.message, t) : null;
+
     // Auto-show troubleshoot dialog on USB error
     useEffect(() => {
         if (flowStatus === 'error' && flowError?.code === 'USB_ERROR') {
@@ -112,7 +142,7 @@ export function DeviceCard({ className }: DeviceCardProps) {
             case 'connected':
                 return t('connection.flow.connected');
             case 'error':
-                return flowError?.message || t('device.status.error');
+                return t('device.status.error'); // Just show "Lỗi kết nối", detailed error in error box
             default:
                 return t('device.status.disconnected');
         }
@@ -205,10 +235,10 @@ export function DeviceCard({ className }: DeviceCardProps) {
             </div>
 
             {/* Error Message */}
-            {flowStatus === 'error' && flowError && (
+            {flowStatus === 'error' && translatedError && (
                 <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3">
                     <p className="text-xs text-destructive font-medium">
-                        {flowError.message}
+                        {translatedError}
                     </p>
                 </div>
             )}
@@ -249,7 +279,7 @@ export function DeviceCard({ className }: DeviceCardProps) {
                 open={showTroubleshoot}
                 onOpenChange={setShowTroubleshoot}
                 onRetry={handleRetry}
-                errorMessage={flowError?.message}
+                errorMessage={translatedError ?? undefined}
             />
         </div>
     );

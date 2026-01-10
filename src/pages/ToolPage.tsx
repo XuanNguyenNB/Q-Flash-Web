@@ -10,9 +10,11 @@ import { Zap, Plug, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react
 
 import { useDeviceStore } from '@/stores/deviceStore';
 import { usePartitionStore } from '@/stores/partitionStore';
+import { useEDLConnectionStore } from '@/stores/edlConnectionStore';
 import { useWebUSB } from '@/hooks';
 import { PartitionGrid } from '@/components/features/partition';
-import { ManualFirehoseLoader, BrandGroupSelector, type BrandGroup } from '@/components/features/firehose';
+import { ManualFirehoseLoader } from '@/components/features/firehose';
+import { BrandGroupSelector } from '@/components/features/firehose/BrandGroupSelector';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +30,9 @@ export default function ToolPage() {
     const { currentMode, setMode, setConnected } = useDeviceStore();
     const { partitions, isLoading } = usePartitionStore();
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [selectedBrandGroup, setSelectedBrandGroup] = useState<BrandGroup>('oppo');
+
+    // Use EDL store for brand group (persists across tab switches)
+    const { selectedBrandGroup, setSelectedBrandGroup } = useEDLConnectionStore();
 
     // Get EDL connection state from WebUSB protocol (source of truth)
     const { isConnected: getIsConnected } = useWebUSB();
@@ -93,14 +97,6 @@ export default function ToolPage() {
                     <PartitionGrid isLoading={isLoading} />
                 ) : (
                     <div className="space-y-8">
-                        {/* Brand Group Selector */}
-                        <div className="p-5 rounded-xl bg-gradient-to-br from-primary/5 to-muted/30 border border-border/50">
-                            <BrandGroupSelector
-                                selectedGroup={selectedBrandGroup}
-                                onGroupChange={setSelectedBrandGroup}
-                            />
-                        </div>
-
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* No Device State - Connection Guide */}
                             <div className="flex flex-col gap-6">
@@ -209,8 +205,13 @@ export default function ToolPage() {
                                 </div>
                             </div>
 
-                            {/* Manual Firehose Loader */}
-                            <div className="lg:col-span-2 mt-4">
+                            {/* Brand Group Selector + Manual Firehose Loader */}
+                            <div className="lg:col-span-2 mt-4 space-y-6">
+                                <BrandGroupSelector
+                                    selectedGroup={selectedBrandGroup}
+                                    onGroupChange={setSelectedBrandGroup}
+                                    disabled={isEDLConnected}
+                                />
                                 <ManualFirehoseLoader brandGroup={selectedBrandGroup} />
                             </div>
                         </div>
