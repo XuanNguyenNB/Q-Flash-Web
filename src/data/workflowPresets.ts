@@ -92,9 +92,26 @@ export const BRAND_OPTIONS: BrandOption[] = [
       { id: 'honor-200-smart', name: 'Honor 200 Smart', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9] },
 
       // ============ HONOR 100 SERIES ============
-      { id: 'honor-100', name: 'Honor 100', osVersions: [MAGICOS_VERSIONS.v8] },
-      { id: 'honor-100-pro', name: 'Honor 100 Pro', osVersions: [MAGICOS_VERSIONS.v8] },
-      { id: 'honor-100-gt', name: 'Honor 100 GT', osVersions: [MAGICOS_VERSIONS.v8] },
+      { id: 'honor-100', name: 'Honor 100', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-100-pro', name: 'Honor 100 Pro', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-100-gt', name: 'Honor 100 GT', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+
+      // ============ HONOR WIN SERIES ============
+      { id: 'honor-win', name: 'Honor WIN', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-win-rt', name: 'Honor WIN RT', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+
+      // ============ HONOR GT SERIES ============
+      { id: 'honor-gt-pro-5g', name: 'Honor GT Pro 5G', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-gt', name: 'Honor GT', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-90-gt', name: 'Honor 90 GT', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-80-gt', name: 'Honor 80 GT', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-x50-gt', name: 'Honor X50 GT', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-x40-gt', name: 'Honor X40 GT / X40 GT Racing', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+
+      // ============ HONOR MAGICPAD SERIES ============
+      { id: 'honor-magicpad-3', name: 'Honor MagicPad 3', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-magicpad-2', name: 'Honor MagicPad 2', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
+      { id: 'honor-pad-gt-pro', name: 'Honor Pad GT Pro', osVersions: [MAGICOS_VERSIONS.v8, MAGICOS_VERSIONS.v9, MAGICOS_VERSIONS.v10] },
     ],
   },
   {
@@ -788,7 +805,7 @@ export const HONOR_NOTIFICATION_FIX_WORKFLOW: Workflow = {
   category: 'optimization',
   tags: ['notification', 'optimization', 'honor', 'popular'],
   difficulty: 'medium',
-  estimatedMinutes: 10,
+  estimatedMinutes: 8,
   isOfficial: true,
   downloads: 890,
   rating: 4.7,
@@ -807,25 +824,6 @@ export const HONOR_NOTIFICATION_FIX_WORKFLOW: Workflow = {
     },
     {
       id: 'notif-step-2',
-      type: 'uninstall-packages',
-      title: 'Remove PowerGenie (Honor battery optimization)',
-      titleVi: 'Gỡ PowerGenie (tối ưu pin của Honor)',
-      description: 'Uninstall Honor PowerGenie app that kills background apps',
-      descriptionVi: 'Gỡ ứng dụng PowerGenie của Honor - ứng dụng này thường kill app chạy nền và chặn thông báo',
-      packagesInfo: [
-        {
-          packageName: 'com.hihonor.powergenie',
-          name: 'PowerGenie',
-          nameVi: 'PowerGenie',
-          descriptionVi: 'Ứng dụng tối ưu pin của Honor - kill các app chạy nền để tiết kiệm pin',
-          warningVi: '⚠️ Gỡ app này sẽ giúp thông báo hoạt động tốt hơn, nhưng sẽ tốn pin hơn. Khuyến nghị SAO LƯU trước khi gỡ!',
-          isRecommended: true,
-        },
-      ],
-      canSkip: true,
-    },
-    {
-      id: 'notif-step-3',
       type: 'guided-action',
       title: 'Configure notification settings',
       titleVi: 'Cấu hình cài đặt thông báo trong Settings',
@@ -836,7 +834,7 @@ export const HONOR_NOTIFICATION_FIX_WORKFLOW: Workflow = {
       userPromptVi: 'Làm theo video hướng dẫn để cấu hình cài đặt thông báo trên máy Honor của bạn',
       subSteps: [
         {
-          id: 'notif-3-1',
+          id: 'notif-2-1',
           instruction: 'Cài đặt → Thông báo → Bật "Đánh thức màn hình khi có thông báo"',
           alternativeInstructions: [
             'Kéo xuống dưới chọn ứng dụng cần bật thông báo',
@@ -844,14 +842,14 @@ export const HONOR_NOTIFICATION_FIX_WORKFLOW: Workflow = {
           ],
         },
         {
-          id: 'notif-3-2',
+          id: 'notif-2-2',
           instruction: 'Cài đặt → Pin → Cài đặt pin khác → Bật "Duy trì kết nối trong khi thiết bị ở trạng thái ngủ"',
           alternativeInstructions: [
             'Tùy chọn này giúp các ứng dụng vẫn nhận được thông báo khi máy đang ngủ',
           ],
         },
         {
-          id: 'notif-3-3',
+          id: 'notif-2-3',
           instruction: 'Cài đặt → Ứng dụng → Khởi chạy ứng dụng → Tắt "Quản lý tự động" cho ứng dụng cần thông báo',
           alternativeInstructions: [
             'Sau khi tắt, bật cả 3 mục bên trong: Tự khởi động, Chạy phụ, Hoạt động nền',
@@ -859,7 +857,7 @@ export const HONOR_NOTIFICATION_FIX_WORKFLOW: Workflow = {
           ],
         },
         {
-          id: 'notif-3-4',
+          id: 'notif-2-4',
           instruction: 'Cài đặt → Ứng dụng → Quản lý quyền hạn → Nhấn dấu 3 chấm (góc trên phải) → Quyền truy cập đặc biệt → Tối ưu hóa pin',
           alternativeInstructions: [
             'Chọn "Tất cả ứng dụng"',
