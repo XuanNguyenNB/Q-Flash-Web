@@ -21,6 +21,7 @@ import { DeviceInUseDialog } from '@/components/features/adb/DeviceInUseDialog';
 import { UserGestureRequiredDialog } from '@/components/features/adb/UserGestureRequiredDialog';
 import { VideoGuidePanel } from '@/components/features/automation/VideoGuidePanel';
 import { ADBSetupGuide } from '@/components/features/automation/ADBSetupGuide';
+import { DonateDialog } from '@/components/features/automation/DonateDialog';
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,6 +52,7 @@ import {
 
 import { cn } from '@/lib/utils';
 import { getWorkflowsByDeviceWithCustom } from '@/stores/customWorkflowStore';
+import { getModelIdFromADBCode } from '@/data/honorModelMapping';
 
 /**
  * Map manufacturer name to brand ID
@@ -109,6 +111,26 @@ export function AutomationPage() {
   // Check if device is confirmed (from sidebar or auto-detected)
   const isDeviceConfirmed = deviceFilter.brand && deviceFilter.model && deviceFilter.osVersion;
 
+  // Donate dialog state
+  const [showDonateDialog, setShowDonateDialog] = useState(false);
+  const hasShownDonateRef = useRef(false);
+
+  // Show donate dialog when workflow completes
+  useEffect(() => {
+    if (executionStatus === 'completed' && !hasShownDonateRef.current) {
+      hasShownDonateRef.current = true;
+      // Delay a bit so user can see the completion state first
+      const timer = setTimeout(() => {
+        setShowDonateDialog(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+    // Reset flag when workflow changes or resets
+    if (executionStatus === 'idle') {
+      hasShownDonateRef.current = false;
+    }
+  }, [executionStatus]);
+
   // Get available workflows (includes custom workflows)
   const availableWorkflows = getWorkflowsByDeviceWithCustom(
     deviceFilter.brand || '',
@@ -129,29 +151,39 @@ export function AutomationPage() {
     }
   }, [isADBConnected, setConnected]);
 
-  // Auto-detect brand from ADB device info
+  // Auto-detect brand and model from ADB device info
   useEffect(() => {
     if (!deviceInfo || hasAutoDetected.current) return;
-    if (deviceFilter.brand) return; // Already has brand selected
+    if (deviceFilter.brand && deviceFilter.model !== 'auto') return; // Already has full selection
 
     const manufacturer = deviceInfo.manufacturer;
+    const adbModel = deviceInfo.model;
+
     if (!manufacturer || manufacturer === 'Unknown') return;
 
     const detectedBrand = mapManufacturerToBrand(manufacturer);
     if (detectedBrand) {
       hasAutoDetected.current = true;
 
-      // Auto-set device filter with detected brand
-      // Use 'auto' as model and osVersion to indicate auto-detected
+      // Try to detect model from ADB model code (for Honor)
+      let detectedModel: string | null = null;
+      if (detectedBrand === 'honor' && adbModel) {
+        detectedModel = getModelIdFromADBCode(adbModel);
+        if (detectedModel) {
+          console.log(`[AutomationPage] Auto-detected Honor model: ${detectedModel} from ADB code: ${adbModel}`);
+        }
+      }
+
+      // Auto-set device filter with detected brand and model
       setDeviceFilter({
         brand: detectedBrand,
-        model: 'auto',
-        osVersion: 'auto',
+        model: detectedModel || 'auto',
+        osVersion: 'auto', // User still needs to select OS version
       });
 
       console.log(`[AutomationPage] Auto-detected brand: ${detectedBrand} from manufacturer: ${manufacturer}`);
     }
-  }, [deviceInfo, deviceFilter.brand, setDeviceFilter]);
+  }, [deviceInfo, deviceFilter.brand, deviceFilter.model, setDeviceFilter]);
 
   // Auto-connect on page load
   const hasTriedAutoConnect = useRef(false);
@@ -370,6 +402,11 @@ export function AutomationPage() {
       <DeviceInUseDialog open={showDeviceInUseDialog} onClose={() => setShowDeviceInUseDialog(false)} />
       <UserGestureRequiredDialog open={showUserGestureDialog} onClose={() => setShowUserGestureDialog(false)} />
       <ADBAuthorizationDialog open={isConnecting && !showDeviceInUseDialog && !showUserGestureDialog} onClose={() => {}} />
+      <DonateDialog
+        open={showDonateDialog}
+        onClose={() => setShowDonateDialog(false)}
+        workflowName={selectedWorkflow?.nameVi || selectedWorkflow?.name}
+      />
     </div>
   );
 }

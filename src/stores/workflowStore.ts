@@ -57,6 +57,7 @@ interface WorkflowStore {
   resumeExecution: () => void; // Alias for resumeWorkflow
   stopWorkflow: () => void;
   stopExecution: () => void; // Alias for stopWorkflow
+  completeWorkflow: () => void; // Mark workflow as completed
   nextStep: () => void;
   previousStep: () => void;
   setStepResult: (stepId: string, result: StepExecutionResult) => void;
@@ -209,6 +210,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   // Alias for stopWorkflow
   stopExecution: () => get().stopWorkflow(),
+
+  // Mark workflow as completed (triggers donate dialog)
+  completeWorkflow: () => set({ executionStatus: 'completed' }),
 
   nextStep: () => {
     const { currentStepIndex, selectedWorkflow } = get();

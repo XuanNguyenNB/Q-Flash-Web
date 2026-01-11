@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 // Components
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SearchableModelSelect } from '@/components/ui/searchable-model-select';
 import { DevicePanel } from '@/components/features/device/DevicePanel';
 import { DeviceCard } from '@/components/features/device/DeviceCard';
 import { ConnectionProgress } from '@/components/features/device/ConnectionProgress';
@@ -90,6 +91,17 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     const [tempBrand, setTempBrand] = useState<string>(deviceFilter.brand || '');
     const [tempModel, setTempModel] = useState<string>(deviceFilter.model || '');
     const [tempOS, setTempOS] = useState<string>(deviceFilter.osVersion || '');
+
+    // Sync temp state with deviceFilter when it changes (e.g., from auto-detect)
+    useEffect(() => {
+        if (deviceFilter.brand && deviceFilter.brand !== tempBrand) {
+            setTempBrand(deviceFilter.brand);
+        }
+        // Sync model if it's not 'auto' (meaning it was auto-detected)
+        if (deviceFilter.model && deviceFilter.model !== 'auto' && deviceFilter.model !== tempModel) {
+            setTempModel(deviceFilter.model);
+        }
+    }, [deviceFilter.brand, deviceFilter.model]);
 
     // Get selected brand/model data for dropdowns
     const selectedBrandData = BRAND_OPTIONS.find((b) => b.id === tempBrand);
@@ -262,22 +274,18 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                                         </Select>
                                     </div>
 
-                                    {/* Model */}
+                                    {/* Model - Searchable */}
                                     {tempBrand && (
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-medium text-muted-foreground">Model</label>
-                                            <Select value={tempModel} onValueChange={handleModelChange}>
-                                                <SelectTrigger className="h-8 text-xs">
-                                                    <SelectValue placeholder="Chọn model..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {models.map((model) => (
-                                                        <SelectItem key={model.id} value={model.id} className="text-xs">
-                                                            {model.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <SearchableModelSelect
+                                                models={models}
+                                                value={tempModel}
+                                                onValueChange={handleModelChange}
+                                                placeholder="Chọn model..."
+                                                searchPlaceholder="Tìm model..."
+                                                emptyText="Không tìm thấy model."
+                                            />
                                         </div>
                                     )}
 

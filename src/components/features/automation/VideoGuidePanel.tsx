@@ -47,6 +47,7 @@ export function VideoGuidePanel({ className }: VideoGuidePanelProps) {
     previousStep,
     getProgress,
     clearSelectedWorkflow,
+    completeWorkflow,
   } = useWorkflowStore();
 
   // Workflow execution - only need for checking if workflow is running
@@ -76,7 +77,7 @@ export function VideoGuidePanel({ className }: VideoGuidePanelProps) {
   // Handle complete for uninstall step
   const handleUninstallComplete = () => {
     if (isLastStep) {
-      clearSelectedWorkflow();
+      completeWorkflow();
     } else {
       nextStep();
     }
@@ -85,7 +86,7 @@ export function VideoGuidePanel({ className }: VideoGuidePanelProps) {
   // Handle complete for optimize step
   const handleOptimizeComplete = () => {
     if (isLastStep) {
-      clearSelectedWorkflow();
+      completeWorkflow();
     } else {
       nextStep();
     }
@@ -512,7 +513,7 @@ export function VideoGuidePanel({ className }: VideoGuidePanelProps) {
                       size="sm"
                       variant="default"
                       className="h-9 px-4 text-sm bg-green-600 hover:bg-green-700"
-                      onClick={clearSelectedWorkflow}
+                      onClick={completeWorkflow}
                     >
                       <CheckCircle2 className="w-4 h-4 mr-1" />
                       Hoàn thành
