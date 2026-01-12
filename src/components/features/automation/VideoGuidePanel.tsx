@@ -189,7 +189,7 @@ export function VideoGuidePanel({ className }: VideoGuidePanelProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <Video className="w-4 h-4" />
-            Video Hướng dẫn
+            Hướng dẫn chi tiết
           </CardTitle>
           {currentStep && (
             <Badge variant="secondary" className="text-xs px-2 py-0.5">

@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useADB } from '@/hooks/useADB';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -32,6 +33,7 @@ import {
   Package,
   Archive,
   SkipForward,
+  AppWindow,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { PackageInfo } from '@/types/workflow';
@@ -94,16 +96,16 @@ export function PackageUninstallStep({
   onComplete,
   className,
 }: PackageUninstallStepProps) {
-  // Selected packages (default: all recommended, exclude optional)
-  const [selectedPackages, setSelectedPackages] = useState<Set<string>>(() => {
-    const initial = new Set<string>();
-    packagesInfo.forEach((pkg) => {
-      if (!pkg.isOptional) {
-        initial.add(pkg.packageName);
-      }
-    });
-    return initial;
-  });
+  // Navigation
+  const navigate = useNavigate();
+
+  // Installed packages filter state
+  const [isLoadingInstalledApps, setIsLoadingInstalledApps] = useState(true);
+  const [installedPackages, setInstalledPackages] = useState<Set<string>>(new Set());
+  const [filteredPackagesInfo, setFilteredPackagesInfo] = useState<PackageInfo[]>([]);
+
+  // Selected packages (will be set after filtering)
+  const [selectedPackages, setSelectedPackages] = useState<Set<string>>(new Set());
 
   // Uninstall state
   const [isUninstalling, setIsUninstalling] = useState(false);
@@ -119,9 +121,74 @@ export function PackageUninstallStep({
   const [backupProgress, setBackupProgress] = useState(0);
 
   // ADB
-  const { getInstance, getPackagePath, pullFile } = useADB();
+  const { getInstance, getPackagePath, pullFile, listPackages } = useADB();
   const protocol = getInstance();
   const isConnected = protocol.isConnected;
+
+  // Load installed packages and filter against bloatware list
+  useEffect(() => {
+    async function loadAndFilterPackages() {
+      if (!isConnected) {
+        setIsLoadingInstalledApps(false);
+        // Show all packages if not connected (user can connect later)
+        setFilteredPackagesInfo(packagesInfo);
+        const initial = new Set<string>();
+        packagesInfo.forEach((pkg) => {
+          if (!pkg.isOptional) {
+            initial.add(pkg.packageName);
+          }
+        });
+        setSelectedPackages(initial);
+        return;
+      }
+
+      setIsLoadingInstalledApps(true);
+      try {
+        // Get all installed packages (both user and system)
+        const [userApps, systemApps] = await Promise.all([
+          listPackages('user'),
+          listPackages('system'),
+        ]);
+
+        // Combine into a Set for fast lookup
+        const allInstalledSet = new Set<string>();
+        userApps.forEach((app) => allInstalledSet.add(app.package));
+        systemApps.forEach((app) => allInstalledSet.add(app.package));
+        setInstalledPackages(allInstalledSet);
+
+        // Filter packagesInfo to only include installed packages
+        const filtered = packagesInfo.filter((pkg) => allInstalledSet.has(pkg.packageName));
+        setFilteredPackagesInfo(filtered);
+
+        // Pre-select non-optional packages that are installed
+        const initial = new Set<string>();
+        filtered.forEach((pkg) => {
+          if (!pkg.isOptional) {
+            initial.add(pkg.packageName);
+          }
+        });
+        setSelectedPackages(initial);
+      } catch (error) {
+        console.error('Failed to load installed packages:', error);
+        toast.error('Không thể lấy danh sách ứng dụng', {
+          description: String(error),
+        });
+        // Fallback to showing all packages
+        setFilteredPackagesInfo(packagesInfo);
+        const initial = new Set<string>();
+        packagesInfo.forEach((pkg) => {
+          if (!pkg.isOptional) {
+            initial.add(pkg.packageName);
+          }
+        });
+        setSelectedPackages(initial);
+      } finally {
+        setIsLoadingInstalledApps(false);
+      }
+    }
+
+    loadAndFilterPackages();
+  }, [isConnected, listPackages, packagesInfo]);
 
   // Toggle package selection
   const togglePackage = (packageName: string) => {
@@ -136,9 +203,9 @@ export function PackageUninstallStep({
     });
   };
 
-  // Select all
+  // Select all (only from filtered list)
   const selectAll = () => {
-    const all = new Set(packagesInfo.map((p) => p.packageName));
+    const all = new Set(filteredPackagesInfo.map((p) => p.packageName));
     setSelectedPackages(all);
   };
 
@@ -250,6 +317,27 @@ export function PackageUninstallStep({
     let backupCount = 0;
     let failedCount = 0;
 
+    // If more than 1 app, use File System Access API to select folder
+    let directoryHandle: FileSystemDirectoryHandle | null = null;
+    if (packagesToBackup.length > 1 && 'showDirectoryPicker' in window) {
+      try {
+        directoryHandle = await window.showDirectoryPicker({
+          mode: 'readwrite',
+          startIn: 'downloads',
+        });
+        toast.info('Đã chọn thư mục sao lưu', {
+          description: directoryHandle.name,
+        });
+      } catch (error) {
+        // User cancelled or API not supported
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Directory picker error:', error);
+        }
+        // Fall back to individual downloads
+        directoryHandle = null;
+      }
+    }
+
     for (let i = 0; i < packagesToBackup.length; i++) {
       const pkg = packagesToBackup[i];
       setBackupProgress(((i + 1) / packagesToBackup.length) * 100);
@@ -259,18 +347,34 @@ export function PackageUninstallStep({
         if (path) {
           const blob = await pullFile(path);
           if (blob) {
-            // Trigger download
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${pkg}_backup.apk`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-            backupCount++;
-            // Brief pause to ensure browser handles download trigger
-            await new Promise(r => setTimeout(r, 500));
+            const fileName = `${pkg}_backup.apk`;
+
+            if (directoryHandle) {
+              // Save directly to selected folder
+              try {
+                const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                backupCount++;
+              } catch (writeError) {
+                console.error(`Failed to write ${fileName}:`, writeError);
+                failedCount++;
+              }
+            } else {
+              // Fallback: trigger individual download
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = fileName;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+              document.body.removeChild(a);
+              backupCount++;
+              // Brief pause to ensure browser handles download trigger
+              await new Promise(r => setTimeout(r, 500));
+            }
           } else {
             failedCount++;
           }
@@ -288,7 +392,9 @@ export function PackageUninstallStep({
 
     if (backupCount > 0) {
       toast.success(`Đã sao lưu ${backupCount} ứng dụng`, {
-        description: failedCount > 0 ? `${failedCount} ứng dụng không tìm thấy` : 'Tiếp tục xóa...',
+        description: directoryHandle
+          ? `Lưu vào thư mục: ${directoryHandle.name}`
+          : failedCount > 0 ? `${failedCount} ứng dụng không tìm thấy` : 'Tiếp tục xóa...',
       });
     } else if (failedCount > 0) {
       toast.warning('Không thể sao lưu', {
@@ -307,9 +413,9 @@ export function PackageUninstallStep({
     ? 100
     : 0;
 
-  // Group packages
-  const recommendedPackages = packagesInfo.filter((p) => !p.isOptional);
-  const optionalPackages = packagesInfo.filter((p) => p.isOptional);
+  // Group packages from filtered list
+  const recommendedPackages = filteredPackagesInfo.filter((p) => !p.isOptional);
+  const optionalPackages = filteredPackagesInfo.filter((p) => p.isOptional);
 
   if (isComplete) {
     const successCount = results.filter((r) => r.success).length;
@@ -340,7 +446,7 @@ export function PackageUninstallStep({
             Chọn ứng dụng cần xóa
           </h3>
           <Badge variant="secondary">
-            {selectedPackages.size}/{packagesInfo.length} đã chọn
+            {selectedPackages.size}/{filteredPackagesInfo.length} đã chọn
           </Badge>
         </div>
         <div className="flex gap-2">
@@ -349,7 +455,7 @@ export function PackageUninstallStep({
             variant="outline"
             className="text-xs h-7"
             onClick={selectAll}
-            disabled={isUninstalling}
+            disabled={isUninstalling || isLoadingInstalledApps}
           >
             Chọn tất cả
           </Button>
@@ -358,7 +464,7 @@ export function PackageUninstallStep({
             variant="outline"
             className="text-xs h-7"
             onClick={deselectAll}
-            disabled={isUninstalling}
+            disabled={isUninstalling || isLoadingInstalledApps}
           >
             Bỏ chọn tất cả
           </Button>
@@ -367,8 +473,43 @@ export function PackageUninstallStep({
 
       {/* Package List - Scrollable with fixed height */}
       <div className="flex-1 min-h-0 overflow-hidden">
+        {isLoadingInstalledApps ? (
+          <div className="flex flex-col items-center justify-center h-full p-6">
+            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+            <p className="text-sm text-muted-foreground">Đang kiểm tra ứng dụng trên thiết bị...</p>
+          </div>
+        ) : filteredPackagesInfo.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+            <CheckCircle2 className="w-12 h-12 text-green-500 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Tuyệt vời!</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Không tìm thấy ứng dụng rác nào trên thiết bị.<br />
+              Có thể bạn đã dọn dẹp trước đó rồi.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button onClick={onComplete}>Tiếp tục</Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/adb?tab=app-manager')}
+                className="gap-2"
+              >
+                <AppWindow className="w-4 h-4" />
+                Gỡ theo ý bạn
+              </Button>
+            </div>
+          </div>
+        ) : (
         <ScrollArea className="h-full">
         <div className="p-3 space-y-4">
+          {/* Info banner showing how many apps were found */}
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/30">
+            <Info className="w-4 h-4 text-blue-500 flex-none" />
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              Tìm thấy <strong>{filteredPackagesInfo.length}</strong> ứng dụng rác trên thiết bị (trong tổng số {packagesInfo.length} app trong danh sách).
+              Bỏ tích những app bạn muốn giữ lại.
+            </p>
+          </div>
+
           {/* Recommended packages */}
           <div>
             <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
@@ -420,6 +561,7 @@ export function PackageUninstallStep({
           )}
         </div>
         </ScrollArea>
+        )}
       </div>
 
       {/* Progress & Action */}

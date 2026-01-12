@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 // Components
@@ -31,7 +32,13 @@ export function ADBPage() {
     const { t } = useTranslation();
     const { setMode, setConnected } = useDeviceStore();
     const { showDeviceInUseDialog, setShowDeviceInUseDialog, showUserGestureDialog, setShowUserGestureDialog, isConnecting } = useADBStore();
-    const [activeTab, setActiveTab] = useState("quick-view");
+    const [searchParams] = useSearchParams();
+    const [activeTab, setActiveTab] = useState(() => {
+        // Read initial tab from URL query param
+        const tabFromUrl = searchParams.get('tab');
+        const validTabs = ['quick-view', 'app-manager', 'file-manager', 'terminal'];
+        return tabFromUrl && validTabs.includes(tabFromUrl) ? tabFromUrl : 'quick-view';
+    });
 
     // Ensure we are in ADB mode when this page loads
     useEffect(() => {

@@ -7,7 +7,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { useDeviceStore } from '@/stores/deviceStore';
 import { useADBStore } from '@/stores/adbStore';
 import { useADB } from '@/hooks/useADB';
@@ -47,11 +46,10 @@ import {
   Zap,
   Workflow,
   Smartphone,
-  Settings,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { getWorkflowsByDeviceWithCustom } from '@/stores/customWorkflowStore';
+import { getWorkflowsByDevice } from '@/data/workflowPresets';
 import { getModelIdFromADBCode } from '@/data/honorModelMapping';
 
 /**
@@ -131,8 +129,8 @@ export function AutomationPage() {
     }
   }, [executionStatus]);
 
-  // Get available workflows (includes custom workflows)
-  const availableWorkflows = getWorkflowsByDeviceWithCustom(
+  // Get available workflows (preset only)
+  const availableWorkflows = getWorkflowsByDevice(
     deviceFilter.brand || '',
     deviceFilter.model || '',
     deviceFilter.osVersion || ''
@@ -267,12 +265,6 @@ export function AutomationPage() {
           <Workflow className="w-4 h-4" />
           Tự Động Hóa
         </h1>
-        <Link to="/workflow-editor">
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
-            <Settings className="w-3 h-3" />
-            Quản lý quy trình
-          </Button>
-        </Link>
       </div>
 
       {/* Main 3-Column Grid Layout - Full Height */}
@@ -404,7 +396,11 @@ export function AutomationPage() {
       <ADBAuthorizationDialog open={isConnecting && !showDeviceInUseDialog && !showUserGestureDialog} onClose={() => {}} />
       <DonateDialog
         open={showDonateDialog}
-        onClose={() => setShowDonateDialog(false)}
+        onClose={() => {
+          setShowDonateDialog(false);
+          // Reset workflow after closing donate dialog
+          clearSelectedWorkflow();
+        }}
         workflowName={selectedWorkflow?.nameVi || selectedWorkflow?.name}
       />
     </div>
