@@ -6,7 +6,4 @@
 
 export { WorkflowSidebar } from './WorkflowSidebar';
 export { WorkflowMainPanel } from './WorkflowMainPanel';
-export { AIAssistantPanel } from './AIAssistantPanel';
-export { StepControlPanel } from './StepControlPanel';
-export { AIActionLogPanel } from './AIActionLogPanel';
 export { VideoGuidePanel } from './VideoGuidePanel';

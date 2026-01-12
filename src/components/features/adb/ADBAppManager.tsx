@@ -344,18 +344,29 @@ export function ADBAppManager() {
         }
     };
 
-    const handleDisable = async (pkg: string) => {
-        // Toggle based on current state? For now assume disable.
-        // Or check `pm list packages -d`
-        // Simplified: Button is "Disable" 
-        const result = await runCommand(`pm disable-user --user 0 ${pkg}`);
-        if (result && (result.includes('Success') || result.includes('disabled'))) {
-            toast.success(t('adb.apps.disableSuccess', { package: pkg }));
-            trackEvent('adb', 'app_disable', pkg);
-            // Refresh app list to show disabled status
-            fetchApps(appType);
+    const handleToggleApp = async (pkg: string, currentlyEnabled: boolean) => {
+        if (currentlyEnabled) {
+            // Disable the app
+            const result = await runCommand(`pm disable-user --user 0 ${pkg}`);
+            if (result && (result.includes('Success') || result.includes('disabled'))) {
+                toast.success(t('adb.apps.disableSuccess', { package: pkg }));
+                trackEvent('adb', 'app_disable', pkg);
+                // Refresh app list
+                fetchApps(appType);
+            } else {
+                toast.error(t('adb.files.actionFailed', { error: result || 'Unknown' }));
+            }
         } else {
-            toast.error(t('adb.files.actionFailed', { error: result || 'Unknown' }));
+            // Enable the app
+            const result = await runCommand(`pm enable ${pkg}`);
+            if (result && (result.includes('Success') || result.includes('enabled'))) {
+                toast.success(t('adb.apps.enableSuccess', { package: pkg }));
+                trackEvent('adb', 'app_enable', pkg);
+                // Refresh app list
+                fetchApps(appType);
+            } else {
+                toast.error(t('adb.files.actionFailed', { error: result || 'Unknown' }));
+            }
         }
     };
 
@@ -408,7 +419,7 @@ export function ADBAppManager() {
             toast.success(t('adb.apps.uninstallSuccess', { package: `${successCount} apps` }));
             trackEvent('adb', 'app_uninstall', `${successCount}_apps`, successCount);
         } else {
-            toast.warning(`Uninstalled ${successCount}/${total} apps`);
+            toast.warning(t('adb.apps.uninstallPartial', { success: successCount, total }));
         }
 
         setUninstallTarget(null);
@@ -583,7 +594,7 @@ export function ADBAppManager() {
                             </div>
                         </div>
                         <div className="text-right text-xs text-muted-foreground min-w-[60px]">
-                            {filteredApps.length} apps
+                            {filteredApps.length} {t('adb.apps.appCount', 'ứng dụng')}
                         </div>
                     </div>
                 </CardHeader>
@@ -641,11 +652,11 @@ export function ADBAppManager() {
                                                     </p>
                                                     <div className="flex gap-1">
                                                         <Badge variant={app.type === 'user' ? 'default' : 'secondary'} className="text-[10px] h-4 px-1 py-0">
-                                                            {app.type === 'user' ? 'User' : 'System'}
+                                                            {app.type === 'user' ? t('adb.apps.userBadge', 'Người dùng') : t('adb.apps.systemBadge', 'Hệ thống')}
                                                         </Badge>
                                                         {!app.enabled && (
                                                             <Badge variant="destructive" className="text-[10px] h-4 px-1 py-0">
-                                                                Disabled
+                                                                {t('adb.apps.statusDisabled', 'Đã tắt')}
                                                             </Badge>
                                                         )}
                                                     </div>
@@ -712,14 +723,22 @@ export function ADBAppManager() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-purple-500 hover:bg-purple-500/10"
+                                                className={cn(
+                                                    "h-8 w-8",
+                                                    app.enabled
+                                                        ? "text-purple-500 hover:bg-purple-500/10"
+                                                        : "text-green-500 hover:bg-green-500/10"
+                                                )}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDisable(app.package);
+                                                    handleToggleApp(app.package, app.enabled);
                                                 }}
-                                                title={t('adb.apps.disable', 'Disable')}
+                                                title={app.enabled
+                                                    ? t('adb.apps.disable', 'Vô hiệu hóa')
+                                                    : t('adb.apps.enable', 'Bật lại')
+                                                }
                                             >
-                                                <Ban className="w-4 h-4" />
+                                                {app.enabled ? <Ban className="w-4 h-4" /> : <Power className="w-4 h-4" />}
                                             </Button>
 
                                             <Button

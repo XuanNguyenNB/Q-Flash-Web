@@ -578,17 +578,68 @@ export function useADB(): UseADBReturn {
         if (!adb.isConnected) return [];
         if (pendingOperation) return [];
 
-        // Convert filter to boolean for ADBProtocol.listPackages
-        const systemApps = filter === 'system';
-        const packages = await adb.listPackages(systemApps);
+        try {
+            let command = 'pm list packages';
+            let appType: 'user' | 'system' = 'user';
 
-        // Convert string[] to ADBAppEntry[]
-        return packages.map(pkg => ({
-            package: pkg,
-            path: '',
-            enabled: filter !== 'disabled',
-            type: systemApps ? 'system' : 'user'
-        } as ADBAppEntry));
+            // Determine the correct pm list packages flag
+            switch (filter) {
+                case 'user':
+                    command = 'pm list packages -3'; // Third-party apps
+                    appType = 'user';
+                    break;
+                case 'system':
+                    command = 'pm list packages -s'; // System apps
+                    appType = 'system';
+                    break;
+                case 'enabled':
+                    command = 'pm list packages -e'; // Enabled apps
+                    appType = 'user'; // Will be determined per-package
+                    break;
+                case 'disabled':
+                    command = 'pm list packages -d'; // Disabled apps
+                    appType = 'user'; // Will be determined per-package
+                    break;
+            }
+
+            const result = await adb.runShellCommand(command);
+            if (!result) return [];
+
+            const packages = result.split('\n')
+                .map(line => line.replace('package:', '').trim())
+                .filter(pkg => pkg.length > 0);
+
+            // For enabled/disabled, we need to determine if each app is system or user
+            // For user/system filter, we already know the type
+            const entries: ADBAppEntry[] = [];
+
+            for (const pkg of packages) {
+                let type = appType;
+
+                // For enabled/disabled filters, check if it's a system app
+                if (filter === 'enabled' || filter === 'disabled') {
+                    // Check the package path to determine if it's system
+                    const pathResult = await adb.runShellCommand(`pm path ${pkg}`);
+                    if (pathResult && (pathResult.includes('/system/') || pathResult.includes('/product/') || pathResult.includes('/vendor/'))) {
+                        type = 'system';
+                    } else {
+                        type = 'user';
+                    }
+                }
+
+                entries.push({
+                    package: pkg,
+                    path: '',
+                    enabled: filter !== 'disabled',
+                    type: type
+                } as ADBAppEntry);
+            }
+
+            return entries;
+        } catch (error) {
+            console.error('Error listing packages:', error);
+            return [];
+        }
     }, [getInstance, pendingOperation]);
 
     const installAPK = useCallback(async (file: File, progressCallback?: (percent: number) => void): Promise<boolean> => {

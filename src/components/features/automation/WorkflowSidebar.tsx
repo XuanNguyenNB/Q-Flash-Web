@@ -11,14 +11,11 @@ import { useState, useCallback } from 'react';
 import { useWorkflowStore } from '@/stores/workflowStore';
 import { useADBStore } from '@/stores/adbStore';
 import { useADB } from '@/hooks/useADB';
-import { useAIAutomation } from '@/hooks/useAIAutomation';
 import { BRAND_OPTIONS } from '@/data/workflowPresets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { StepControlPanel } from './StepControlPanel';
-import { AIActionLogPanel } from './AIActionLogPanel';
 import {
   Check,
   Smartphone,
@@ -53,26 +50,15 @@ interface WorkflowSidebarProps {
   onAskAI?: (question: string) => void;
 }
 
-export function WorkflowSidebar({ onAskAI }: WorkflowSidebarProps) {
+export function WorkflowSidebar({ onAskAI: _onAskAI }: WorkflowSidebarProps) {
   const { t } = useTranslation();
   const {
     deviceFilter,
     setDeviceFilter,
     selectedWorkflow,
     executionStatus,
-    currentStepIndex,
   } = useWorkflowStore();
   const { isConnecting } = useADBStore();
-
-  // AI Automation hook
-  const {
-    isRunning: isAIRunning,
-    canUseAutomation,
-    isScrcpyAvailable,
-    startAutomation,
-    stopAutomation,
-    logs: aiLogs,
-  } = useAIAutomation();
 
   // ADB hook - get protocol for actual connection state
   const { connect, disconnect, getInstance } = useADB();
@@ -308,25 +294,6 @@ export function WorkflowSidebar({ onAskAI }: WorkflowSidebarProps) {
           </CardContent>
         )}
       </Card>
-
-      {/* Step Control Panel - Vùng khoanh đỏ */}
-      {selectedWorkflow && (
-        <Card className="flex-none">
-          <StepControlPanel
-            onAskAI={onAskAI}
-            onStartAIAutomation={startAutomation}
-            onStopAIAutomation={stopAutomation}
-            canUseAIAutomation={isScrcpyAvailable}
-          />
-        </Card>
-      )}
-
-      {/* AI Action Log Panel - shows when AI is running or has logs */}
-      {(isAIRunning || aiLogs.length > 0) && (
-        <Card className="flex-none max-h-[200px]">
-          <AIActionLogPanel maxHeight="180px" />
-        </Card>
-      )}
     </div>
   );
 }

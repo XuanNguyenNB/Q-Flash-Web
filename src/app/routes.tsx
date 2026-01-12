@@ -1,6 +1,6 @@
 /**
  * Q-Flash-Web Routes Configuration
- * 
+ *
  * Centralized route definitions for the application.
  */
 
@@ -15,10 +15,7 @@ import SupportPage from '../pages/SupportPage';
 import DonatePage from '../pages/DonatePage';
 import { ADBPage } from '../pages/ADBPage';
 import FastbootPage from '../pages/FastbootPage';
-import { TestConnectionFlowPage } from '../pages/TestConnectionFlowPage';
-import TestBackupPage from '../pages/TestBackupPage';
 import { AutomationPage } from '../pages/AutomationPage';
-import { WorkflowEditorPage } from '../pages/WorkflowEditorPage';
 
 /**
  * Route configuration type
@@ -42,9 +39,6 @@ export const routeConfig: RouteConfig[] = [
     { path: '/adb', element: <ADBPage />, label: 'nav.adb' },
     { path: '/fastboot', element: <FastbootPage />, label: 'nav.fastboot' },
     { path: '/automation', element: <AutomationPage />, label: 'nav.automation' },
-    { path: '/workflow-editor', element: <WorkflowEditorPage />, label: 'nav.workflowEditor' },
-    { path: '/test-connection-flow', element: <TestConnectionFlowPage />, label: 'Test Connection Flow' },
-    { path: '/test-backup', element: <TestBackupPage />, label: 'Test Backup' },
 ];
 
 /**

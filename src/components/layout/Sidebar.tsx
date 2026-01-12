@@ -1,26 +1,25 @@
 /**
  * Sidebar Component
- * 
- * Left sidebar with device selector, device card, and navigation items.
- * Part of the App Shell layout.
- * 
- * Updated: Story 2.4 - Integrated DeviceCard component
- * Updated: Story 4.6 - Added RomLoader component
- * Updated: Story X.X - Added XML Backup feature
+ *
+ * Unified left sidebar with tabs: Device/Actions and Logs.
+ * Combines previous Sidebar and LogPanel into a single panel.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 // Components
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SearchableModelSelect } from '@/components/ui/searchable-model-select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DevicePanel } from '@/components/features/device/DevicePanel';
 import { DeviceCard } from '@/components/features/device/DeviceCard';
 import { ConnectionProgress } from '@/components/features/device/ConnectionProgress';
 import { RomLoader } from '@/components/features/rom';
-import { ADBConnectionStatus, ADBQuickActions } from '@/components/features/adb';
+import { ADBConnectionStatus } from '@/components/features/adb';
 import { FastbootConnectionStatus, FastbootDeviceInfo } from '@/components/features/fastboot';
 import { ManualFirehosePopup } from '@/components/features/device/ManualFirehosePopup';
 import { XMLBackupDialog } from '@/components/features/backup';
@@ -30,18 +29,23 @@ import { XMLFlashDialog } from '@/components/features/flash';
 import {
     ChevronLeft,
     ChevronRight,
-    FileUp,
     FileText,
     Zap,
     Trash2,
     Smartphone,
     Check,
+    Terminal,
+    Filter,
+    Search,
+    X,
+    Copy,
+    Settings,
 } from 'lucide-react';
 
 // Stores
 import { useDeviceStore } from '@/stores/deviceStore';
 import { usePartitionStore } from '@/stores/partitionStore';
-import { useTerminalStore } from '@/stores/terminalStore';
+import { useTerminalStore, type TerminalLogLevel, type TerminalFilterLevel, type TerminalLogEntry } from '@/stores/terminalStore';
 import { useWorkflowStore } from '@/stores/workflowStore';
 
 // Data
@@ -53,7 +57,39 @@ import { useWebUSB, useXMLBackup, useXMLFlash, useFirehose } from '@/hooks';
 // Utils
 import { cn } from '@/lib/utils';
 
-import { ADBAutoConnector } from '@/components/features/adb/ADBAutoConnector';
+/**
+ * Color mapping for log levels
+ */
+const levelColors: Record<TerminalLogLevel, string> = {
+    info: 'text-zinc-400',
+    success: 'text-green-500',
+    warning: 'text-yellow-500',
+    error: 'text-red-500',
+    debug: 'text-purple-400',
+};
+
+/**
+ * Filter level options for dropdown
+ */
+const FILTER_OPTIONS: { value: TerminalFilterLevel; labelKey: string }[] = [
+    { value: 'all', labelKey: 'terminal.filter.all' },
+    { value: 'info', labelKey: 'terminal.filter.info' },
+    { value: 'success', labelKey: 'terminal.filter.success' },
+    { value: 'warning', labelKey: 'terminal.filter.warning' },
+    { value: 'error', labelKey: 'terminal.filter.error' },
+];
+
+/**
+ * Format timestamp to [HH:mm:ss]
+ */
+function formatTime(date: Date): string {
+    return date.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+}
 
 interface SidebarProps {
     collapsed?: boolean;
@@ -61,7 +97,7 @@ interface SidebarProps {
 }
 
 /**
- * Sidebar component with device selector, device card, ROM loader, and collapse functionality
+ * Sidebar component with tabs for Device/Actions and Logs
  */
 export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     const { t } = useTranslation();
@@ -69,6 +105,7 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     const [showManualPopup, setShowManualPopup] = useState(false);
     const [showXMLBackupDialog, setShowXMLBackupDialog] = useState(false);
     const [showXMLFlashDialog, setShowXMLFlashDialog] = useState(false);
+    const [activeTab, setActiveTab] = useState('device');
 
     // Hooks
     const { getManager } = useWebUSB();
@@ -77,7 +114,21 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
     const { getInstance } = useFirehose();
     const partitions = usePartitionStore((state) => state.partitions);
     const isLoadingPartitions = usePartitionStore((state) => state.isLoading);
-    const log = useTerminalStore((state) => state.log);
+    const terminalLog = useTerminalStore((state) => state.log);
+
+    // Terminal store for Logs tab
+    const logs = useTerminalStore((state) => state.logs);
+    const clearLogs = useTerminalStore((state) => state.clear);
+    const filterLevel = useTerminalStore((state) => state.filterLevel);
+    const searchQuery = useTerminalStore((state) => state.searchQuery);
+    const setFilterLevel = useTerminalStore((state) => state.setFilterLevel);
+    const setSearchQuery = useTerminalStore((state) => state.setSearchQuery);
+
+    // Log panel state
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [showFilters, setShowFilters] = useState(false);
+    const [localSearch, setLocalSearch] = useState('');
+    const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Check if partitions are loaded
     const hasPartitions = partitions.length > 0;
@@ -97,7 +148,6 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
         if (deviceFilter.brand && deviceFilter.brand !== tempBrand) {
             setTempBrand(deviceFilter.brand);
         }
-        // Sync model if it's not 'auto' (meaning it was auto-detected)
         if (deviceFilter.model && deviceFilter.model !== 'auto' && deviceFilter.model !== tempModel) {
             setTempModel(deviceFilter.model);
         }
@@ -111,6 +161,79 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
 
     const canConfirmDevice = tempBrand && tempModel && tempOS;
     const isDeviceConfirmed = deviceFilter.brand === tempBrand && deviceFilter.model === tempModel && deviceFilter.osVersion === tempOS && deviceFilter.brand !== '';
+
+    // Handle search input change with debounce
+    const handleSearchChange = useCallback((value: string) => {
+        setLocalSearch(value);
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        searchTimeoutRef.current = setTimeout(() => {
+            setSearchQuery(value);
+        }, 200);
+    }, [setSearchQuery]);
+
+    // Clear search
+    const handleClearSearch = useCallback(() => {
+        setLocalSearch('');
+        setSearchQuery('');
+    }, [setSearchQuery]);
+
+    // Filter and search logs
+    const filteredLogs = useMemo(() => {
+        let result = logs;
+        if (filterLevel !== 'all') {
+            result = result.filter(log => log.level === filterLevel);
+        }
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(log => log.message.toLowerCase().includes(query));
+        }
+        return result;
+    }, [logs, filterLevel, searchQuery]);
+
+    // Count logs by level
+    const levelCounts = useMemo(() => {
+        const counts: Record<TerminalFilterLevel, number> = {
+            all: logs.length,
+            info: 0,
+            success: 0,
+            warning: 0,
+            error: 0,
+            debug: 0,
+        };
+        logs.forEach(log => {
+            counts[log.level]++;
+        });
+        return counts;
+    }, [logs]);
+
+    // Copy log entry to clipboard
+    const handleCopy = useCallback(async (entry: TerminalLogEntry) => {
+        const text = `[${formatTime(entry.timestamp)}] ${entry.message}`;
+        try {
+            await navigator.clipboard.writeText(text);
+            toast.success(t('terminal.copied'));
+        } catch {
+            console.error('Failed to copy to clipboard');
+        }
+    }, [t]);
+
+    // Auto-scroll to bottom when new logs are added
+    useEffect(() => {
+        if (scrollRef.current && !collapsed && activeTab === 'logs') {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [filteredLogs, collapsed, activeTab]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const handleBrandChange = (brandId: string) => {
         setTempBrand(brandId);
@@ -147,22 +270,20 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
         }
     };
 
-    // Handle Remove FRP (Factory Reset Protection / Google Account)
+    // Handle Remove FRP
     const handleRemoveFRP = async () => {
         const usbManager = getManager();
         if (!usbManager) {
-            log('error', 'USB not connected');
+            terminalLog('error', 'USB not connected');
             return;
         }
 
-        // Find frp partition
         const frpPartition = partitions.find(p => p.name.toLowerCase() === 'frp');
         if (!frpPartition) {
-            log('error', t('flash.frp.notFound'));
+            terminalLog('error', t('flash.frp.notFound'));
             return;
         }
 
-        // Confirm with user using i18n
         const confirmed = window.confirm(
             `${t('flash.frp.title')}\n\n` +
             `${t('flash.frp.description')}\n` +
@@ -172,25 +293,19 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
         if (!confirmed) return;
 
         setIsRemovingFRP(true);
-        log('info', t('flash.frp.removing'));
+        terminalLog('info', t('flash.frp.removing'));
 
         try {
             const firehose = getInstance(usbManager);
-
-            // Configure firehose
             const configResult = await firehose.configure();
             if (!configResult.success) {
                 throw new Error('Failed to configure Firehose');
             }
 
-            // Create empty FRP data (all zeros)
-            // FRP partition is typically 512KB - 1MB
-            const frpSize = frpPartition.size || 512 * 1024; // Default 512KB
+            const frpSize = frpPartition.size || 512 * 1024;
             const emptyFrpData = new Uint8Array(frpSize);
+            terminalLog('info', `Writing empty FRP data (${Math.ceil(frpSize / 1024)} KB)...`);
 
-            log('info', `Writing empty FRP data (${Math.ceil(frpSize / 1024)} KB)...`);
-
-            // Write empty data to FRP partition
             const result = await firehose.writePartition(
                 frpPartition.lun || 0,
                 frpPartition.startSector,
@@ -200,13 +315,13 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
             );
 
             if (result.success) {
-                log('success', t('flash.frp.success'));
+                terminalLog('success', t('flash.frp.success'));
             } else {
                 throw new Error(result.error || 'Failed to write FRP partition');
             }
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error);
-            log('error', `${t('flash.frp.failed')}: ${errorMsg}`);
+            terminalLog('error', `${t('flash.frp.failed')}: ${errorMsg}`);
         } finally {
             setIsRemovingFRP(false);
         }
@@ -217,178 +332,349 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
             <aside
                 className={cn(
                     "fixed left-0 top-14 bottom-0 z-40 flex flex-col border-r border-border bg-sidebar transition-all duration-300",
-                    collapsed ? "w-16" : "w-[260px]"
+                    collapsed ? "w-16" : "w-[340px]"
                 )}
             >
-                {/* Device Panel with Selector & Device Card */}
-                <div className="p-4 border-b border-border space-y-3">
-                    {/* EDL Mode */}
-                    {currentMode === 'edl' && (
-                        <>
-                            {!collapsed && <DevicePanel />}
-                            {!collapsed && <DeviceCard />}
-                            {!collapsed && <ConnectionProgress className="mt-3" />}
-                        </>
-                    )}
-
-                    {/* ADB Mode - Connection Card Only */}
-                    {currentMode === 'adb' && (
-                        <>
-                            {!collapsed && <ADBConnectionStatus variant="card" />}
-                        </>
-                    )}
-
-                    {/* Fastboot Mode */}
-                    {currentMode === 'fastboot' && (
-                        <>
-                            {!collapsed && <FastbootConnectionStatus variant="card" />}
-                            {!collapsed && <FastbootDeviceInfo className="border-0 shadow-none p-0 bg-transparent" />}
-                        </>
-                    )}
-
-                    {/* Automation Mode - ADB Connection + Device Selection */}
-                    {currentMode === 'automation' && (
-                        <>
-                            {!collapsed && <ADBConnectionStatus variant="card" />}
-                            {!collapsed && (
-                                <div className="space-y-3 mt-3">
-                                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                        <Smartphone className="w-3.5 h-3.5" />
-                                        Chọn Thiết Bị
-                                    </p>
-
-                                    {/* Brand */}
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-medium text-muted-foreground">Hãng</label>
-                                        <Select value={tempBrand} onValueChange={handleBrandChange}>
-                                            <SelectTrigger className="h-8 text-xs">
-                                                <SelectValue placeholder="Chọn hãng..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {BRAND_OPTIONS.map((brand) => (
-                                                    <SelectItem key={brand.id} value={brand.id} className="text-xs">
-                                                        {brand.icon} {brand.nameVi}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    {/* Model - Searchable */}
-                                    {tempBrand && (
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-medium text-muted-foreground">Model</label>
-                                            <SearchableModelSelect
-                                                models={models}
-                                                value={tempModel}
-                                                onValueChange={handleModelChange}
-                                                placeholder="Chọn model..."
-                                                searchPlaceholder="Tìm model..."
-                                                emptyText="Không tìm thấy model."
-                                            />
-                                        </div>
+                {!collapsed && (
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
+                        {/* Tab Headers */}
+                        <div className="px-3 py-2 border-b border-border">
+                            <TabsList className="w-full grid grid-cols-2 h-8">
+                                <TabsTrigger value="device" className="text-xs gap-1.5">
+                                    <Settings className="w-3.5 h-3.5" />
+                                    Device
+                                </TabsTrigger>
+                                <TabsTrigger value="logs" className="text-xs gap-1.5">
+                                    <Terminal className="w-3.5 h-3.5" />
+                                    Logs
+                                    {logs.length > 0 && (
+                                        <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-primary/20 rounded-full">
+                                            {logs.length}
+                                        </span>
                                     )}
-
-                                    {/* OS Version */}
-                                    {tempModel && (
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-medium text-muted-foreground">Hệ điều hành</label>
-                                            <Select value={tempOS} onValueChange={setTempOS}>
-                                                <SelectTrigger className="h-8 text-xs">
-                                                    <SelectValue placeholder="Chọn OS..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {osVersions.map((os) => (
-                                                        <SelectItem key={os.id} value={os.id} className="text-xs">
-                                                            {os.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    )}
-
-                                    {/* Confirm Button */}
-                                    <Button
-                                        onClick={handleConfirmDevice}
-                                        disabled={!canConfirmDevice}
-                                        className={cn('w-full gap-1.5 h-8 text-xs', isDeviceConfirmed && 'bg-green-600 hover:bg-green-700')}
-                                        size="sm"
-                                    >
-                                        {isDeviceConfirmed && <Check className="w-3 h-3" />}
-                                        {isDeviceConfirmed ? 'Đã xác nhận' : 'Xác nhận'}
-                                    </Button>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-
-                {/* Quick Actions */}
-                <div className="flex-1 p-4 overflow-y-auto">
-
-                    {!collapsed && currentMode !== 'adb' && (
-                        <div className="space-y-2">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                                {t('sidebar.quickActions')}
-                            </p>
-
-                            {/* Show connect hint if not connected */}
-                            {!isConnected && (
-                                <div className="text-sm text-muted-foreground/50 italic">
-                                    {t('sidebar.connectFirst')}
-                                </div>
-                            )}
-
-                            {/* EDL Quick Actions */}
-                            {isConnected && currentMode === 'edl' && (
-                                <div className="space-y-2">
-                                    {/* Flash Domestic ROM (RomLoader) */}
-                                    <RomLoader compact disabled={!canUseQuickActions} />
-
-                                    {/* Backup by XML Button */}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="w-full justify-start gap-2"
-                                        onClick={() => setShowXMLBackupDialog(true)}
-                                        disabled={!canUseQuickActions}
-                                    >
-                                        <FileText className="w-4 h-4" />
-                                        {t('xml_backup.button')}
-                                    </Button>
-
-                                    {/* Flash by XML Button */}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="w-full justify-start gap-2"
-                                        onClick={() => setShowXMLFlashDialog(true)}
-                                        disabled={!canUseQuickActions}
-                                    >
-                                        <Zap className="w-4 h-4" />
-                                        {t('xml_flash.button')}
-                                    </Button>
-
-                                    {/* Remove FRP Button */}
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        className="w-full justify-start gap-2"
-                                        onClick={handleRemoveFRP}
-                                        disabled={!canUseQuickActions || isRemovingFRP}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        {isRemovingFRP ? 'Removing FRP...' : t('flash.removeFRP', 'Remove FRP')}
-                                    </Button>
-                                </div>
-                            )}
+                                </TabsTrigger>
+                            </TabsList>
                         </div>
-                    )}
-                </div>
+
+                        {/* Device Tab */}
+                        <TabsContent value="device" className="flex-1 overflow-y-auto mt-0 data-[state=inactive]:hidden">
+                            {/* Device Panel with Selector & Device Card */}
+                            <div className="p-4 border-b border-border space-y-3">
+                                {/* EDL Mode */}
+                                {currentMode === 'edl' && (
+                                    <>
+                                        <DevicePanel />
+                                        <DeviceCard />
+                                        <ConnectionProgress className="mt-3" />
+                                    </>
+                                )}
+
+                                {/* ADB Mode */}
+                                {currentMode === 'adb' && (
+                                    <ADBConnectionStatus variant="card" />
+                                )}
+
+                                {/* Fastboot Mode */}
+                                {currentMode === 'fastboot' && (
+                                    <>
+                                        <FastbootConnectionStatus variant="card" />
+                                        <FastbootDeviceInfo className="border-0 shadow-none p-0 bg-transparent" />
+                                    </>
+                                )}
+
+                                {/* Automation Mode */}
+                                {currentMode === 'automation' && (
+                                    <>
+                                        <ADBConnectionStatus variant="card" />
+                                        <div className="space-y-3 mt-3">
+                                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                                <Smartphone className="w-3.5 h-3.5" />
+                                                Chọn Thiết Bị
+                                            </p>
+
+                                            {/* Brand */}
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-medium text-muted-foreground">Hãng</label>
+                                                <Select value={tempBrand} onValueChange={handleBrandChange}>
+                                                    <SelectTrigger className="h-8 text-xs">
+                                                        <SelectValue placeholder="Chọn hãng..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {BRAND_OPTIONS.map((brand) => (
+                                                            <SelectItem key={brand.id} value={brand.id} className="text-xs">
+                                                                {brand.icon} {brand.nameVi}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            {/* Model */}
+                                            {tempBrand && (
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-medium text-muted-foreground">Model</label>
+                                                    <SearchableModelSelect
+                                                        models={models}
+                                                        value={tempModel}
+                                                        onValueChange={handleModelChange}
+                                                        placeholder="Chọn model..."
+                                                        searchPlaceholder="Tìm model..."
+                                                        emptyText="Không tìm thấy model."
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* OS Version */}
+                                            {tempModel && (
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-medium text-muted-foreground">Hệ điều hành</label>
+                                                    <Select value={tempOS} onValueChange={setTempOS}>
+                                                        <SelectTrigger className="h-8 text-xs">
+                                                            <SelectValue placeholder="Chọn OS..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {osVersions.map((os) => (
+                                                                <SelectItem key={os.id} value={os.id} className="text-xs">
+                                                                    {os.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            )}
+
+                                            {/* Confirm Button */}
+                                            <Button
+                                                onClick={handleConfirmDevice}
+                                                disabled={!canConfirmDevice}
+                                                className={cn('w-full gap-1.5 h-8 text-xs', isDeviceConfirmed && 'bg-green-600 hover:bg-green-700')}
+                                                size="sm"
+                                            >
+                                                {isDeviceConfirmed && <Check className="w-3 h-3" />}
+                                                {isDeviceConfirmed ? 'Đã xác nhận' : 'Xác nhận'}
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Quick Actions */}
+                            {currentMode !== 'adb' && (
+                                <div className="p-4">
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                                            {t('sidebar.quickActions')}
+                                        </p>
+
+                                        {!isConnected && (
+                                            <div className="text-sm text-muted-foreground/50 italic">
+                                                {t('sidebar.connectFirst')}
+                                            </div>
+                                        )}
+
+                                        {isConnected && currentMode === 'edl' && (
+                                            <div className="space-y-2">
+                                                <RomLoader compact disabled={!canUseQuickActions} />
+
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="w-full justify-start gap-2"
+                                                    onClick={() => setShowXMLBackupDialog(true)}
+                                                    disabled={!canUseQuickActions}
+                                                >
+                                                    <FileText className="w-4 h-4" />
+                                                    {t('xml_backup.button')}
+                                                </Button>
+
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="w-full justify-start gap-2"
+                                                    onClick={() => setShowXMLFlashDialog(true)}
+                                                    disabled={!canUseQuickActions}
+                                                >
+                                                    <Zap className="w-4 h-4" />
+                                                    {t('xml_flash.button')}
+                                                </Button>
+
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    className="w-full justify-start gap-2"
+                                                    onClick={handleRemoveFRP}
+                                                    disabled={!canUseQuickActions || isRemovingFRP}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    {isRemovingFRP ? 'Removing FRP...' : t('flash.removeFRP', 'Remove FRP')}
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </TabsContent>
+
+                        {/* Logs Tab */}
+                        <TabsContent value="logs" className="flex-1 flex flex-col overflow-hidden mt-0 data-[state=inactive]:hidden">
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-muted-foreground">
+                                        ({filteredLogs.length}{filterLevel !== 'all' || searchQuery ? `/${logs.length}` : ''})
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        onClick={() => setShowFilters(!showFilters)}
+                                        className={cn(
+                                            "text-muted-foreground hover:text-foreground",
+                                            (filterLevel !== 'all' || searchQuery) && "text-primary"
+                                        )}
+                                    >
+                                        <Filter className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        onClick={clearLogs}
+                                        className="text-muted-foreground hover:text-foreground"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Filter & Search */}
+                            {showFilters && (
+                                <div className="px-3 py-2 border-b border-border space-y-2">
+                                    <div className="relative">
+                                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                                        <Input
+                                            type="text"
+                                            placeholder={t('terminal.search.placeholder')}
+                                            value={localSearch}
+                                            onChange={(e) => handleSearchChange(e.target.value)}
+                                            className="h-7 pl-7 pr-7 text-xs"
+                                        />
+                                        {localSearch && (
+                                            <button
+                                                onClick={handleClearSearch}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-1">
+                                        {FILTER_OPTIONS.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                onClick={() => setFilterLevel(option.value)}
+                                                className={cn(
+                                                    "px-2 py-0.5 text-xs rounded-md transition-colors",
+                                                    filterLevel === option.value
+                                                        ? "bg-primary text-primary-foreground"
+                                                        : "bg-muted hover:bg-muted/80 text-muted-foreground",
+                                                    option.value !== 'all' && levelCounts[option.value] === 0 && "opacity-50"
+                                                )}
+                                            >
+                                                {t(option.labelKey)}
+                                                {option.value !== 'all' && levelCounts[option.value] > 0 && (
+                                                    <span className="ml-1 opacity-70">({levelCounts[option.value]})</span>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Log Entries */}
+                            <div
+                                ref={scrollRef}
+                                className="flex-1 overflow-y-auto p-3 font-mono text-xs leading-relaxed"
+                            >
+                                {filteredLogs.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground/50">
+                                        <Terminal className="h-8 w-8 mb-2" />
+                                        <span className="text-sm">
+                                            {searchQuery || filterLevel !== 'all'
+                                                ? t('terminal.search.noResults')
+                                                : t('terminal.empty')
+                                            }
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-1">
+                                        {filteredLogs.map((entry) => (
+                                            <div
+                                                key={entry.id}
+                                                className={cn(
+                                                    "flex gap-2 group relative",
+                                                    levelColors[entry.level]
+                                                )}
+                                            >
+                                                <span className="text-zinc-500 shrink-0">
+                                                    [{formatTime(entry.timestamp)}]
+                                                </span>
+                                                <span className="break-all flex-1">
+                                                    {entry.message}
+                                                </span>
+                                                {entry.level === 'error' && (
+                                                    <button
+                                                        onClick={() => handleCopy(entry)}
+                                                        className="opacity-0 group-hover:opacity-100 shrink-0 p-1 hover:bg-muted rounded transition-opacity"
+                                                        title={t('terminal.copy')}
+                                                    >
+                                                        <Copy className="h-3 w-3" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                )}
+
+                {/* Collapsed State - Show icons only */}
+                {collapsed && (
+                    <div className="flex flex-col items-center py-4 gap-4">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                                "text-muted-foreground",
+                                activeTab === 'device' && "bg-muted text-foreground"
+                            )}
+                            onClick={() => { setActiveTab('device'); onToggleCollapse?.(); }}
+                        >
+                            <Settings className="h-5 w-5" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                                "text-muted-foreground relative",
+                                activeTab === 'logs' && "bg-muted text-foreground"
+                            )}
+                            onClick={() => { setActiveTab('logs'); onToggleCollapse?.(); }}
+                        >
+                            <Terminal className="h-5 w-5" />
+                            {logs.length > 0 && (
+                                <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+                                    {logs.length > 99 ? '99+' : logs.length}
+                                </span>
+                            )}
+                        </Button>
+                    </div>
+                )}
 
                 {/* Collapse Button */}
-                <div className="p-2 border-t border-border">
+                <div className="mt-auto p-2 border-t border-border">
                     <Button
                         variant="ghost"
                         size="sm"
@@ -422,28 +708,24 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
                 </button>
             )}
 
-            {/* Manual Firehose Popup (Global for Sidebar) */}
+            {/* Dialogs */}
             <ManualFirehosePopup
                 open={showManualPopup}
                 onOpenChange={setShowManualPopup}
                 onSubmit={(files) => {
-                    // TODO: Dispatch to firehose store/loader
                     console.log('Manual firehose loaded via sidebar:', files);
-                    // We can assume success for UI purposes
                     useDeviceStore.getState().setFirehoseLoaded(true);
                     setShowManualPopup(false);
                 }}
                 onSkip={() => setShowManualPopup(false)}
             />
 
-            {/* XML Backup Dialog */}
             <XMLBackupDialog
                 open={showXMLBackupDialog}
                 onOpenChange={setShowXMLBackupDialog}
                 onConfirm={handleXMLBackupConfirm}
             />
 
-            {/* XML Flash Dialog */}
             <XMLFlashDialog
                 open={showXMLFlashDialog}
                 onOpenChange={setShowXMLFlashDialog}
