@@ -27,3 +27,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Temp files
+tmpclaude-*
+
+# Claude skills (local only)
+.claude/skills/
