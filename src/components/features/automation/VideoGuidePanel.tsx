@@ -390,138 +390,123 @@ export function VideoGuidePanel({ className }: VideoGuidePanelProps) {
                     </>
                   )}
                 </div>
-              ) : (
-                // No video available - placeholder
-                <div className="flex-none h-32 bg-muted/30 flex flex-col items-center justify-center border-b">
-                  <Video className="w-8 h-8 mb-2 text-muted-foreground opacity-30" />
-                  <p className="text-[10px] text-muted-foreground">Chưa có video cho bước này</p>
-                </div>
-              )}
+              ) : null}
 
-              {/* Sub-steps / Instructions - Scrollable (not for uninstall step) */}
-              {!isUninstallStep && (
-              <ScrollArea className={cn(
-                'min-h-0',
-                hasVideo && isVideoVertical ? 'flex-none max-h-[180px]' : 'flex-1'
-              )}>
-                {hasSubSteps && (
-                  <div className="p-3 space-y-2">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground mb-2">
-                      <Info className="w-3.5 h-3.5" />
-                      Các bước thực hiện:
-                    </div>
-                    {currentStep.subSteps?.map((subStep, idx) => (
-                      <div
-                        key={subStep.id}
-                        className="flex items-start gap-2.5 p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors"
-                      >
-                        <div className="flex-none w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                          <span className="text-xs">{idx + 1}</span>
+              {/* Sub-steps / Instructions - Scrollable (not for uninstall step and optimize step) */}
+              {!isUninstallStep && !isOptimizeStep && (
+                <ScrollArea className={cn(
+                  'min-h-0',
+                  hasVideo && isVideoVertical ? 'flex-none max-h-[180px]' : 'flex-1'
+                )}>
+                  {hasSubSteps && (
+                    <div className="p-3 space-y-2">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground mb-2">
+                        <Info className="w-3.5 h-3.5" />
+                        Các bước thực hiện:
+                      </div>
+                      {currentStep.subSteps?.map((subStep, idx) => (
+                        <div
+                          key={subStep.id}
+                          className="flex items-start gap-2.5 p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors"
+                        >
+                          <div className="flex-none w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                            <span className="text-xs">{idx + 1}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm leading-relaxed">{subStep.instruction}</p>
+                            {subStep.alternativeInstructions && subStep.alternativeInstructions.length > 0 && (
+                              <div className="mt-2 pl-2.5 border-l-2 border-primary/20">
+                                <p className="text-xs text-muted-foreground font-medium mb-1">Hoặc:</p>
+                                {subStep.alternativeInstructions.map((alt, i) => (
+                                  <p key={i} className="text-xs text-muted-foreground">• {alt}</p>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm leading-relaxed">{subStep.instruction}</p>
-                          {subStep.alternativeInstructions && subStep.alternativeInstructions.length > 0 && (
-                            <div className="mt-2 pl-2.5 border-l-2 border-primary/20">
-                              <p className="text-xs text-muted-foreground font-medium mb-1">Hoặc:</p>
-                              {subStep.alternativeInstructions.map((alt, i) => (
-                                <p key={i} className="text-xs text-muted-foreground">• {alt}</p>
-                              ))}
-                            </div>
-                          )}
+                      ))}
+                    </div>
+                  )}
+
+                  {/* User prompt / Main instruction */}
+                  {currentStep.userPromptVi && !hasSubSteps && (
+                    <div className="p-3">
+                      <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+                        <div className="flex items-start gap-2">
+                          <Info className="w-4 h-4 text-amber-600 flex-none mt-0.5" />
+                          <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
+                            {currentStep.userPromptVi}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* User prompt / Main instruction */}
-                {currentStep.userPromptVi && !hasSubSteps && (
-                  <div className="p-3">
-                    <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
-                      <div className="flex items-start gap-2">
-                        <Info className="w-4 h-4 text-amber-600 flex-none mt-0.5" />
-                        <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
-                          {currentStep.userPromptVi}
-                        </p>
-                      </div>
                     </div>
-                  </div>
-                )}
-
-                {/* No instructions fallback */}
-                {!hasSubSteps && !currentStep.userPromptVi && (
-                  <div className="p-3 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Xem video hướng dẫn và làm theo
-                    </p>
-                  </div>
-                )}
-              </ScrollArea>
+                  )}
+                </ScrollArea>
               )}
             </div>
 
             {/* Workflow Control Bar - Simplified (not for uninstall step) */}
             {!isUninstallStep && (
-            <div className="flex-none border-t bg-muted/30 p-3 space-y-3">
-              {/* Progress */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Tiến độ</span>
-                  <span className="font-medium">{workflowProgress.completed}/{workflowProgress.total} bước</span>
+              <div className="flex-none border-t bg-muted/30 p-3 space-y-3">
+                {/* Progress */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Tiến độ</span>
+                    <span className="font-medium">{workflowProgress.completed}/{workflowProgress.total} bước</span>
+                  </div>
+                  <Progress value={workflowProgress.percentage} className="h-2" />
                 </div>
-                <Progress value={workflowProgress.percentage} className="h-2" />
-              </div>
 
-              {/* Control Buttons - Simplified */}
-              {isCompleted ? (
-                // Completed state
-                <div className="flex items-center justify-center gap-2 py-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                    Hoàn thành!
-                  </span>
-                </div>
-              ) : (
-                // Navigation buttons
-                <div className="flex items-center justify-center gap-3">
-                  {/* Previous Step */}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-9 px-4 text-sm"
-                    onClick={previousStep}
-                    disabled={currentStepIndex === 0 || isRunning}
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Trước
-                  </Button>
-
-                  {/* Next Step */}
-                  <Button
-                    size="sm"
-                    className="h-9 px-4 text-sm"
-                    onClick={nextStep}
-                    disabled={currentStepIndex >= (selectedWorkflow?.steps.length || 1) - 1 || isRunning}
-                  >
-                    Tiếp
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-
-                  {/* Complete Button - Only show on last step */}
-                  {isLastStep && (
+                {/* Control Buttons - Simplified */}
+                {isCompleted ? (
+                  // Completed state
+                  <div className="flex items-center justify-center gap-2 py-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                      Hoàn thành!
+                    </span>
+                  </div>
+                ) : (
+                  // Navigation buttons
+                  <div className="flex items-center justify-center gap-3">
+                    {/* Previous Step */}
                     <Button
                       size="sm"
-                      variant="default"
-                      className="h-9 px-4 text-sm bg-green-600 hover:bg-green-700"
-                      onClick={completeWorkflow}
+                      variant="outline"
+                      className="h-9 px-4 text-sm"
+                      onClick={previousStep}
+                      disabled={currentStepIndex === 0 || isRunning}
                     >
-                      <CheckCircle2 className="w-4 h-4 mr-1" />
-                      Hoàn thành
+                      <ChevronLeft className="w-4 h-4 mr-1" />
+                      Trước
                     </Button>
-                  )}
-                </div>
-              )}
-            </div>
+
+                    {/* Next Step */}
+                    <Button
+                      size="sm"
+                      className="h-9 px-4 text-sm"
+                      onClick={nextStep}
+                      disabled={currentStepIndex >= (selectedWorkflow?.steps.length || 1) - 1 || isRunning}
+                    >
+                      Tiếp
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+
+                    {/* Complete Button - Only show on last step */}
+                    {isLastStep && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-9 px-4 text-sm bg-green-600 hover:bg-green-700"
+                        onClick={completeWorkflow}
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                        Hoàn thành
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}

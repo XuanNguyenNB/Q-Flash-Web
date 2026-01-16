@@ -132,12 +132,8 @@ export function PackageUninstallStep({
         setIsLoadingInstalledApps(false);
         // Show all packages if not connected (user can connect later)
         setFilteredPackagesInfo(packagesInfo);
-        const initial = new Set<string>();
-        packagesInfo.forEach((pkg) => {
-          if (!pkg.isOptional) {
-            initial.add(pkg.packageName);
-          }
-        });
+        // Select all packages by default (including optional)
+        const initial = new Set<string>(packagesInfo.map(pkg => pkg.packageName));
         setSelectedPackages(initial);
         return;
       }
@@ -160,13 +156,8 @@ export function PackageUninstallStep({
         const filtered = packagesInfo.filter((pkg) => allInstalledSet.has(pkg.packageName));
         setFilteredPackagesInfo(filtered);
 
-        // Pre-select non-optional packages that are installed
-        const initial = new Set<string>();
-        filtered.forEach((pkg) => {
-          if (!pkg.isOptional) {
-            initial.add(pkg.packageName);
-          }
-        });
+        // Pre-select all packages that are installed (including optional)
+        const initial = new Set<string>(filtered.map(pkg => pkg.packageName));
         setSelectedPackages(initial);
       } catch (error) {
         console.error('Failed to load installed packages:', error);
@@ -175,12 +166,8 @@ export function PackageUninstallStep({
         });
         // Fallback to showing all packages
         setFilteredPackagesInfo(packagesInfo);
-        const initial = new Set<string>();
-        packagesInfo.forEach((pkg) => {
-          if (!pkg.isOptional) {
-            initial.add(pkg.packageName);
-          }
-        });
+        // Select all packages by default (including optional)
+        const initial = new Set<string>(packagesInfo.map(pkg => pkg.packageName));
         setSelectedPackages(initial);
       } finally {
         setIsLoadingInstalledApps(false);
@@ -254,11 +241,31 @@ export function PackageUninstallStep({
       setCurrentIndex(i);
 
       try {
-        // Run ADB uninstall command
-        const command = `pm uninstall -k --user 0 ${pkg}`;
-        const output = await protocol.runShellCommand(command);
+        // Run ADB uninstall command (without -k to fully remove app data)
+        // This prevents apps from auto-restoring after reboot
+        const command = `pm uninstall --user 0 ${pkg}`;
+        let output = await protocol.runShellCommand(command);
 
-        const result = parseUninstallResult(output, pkg);
+        let result = parseUninstallResult(output, pkg);
+
+        // If uninstall failed (not "not found"), try to disable the app instead
+        // Some system apps can't be uninstalled but can be disabled
+        if (!result.success && result.reason !== 'not_found') {
+          const disableCommand = `pm disable-user --user 0 ${pkg}`;
+          const disableOutput = await protocol.runShellCommand(disableCommand);
+
+          // Check if disable was successful
+          if (disableOutput.toLowerCase().includes('disabled') ||
+            disableOutput.toLowerCase().includes('new state: disabled')) {
+            result = {
+              packageName: pkg,
+              success: true,
+              // Note: app was disabled, not uninstalled
+            };
+            console.log(`[PackageUninstall] ${pkg} disabled instead of uninstalled`);
+          }
+        }
+
         setResults((prev) => [...prev, result]);
 
         if (result.success) {
@@ -410,8 +417,8 @@ export function PackageUninstallStep({
   const progress = isUninstalling
     ? ((currentIndex + 1) / selectedPackages.size) * 100
     : isComplete
-    ? 100
-    : 0;
+      ? 100
+      : 0;
 
   // Group packages from filtered list
   const recommendedPackages = filteredPackagesInfo.filter((p) => !p.isOptional);
@@ -499,68 +506,68 @@ export function PackageUninstallStep({
             </div>
           </div>
         ) : (
-        <ScrollArea className="h-full">
-        <div className="p-3 space-y-4">
-          {/* Info banner showing how many apps were found */}
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/30">
-            <Info className="w-4 h-4 text-blue-500 flex-none" />
-            <p className="text-xs text-blue-700 dark:text-blue-300">
-              Tìm thấy <strong>{filteredPackagesInfo.length}</strong> ứng dụng rác trên thiết bị (trong tổng số {packagesInfo.length} app trong danh sách).
-              Bỏ tích những app bạn muốn giữ lại.
-            </p>
-          </div>
-
-          {/* Recommended packages */}
-          <div>
-            <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
-              <Package className="w-3 h-3" />
-              Ứng dụng nên xóa ({recommendedPackages.length})
-            </h4>
-            <div className="space-y-1">
-              {recommendedPackages.map((pkg) => (
-                <PackageItem
-                  key={pkg.packageName}
-                  pkg={pkg}
-                  isSelected={selectedPackages.has(pkg.packageName)}
-                  onToggle={() => togglePackage(pkg.packageName)}
-                  disabled={isUninstalling}
-                  result={results.find((r) => r.packageName === pkg.packageName)}
-                  isCurrent={
-                    isUninstalling &&
-                    Array.from(selectedPackages)[currentIndex] === pkg.packageName
-                  }
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Optional packages */}
-          {optionalPackages.length > 0 && (
-            <div>
-              <h4 className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-2 flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />
-                Tùy chọn - Cân nhắc trước khi xóa ({optionalPackages.length})
-              </h4>
-              <div className="space-y-1">
-                {optionalPackages.map((pkg) => (
-                  <PackageItem
-                    key={pkg.packageName}
-                    pkg={pkg}
-                    isSelected={selectedPackages.has(pkg.packageName)}
-                    onToggle={() => togglePackage(pkg.packageName)}
-                    disabled={isUninstalling}
-                    result={results.find((r) => r.packageName === pkg.packageName)}
-                    isCurrent={
-                      isUninstalling &&
-                      Array.from(selectedPackages)[currentIndex] === pkg.packageName
-                    }
-                  />
-                ))}
+          <ScrollArea className="h-full">
+            <div className="p-3 space-y-4">
+              {/* Info banner showing how many apps were found */}
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                <Info className="w-4 h-4 text-blue-500 flex-none" />
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Tìm thấy <strong>{filteredPackagesInfo.length}</strong> ứng dụng rác trên thiết bị (trong tổng số {packagesInfo.length} app trong danh sách).
+                  Bỏ tích những app bạn muốn giữ lại.
+                </p>
               </div>
+
+              {/* Recommended packages */}
+              <div>
+                <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                  <Package className="w-3 h-3" />
+                  Ứng dụng nên xóa ({recommendedPackages.length})
+                </h4>
+                <div className="space-y-1">
+                  {recommendedPackages.map((pkg) => (
+                    <PackageItem
+                      key={pkg.packageName}
+                      pkg={pkg}
+                      isSelected={selectedPackages.has(pkg.packageName)}
+                      onToggle={() => togglePackage(pkg.packageName)}
+                      disabled={isUninstalling}
+                      result={results.find((r) => r.packageName === pkg.packageName)}
+                      isCurrent={
+                        isUninstalling &&
+                        Array.from(selectedPackages)[currentIndex] === pkg.packageName
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Optional packages */}
+              {optionalPackages.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    Tùy chọn - Cân nhắc trước khi xóa ({optionalPackages.length})
+                  </h4>
+                  <div className="space-y-1">
+                    {optionalPackages.map((pkg) => (
+                      <PackageItem
+                        key={pkg.packageName}
+                        pkg={pkg}
+                        isSelected={selectedPackages.has(pkg.packageName)}
+                        onToggle={() => togglePackage(pkg.packageName)}
+                        disabled={isUninstalling}
+                        result={results.find((r) => r.packageName === pkg.packageName)}
+                        isCurrent={
+                          isUninstalling &&
+                          Array.from(selectedPackages)[currentIndex] === pkg.packageName
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        </ScrollArea>
+          </ScrollArea>
         )}
       </div>
 

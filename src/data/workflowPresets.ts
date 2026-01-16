@@ -636,6 +636,66 @@ const HONOR_CHINA_BLOATWARE: PackageInfo[] = [
     nameVi: 'Dịch vụ điện thoại Honor',
     descriptionVi: 'Dịch vụ hỗ trợ điện thoại Honor Trung Quốc',
   },
+
+  // ===== Trình duyệt & Công cụ bên thứ 3 =====
+  {
+    packageName: 'com.UCMobile',
+    name: 'UC Browser',
+    nameVi: 'Trình duyệt UC',
+    descriptionVi: 'Trình duyệt UC của Alibaba - nhiều quảng cáo',
+  },
+  {
+    packageName: 'cn.wps.moffice_eng',
+    name: 'WPS Office',
+    nameVi: 'WPS Office',
+    descriptionVi: 'Ứng dụng văn phòng WPS - có thể thay bằng Google Docs',
+  },
+  {
+    packageName: 'com.ximalaya.ting.android',
+    name: 'Ximalaya',
+    nameVi: 'Ximalaya',
+    descriptionVi: 'Ứng dụng nghe nhạc/podcast Trung Quốc',
+  },
+
+  // ===== Ứng dụng Game Honor =====
+  {
+    packageName: 'com.hihonor.quickgame',
+    name: 'Honor Quick Game',
+    nameVi: 'Game nhanh Honor',
+    descriptionVi: 'Nền tảng game nhỏ của Honor - quảng cáo nhiều',
+  },
+  {
+    packageName: 'com.honor.quickgamecenter',
+    name: 'Honor Quick Game Center',
+    nameVi: 'Trung tâm game Honor',
+    descriptionVi: 'Trung tâm game của Honor - có thể gây hao pin',
+  },
+
+  // ===== Dịch vụ Honor không cần thiết =====
+  {
+    packageName: 'com.hihonor.redteamobile.roaming',
+    name: 'Honor Roaming',
+    nameVi: 'Roaming Honor',
+    descriptionVi: 'Dịch vụ chuyển vùng quốc tế - không cần ở VN',
+  },
+  {
+    packageName: 'com.hihonor.satellite',
+    name: 'Honor Satellite',
+    nameVi: 'Vệ tinh Honor',
+    descriptionVi: 'Dịch vụ liên lạc vệ tinh - chỉ hoạt động ở TQ',
+  },
+  {
+    packageName: 'com.hihonor.auto',
+    name: 'Honor Auto',
+    nameVi: 'Honor Xe hơi',
+    descriptionVi: 'Kết nối xe hơi Honor - không phổ biến ở VN',
+  },
+  {
+    packageName: 'com.hihonor.tips',
+    name: 'Honor Tips',
+    nameVi: 'Mẹo Honor',
+    descriptionVi: 'Ứng dụng hướng dẫn sử dụng - bằng tiếng Trung',
+  },
 ];
 
 // Honor China Cleanup Workflow

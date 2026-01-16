@@ -164,9 +164,9 @@ export function ADBPage() {
 
                             {/* 1. Quick View Tab */}
                             <TabsContent value="quick-view" className="space-y-4 focus-visible:outline-none focus-visible:ring-0">
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-220px)]">
                                     {/* Left Column (1/3): Quick Actions + Device Info */}
-                                    <div className="lg:col-span-1 flex flex-col gap-6 h-full">
+                                    <div className="lg:col-span-1 flex flex-col gap-6 h-full overflow-y-auto">
                                         <div className="flex-none">
                                             <ADBDeviceInfo className="h-auto" />
                                         </div>
@@ -176,7 +176,7 @@ export function ADBPage() {
                                     </div>
 
                                     {/* Right Column (2/3): View Screen (Scrcpy) */}
-                                    <div className="lg:col-span-2 h-[600px] lg:h-auto min-h-[600px]">
+                                    <div className="lg:col-span-2 h-full">
                                         <ScrcpyPanel className="h-full" />
                                     </div>
                                 </div>

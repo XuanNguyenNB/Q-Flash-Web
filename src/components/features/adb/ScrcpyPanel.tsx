@@ -723,10 +723,10 @@ export function ScrcpyPanel({ className }: ScrcpyPanelProps) {
                         </div>
 
                         {/* --- DISPLAY AREA --- */}
-                        <div className="relative bg-transparent flex justify-center items-center flex-1">
+                        <div className="relative bg-transparent flex justify-center items-center flex-1 overflow-hidden">
                             <canvas
                                 ref={canvasRef}
-                                className="block max-h-full w-auto h-auto object-contain cursor-crosshair touch-none select-none outline-none"
+                                className="block max-w-full max-h-full w-auto h-auto object-contain cursor-crosshair touch-none select-none outline-none"
                                 onPointerDown={handlePointerDown}
                                 onPointerMove={handlePointerMove}
                                 onPointerUp={handlePointerUp}

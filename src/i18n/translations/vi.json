@@ -509,7 +509,9 @@
         "flow": {
             "connecting": "Đang kết nối thiết bị USB...",
             "sahara": "Đang tải programmer...",
+            "uploading": "Đang tải lên Firehose...",
             "firehose": "Đang cấu hình giao thức Firehose...",
+            "authenticating": "Đang xác thực VIP...",
             "auth": "Đang xác thực với máy chủ OEM...",
             "reading": "Đang đọc bảng phân vùng...",
             "connected": "Thiết bị đã sẵn sàng"

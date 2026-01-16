@@ -7,7 +7,7 @@
  * Story: 2.4 - Device Card & Connection Status
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // Stores
@@ -112,17 +112,30 @@ export function DeviceCard({ className }: DeviceCardProps) {
         }
     }, [flowStatus, flowError]);
 
+    // Track previous device ID to detect actual changes (not just remounts)
+    const prevDeviceIdRef = useRef<string | undefined>(selectedDevice?.id);
+
     // Reset state when selected device changes
     useEffect(() => {
-        if (selectedDevice) {
-            // If we were connected to another device, ensure we reset UI state
+        const prevId = prevDeviceIdRef.current;
+        const currentId = selectedDevice?.id;
+
+        // Update ref for next comparison
+        prevDeviceIdRef.current = currentId;
+
+        // Only reset if:
+        // 1. Previous device existed (not first mount)
+        // 2. Current device exists
+        // 3. ID actually changed (different device selected)
+        if (prevId && currentId && prevId !== currentId) {
+            // Reset partition store for new device
             usePartitionStore.getState().reset();
-            // Disconnect if active connection exists (handled by flow status check internally usually, but good to enforce)
+            // Disconnect if active connection exists
             if (flowStatus === 'connected' || flowStatus === 'reading-partitions') {
                 disconnect();
             }
         }
-    }, [selectedDevice?.id]); // Only trigger on ID change to avoid loops
+    }, [selectedDevice?.id, flowStatus, disconnect]);
 
     // Map flow status to display text
     const getStatusText = (): string => {
