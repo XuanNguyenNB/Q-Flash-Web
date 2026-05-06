@@ -10,12 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-assets
 *.local
-
-# Environment files (DO NOT COMMIT SECRETS!)
-.env
-.env.local
-.env.*.local
 
 # Editor directories and files
 .vscode/*
@@ -27,9 +23,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Temp files
-tmpclaude-*
-
-# Claude skills (local only)
-.claude/skills/
