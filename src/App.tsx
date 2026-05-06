@@ -21,14 +21,12 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { getAssetBaseUrl } from "./domain/assets";
 import { phaseLabels, useUnlockWorkflow, type ResumePhase } from "./hooks/useUnlockWorkflow";
 import { isPreflightReady } from "./workflow/preflight";
 import type { PhaseId, PhaseStatus, ProgressEvent, WorkflowLog } from "./workflow/types";
 
 type WorkflowState = ReturnType<typeof useUnlockWorkflow>;
 
-const assetBaseUrl = getAssetBaseUrl();
 const operationProgressStates = new Set(["flashing", "booting", "sahara", "configuring"]);
 
 const preferredLegacyModelId = "xiaomi15ultra";
@@ -164,10 +162,10 @@ function App() {
     <main className="min-h-dvh overflow-hidden bg-[#0b0d10] text-slate-100">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(14,165,233,0.14),transparent_28%),radial-gradient(circle_at_82%_12%,rgba(20,184,166,0.10),transparent_24%)]" />
       <div className="relative mx-auto min-h-dvh max-w-[1660px]">
-        <header className="border-b border-white/8 bg-[#0f1217]/95 px-5 py-5 lg:px-8">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+        <header className="border-b border-white/8 bg-[#0f1217]/95 px-4 py-3 lg:px-6">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="max-w-3xl">
-              <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <div className="mb-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                 <span>Công cụ WebUSB thử nghiệm</span>
                 <span className="h-1 w-1 rounded-full bg-slate-700" />
                 <span>ADB + Fastboot</span>
@@ -178,9 +176,9 @@ function App() {
                   </>
                 )}
               </div>
-              <h1 className="text-3xl font-semibold leading-tight text-white sm:text-4xl">Xiaomi WebUSB Unlock</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                Quy trình thử nghiệm cho Xiaomi 15 Ultra và các model legacy FTD. Tệp được kiểm tra SHA-256 và lưu bộ nhớ đệm trước khi chạy lệnh nguy hiểm.
+              <h1 className="text-2xl font-semibold leading-tight text-white sm:text-3xl">Xiaomi WebUSB Unlock</h1>
+              <p className="mt-1 max-w-3xl truncate text-sm leading-6 text-slate-400">
+                Quy trình Xiaomi 15 Ultra / Legacy FTD, kiểm tra SHA-256 trước khi chạy lệnh nguy hiểm.
               </p>
             </div>
 
@@ -192,17 +190,18 @@ function App() {
             />
           </div>
 
-          <TopStatusCards
-            workflow={workflow}
-            progressPercent={progressPercent}
-            completedSteps={completedSteps}
-            totalSteps={visiblePhaseOrder.length}
-            riskOpen={riskOpen}
-            setRiskOpen={setRiskOpen}
-          />
         </header>
 
-        <section className="grid gap-5 p-5 lg:p-6 xl:grid-cols-[340px_minmax(0,1fr)_400px] 2xl:grid-cols-[360px_minmax(420px,1fr)_420px]">
+        <StatusStrip
+          workflow={workflow}
+          progressPercent={progressPercent}
+          completedSteps={completedSteps}
+          totalSteps={visiblePhaseOrder.length}
+          riskOpen={riskOpen}
+          setRiskOpen={setRiskOpen}
+        />
+
+        <section className="grid gap-4 px-4 py-4 lg:px-6 xl:grid-cols-[320px_minmax(0,1fr)_390px] xl:items-start 2xl:grid-cols-[340px_minmax(420px,1fr)_410px]">
           <ControlPanel
             className="order-1 xl:order-2"
             workflow={workflow}
@@ -236,9 +235,9 @@ const ConnectionCard = ({
   connectButtonLabel: string;
   connectHint: string;
 }) => (
-  <div className="w-full space-y-3 xl:max-w-[600px]">
-    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
-      <div className="mb-3 flex items-center justify-between gap-3">
+  <div className="w-full space-y-2 xl:max-w-[540px]">
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-2.5">
+      <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <div className="text-sm font-semibold text-white">{connectButtonLabel}</div>
           <div className="text-xs text-slate-500">ADB/Fastboot qua navigator.usb.requestDevice</div>
@@ -254,7 +253,7 @@ const ConnectionCard = ({
         type="button"
         disabled={!workflow.canDisconnect}
         onClick={workflow.resetSession}
-        className="mt-2 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-medium text-slate-200 transition duration-200 hover:border-white/20 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:text-slate-600"
+        className="mt-2 inline-flex min-h-9 w-full items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm font-medium text-slate-200 transition duration-200 hover:border-white/20 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:text-slate-600"
       >
         <RefreshCcw className="h-4 w-4" />
         Ngắt kết nối / đặt lại phiên
@@ -274,7 +273,9 @@ const EntryConnectActions = ({
   compact?: boolean;
 }) => {
   const buttonBase =
-    "inline-flex min-h-12 items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-white/10 disabled:bg-slate-800 disabled:text-slate-500";
+    `inline-flex items-center justify-center gap-2 rounded-md font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-white/10 disabled:bg-slate-800 disabled:text-slate-500 ${
+      compact ? "min-h-10 px-3 py-2 text-xs" : "min-h-12 px-4 py-2.5 text-sm"
+    }`;
   const layout = compact ? "grid gap-2 sm:grid-cols-2" : "grid gap-3 sm:grid-cols-2";
 
   return (
@@ -309,7 +310,7 @@ const EntryConnectActions = ({
   );
 };
 
-const TopStatusCards = ({
+const StatusStrip = ({
   workflow,
   progressPercent,
   completedSteps,
@@ -333,30 +334,47 @@ const TopStatusCards = ({
   ].filter(Boolean).length;
 
   return (
-    <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-      <CompactCard icon={<LockKeyhole />} label="Kiểm tra" value={`${preflightCount}/5`} detail="Cổng an toàn" tone={preflightCount === 5 ? "good" : "muted"} />
-      <CompactCard
-        icon={<Cpu />}
-        label="Thiết bị"
-        value={workflow.model?.name ?? "Chưa khóa"}
-        detail={targetDetail(workflow)}
-        tone={workflow.model ? "good" : "muted"}
-      />
-      <CompactCard
-        icon={<HardDrive />}
-        label="Tệp ROM"
-        value={progressPercent === undefined ? assetBaseUrl : `${progressPercent}%`}
-        detail={assetDetail(workflow)}
-        tone="neutral"
-      />
-      <RiskDetails riskOpen={riskOpen} setRiskOpen={setRiskOpen} />
-      <CompactCard
-        icon={<Database />}
-        label="Danh sách"
-        value={workflow.manifest?.models.length.toString() ?? "--"}
-        detail={`Bước ${completedSteps}/${totalSteps}`}
-        tone="neutral"
-      />
+    <div className="border-b border-white/8 bg-[#0b0f14]/88 px-4 py-2 lg:px-6">
+      <div className="flex gap-2 overflow-x-auto pb-1 xl:pb-0">
+        <StatusChip
+          icon={<LockKeyhole />}
+          label="Kiểm tra"
+          value={`${preflightCount}/5`}
+          detail="Cổng an toàn"
+          tone={preflightCount === 5 ? "good" : "muted"}
+        />
+        <StatusChip
+          icon={<Cpu />}
+          label="Thiết bị"
+          value={workflow.model?.name ?? "Chưa khóa"}
+          detail={targetDetail(workflow)}
+          tone={workflow.model ? "good" : "muted"}
+        />
+        <StatusChip
+          icon={<HardDrive />}
+          label="ROM"
+          value={progressPercent === undefined ? "Chờ tiến trình" : `${progressPercent}%`}
+          detail={assetDetail(workflow)}
+          tone="neutral"
+        />
+        <RiskStatusChip riskOpen={riskOpen} setRiskOpen={setRiskOpen} />
+        <StatusChip
+          icon={<Database />}
+          label="Bước"
+          value={`${completedSteps}/${totalSteps}`}
+          detail={`${workflow.manifest?.models.length.toString() ?? "--"} mẫu máy`}
+          tone="neutral"
+        />
+      </div>
+      {riskOpen && (
+        <ul className="mt-2 grid gap-1 rounded-md border border-amber-200/15 bg-amber-300/[0.055] p-2 text-xs leading-5 text-amber-50/82 md:grid-cols-2 xl:grid-cols-3">
+          {fixedWarnings.map((warning) => (
+            <li key={warning} className="truncate" title={warning}>
+              {warning}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
@@ -570,41 +588,64 @@ const Metric = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-const RiskDetails = ({ riskOpen, setRiskOpen }: { riskOpen: boolean; setRiskOpen: (value: boolean) => void }) => (
-  <div className="rounded-lg border border-amber-300/20 bg-amber-300/[0.06] p-3 text-amber-50">
-    <button type="button" onClick={() => setRiskOpen(!riskOpen)} className="flex w-full items-start justify-between gap-3 text-left">
-      <span>
-        <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-100/70">
-          <ShieldAlert className="h-3.5 w-3.5" />
-          Rủi ro
-        </span>
-        <span className="block text-sm font-semibold">Sai mẫu máy có thể brick máy</span>
-        <span className="mt-1 block truncate text-xs text-amber-100/65">MiFlash cuối cùng: chỉ Clean All</span>
-      </span>
-      <ChevronDown className={`mt-1 h-4 w-4 shrink-0 transition ${riskOpen ? "rotate-180" : ""}`} />
-    </button>
-    {riskOpen && (
-      <ul className="mt-3 space-y-2 border-t border-amber-200/10 pt-3 text-xs leading-5 text-amber-50/80">
-        {fixedWarnings.map((warning) => (
-          <li key={warning}>{warning}</li>
-        ))}
-      </ul>
-    )}
-  </div>
+const StatusChip = ({
+  icon,
+  label,
+  value,
+  detail,
+  tone,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  detail: string;
+  tone: "good" | "bad" | "muted" | "neutral";
+}) => {
+  const toneClass = {
+    good: "border-emerald-300/18 bg-emerald-300/[0.06] text-emerald-100",
+    bad: "border-rose-300/25 bg-rose-300/[0.08] text-rose-100",
+    muted: "border-white/8 bg-white/[0.03] text-slate-300",
+    neutral: "border-sky-300/15 bg-sky-300/[0.055] text-sky-100",
+  }[tone];
+
+  return (
+    <div className={`grid h-12 min-w-[188px] grid-cols-[18px_1fr] items-center gap-x-2 rounded-md border px-3 ${toneClass}`}>
+      <span className="row-span-2 text-current/70 [&>svg]:h-4 [&>svg]:w-4">{icon}</span>
+      <div className="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-current/55">
+        <span>{label}</span>
+        <span className="h-1 w-1 rounded-full bg-current/40" />
+        <span className="truncate font-mono tracking-normal">{value}</span>
+      </div>
+      <div className="min-w-0 truncate text-xs font-medium text-current/78">{detail}</div>
+    </div>
+  );
+};
+
+const RiskStatusChip = ({ riskOpen, setRiskOpen }: { riskOpen: boolean; setRiskOpen: (value: boolean) => void }) => (
+  <button
+    type="button"
+    onClick={() => setRiskOpen(!riskOpen)}
+    className="grid h-12 min-w-[230px] grid-cols-[18px_1fr_16px] items-center gap-x-2 rounded-md border border-amber-300/20 bg-amber-300/[0.06] px-3 text-left text-amber-50 transition hover:border-amber-200/35 hover:bg-amber-300/[0.09]"
+  >
+    <ShieldAlert className="row-span-2 h-4 w-4 text-amber-100/75" />
+    <div className="min-w-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-100/60">Rủi ro</div>
+    <ChevronDown className={`row-span-2 h-4 w-4 text-amber-100/70 transition ${riskOpen ? "rotate-180" : ""}`} />
+    <div className="min-w-0 truncate text-xs font-medium text-amber-50/80">Sai mẫu máy có thể brick máy</div>
+  </button>
 );
 
 const WorkflowFamilyPanel = ({ workflow }: { workflow: WorkflowState }) => (
-  <div className="mb-4 rounded-md border border-white/8 bg-black/10 p-3">
-    <div className="mb-3 flex items-center justify-between gap-3">
+  <div className="mb-3 rounded-md border border-white/8 bg-black/10 p-2.5">
+    <div className="mb-2 flex items-center justify-between gap-3">
       <div>
-        <div className="text-sm font-semibold text-white">Chon dong quy trinh</div>
-        <div className="text-xs leading-5 text-slate-500">8E Gen 5 tach rieng EFISP; legacy giu flow FTD cu.</div>
+        <div className="text-sm font-semibold text-white">Dòng quy trình</div>
+        <div className="text-xs leading-5 text-slate-500">Legacy FTD hoặc 8E Gen 5.</div>
       </div>
-      <span className="hidden rounded-sm border border-white/10 px-2 py-1 text-[11px] font-semibold text-slate-400 sm:inline">
+      <span className="hidden rounded-sm border border-white/10 px-2 py-1 text-[10px] font-semibold text-slate-400 sm:inline">
         {workflowFamilyCopy[workflow.workflowFamily].title}
       </span>
     </div>
-    <div className="grid gap-2">
+    <div className="grid rounded-md border border-white/8 bg-white/[0.025] p-1 sm:grid-cols-2">
       {(["legacy-ftd", "efisp-8e-gen5"] as const).map((family) => {
         const active = workflow.workflowFamily === family;
         const copy = workflowFamilyCopy[family];
@@ -614,18 +655,16 @@ const WorkflowFamilyPanel = ({ workflow }: { workflow: WorkflowState }) => (
             key={family}
             type="button"
             disabled={!workflow.canSwitchWorkflowFamily}
+            title={copy.detail}
             onClick={() => workflow.setWorkflowFamily(family)}
-            className={`min-h-[70px] rounded-md border p-3 text-left transition disabled:cursor-not-allowed ${
+            className={`inline-flex min-h-10 items-center justify-center gap-2 rounded px-2.5 text-center text-xs font-semibold transition disabled:cursor-not-allowed ${
               active
-                ? "border-emerald-300/35 bg-emerald-300/[0.08] text-emerald-50"
-                : "border-white/8 bg-white/[0.025] text-slate-300 hover:border-white/18 hover:bg-white/[0.05]"
+                ? "bg-emerald-300 text-slate-950 shadow-[0_8px_24px_rgba(16,185,129,0.14)]"
+                : "text-slate-400 hover:bg-white/[0.045] hover:text-slate-200"
             } ${!workflow.canSwitchWorkflowFamily && !active ? "opacity-45" : ""}`}
           >
-            <span className="mb-1 flex items-center gap-2 text-sm font-semibold">
-              {family === "efisp-8e-gen5" ? <Cpu className="h-4 w-4" /> : <HardDrive className="h-4 w-4" />}
-              {copy.title}
-            </span>
-            <span className="block text-xs leading-5 text-current/65">{copy.detail}</span>
+            {family === "efisp-8e-gen5" ? <Cpu className="h-3.5 w-3.5" /> : <HardDrive className="h-3.5 w-3.5" />}
+            <span className="truncate">{copy.title}</span>
           </button>
         );
       })}
@@ -634,17 +673,17 @@ const WorkflowFamilyPanel = ({ workflow }: { workflow: WorkflowState }) => (
 );
 
 const WorkflowModePanel = ({ workflow }: { workflow: WorkflowState }) => (
-  <div className="mb-4 rounded-md border border-white/8 bg-black/10 p-3">
-    <div className="mb-3 flex items-center justify-between gap-3">
+  <div className="mb-3 rounded-md border border-white/8 bg-black/10 p-2.5">
+    <div className="mb-2 flex items-center justify-between gap-3">
       <div>
-        <div className="text-sm font-semibold text-white">Chọn quy trình ABL</div>
-        <div className="text-xs leading-5 text-slate-500">Chọn MQSAS cho flow thường; EDL mode dành cho máy cần nạp ABL qua 9008.</div>
+        <div className="text-sm font-semibold text-white">Quy trình ABL</div>
+        <div className="text-xs leading-5 text-slate-500">MQSAS thường hoặc EDL cho C06/C07/C08.</div>
       </div>
-      <span className="hidden rounded-sm border border-white/10 px-2 py-1 text-[11px] font-semibold text-slate-400 sm:inline">
+      <span className="hidden rounded-sm border border-white/10 px-2 py-1 text-[10px] font-semibold text-slate-400 sm:inline">
         {workflowModeCopy[workflow.workflowMode].title}
       </span>
     </div>
-    <div className="grid gap-2 sm:grid-cols-2">
+    <div className="grid rounded-md border border-white/8 bg-white/[0.025] p-1 sm:grid-cols-2">
       {(["standard-mqsas", "c06-edl"] as const).map((mode) => {
         const active = workflow.workflowMode === mode;
         const copy = workflowModeCopy[mode];
@@ -654,26 +693,24 @@ const WorkflowModePanel = ({ workflow }: { workflow: WorkflowState }) => (
             key={mode}
             type="button"
             disabled={!workflow.canSwitchWorkflowMode}
+            title={copy.detail}
             onClick={() => workflow.setWorkflowMode(mode)}
-            className={`min-h-[74px] rounded-md border p-3 text-left transition disabled:cursor-not-allowed ${
+            className={`inline-flex min-h-10 items-center justify-center gap-2 rounded px-2.5 text-center text-xs font-semibold transition disabled:cursor-not-allowed ${
               active
-                ? "border-sky-300/35 bg-sky-300/[0.08] text-sky-50"
-                : "border-white/8 bg-white/[0.025] text-slate-300 hover:border-white/18 hover:bg-white/[0.05]"
+                ? "bg-sky-300 text-slate-950 shadow-[0_8px_24px_rgba(56,189,248,0.14)]"
+                : "text-slate-400 hover:bg-white/[0.045] hover:text-slate-200"
             } ${!workflow.canSwitchWorkflowMode && !active ? "opacity-45" : ""}`}
           >
-            <span className="mb-1 flex items-center gap-2 text-sm font-semibold">
-              {mode === "c06-edl" ? <Usb className="h-4 w-4" /> : <PlugZap className="h-4 w-4" />}
-              {copy.title}
-              {mode === "c06-edl" && (
-                <span className="group relative inline-flex" title={edlModeInfo}>
-                  <Info className="h-3.5 w-3.5 text-sky-100/75" aria-hidden="true" />
-                  <span className="pointer-events-none absolute left-1/2 top-6 z-20 w-56 -translate-x-1/2 rounded-md border border-white/10 bg-[#05070a] px-2.5 py-2 text-xs font-medium leading-5 text-slate-200 opacity-0 shadow-xl transition group-hover:opacity-100">
-                    {edlModeInfo}
-                  </span>
+            {mode === "c06-edl" ? <Usb className="h-3.5 w-3.5" /> : <PlugZap className="h-3.5 w-3.5" />}
+            <span className="truncate">{copy.title}</span>
+            {mode === "c06-edl" && (
+              <span className="group relative inline-flex" title={edlModeInfo}>
+                <Info className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="pointer-events-none absolute left-1/2 top-6 z-20 w-56 -translate-x-1/2 rounded-md border border-white/10 bg-[#05070a] px-2.5 py-2 text-xs font-medium leading-5 text-slate-200 opacity-0 shadow-xl transition group-hover:opacity-100">
+                  {edlModeInfo}
                 </span>
-              )}
-            </span>
-            <span className="block text-xs leading-5 text-current/65">{copy.detail}</span>
+              </span>
+            )}
           </button>
         );
       })}
@@ -698,40 +735,42 @@ const AssetPreloadPanel = ({ workflow }: { workflow: WorkflowState }) => {
         : "Khóa và xác minh mẫu máy trước để biết đúng gói ROM cần tải.";
 
   return (
-    <div className="mb-4 rounded-md border border-white/8 bg-white/[0.025] p-3">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div>
+    <div className="mb-3 rounded-md border border-white/8 bg-white/[0.025] p-2.5">
+      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <div className="min-w-0">
           <div className="text-sm font-semibold text-white">{title}</div>
-          <div className="mt-1 text-xs leading-5 text-slate-500">{detail}</div>
+          <div className="mt-0.5 truncate text-xs leading-5 text-slate-500" title={detail}>
+            {detail}
+          </div>
         </div>
-        {running ? <Loader2 className="h-4 w-4 animate-spin text-sky-200" /> : <HardDrive className="h-4 w-4 text-sky-200" />}
+        <button
+          type="button"
+          disabled={!workflow.canPrepareAssetsEarly}
+          onClick={workflow.prepareAssetsEarly}
+          aria-label={title}
+          className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-sky-300/20 bg-sky-300/10 px-3 py-1.5 text-xs font-semibold text-sky-100 transition hover:bg-sky-300/15 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.025] disabled:text-slate-500"
+        >
+          {running ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <HardDrive className="h-3.5 w-3.5" />}
+          {done ? "Đã chuẩn bị" : running ? "Đang tải" : "Chuẩn bị"}
+        </button>
       </div>
-      <button
-        type="button"
-        disabled={!workflow.canPrepareAssetsEarly}
-        onClick={workflow.prepareAssetsEarly}
-        className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-sky-300/20 bg-sky-300/10 px-3 py-2 text-sm font-semibold text-sky-100 transition hover:bg-sky-300/15 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.025] disabled:text-slate-500"
-      >
-        {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <HardDrive className="h-4 w-4" />}
-        {title}
-      </button>
     </div>
   );
 };
 
 const WorkflowRail = ({ workflow, className = "" }: { workflow: WorkflowState; className?: string }) => (
-  <aside className={`rounded-lg border border-white/8 bg-[#12161d]/90 p-5 shadow-[0_22px_70px_rgba(0,0,0,0.18)] ${className}`}>
-    <div className="mb-4 flex items-start justify-between gap-3">
+  <aside className={`rounded-lg border border-white/8 bg-[#12161d]/90 p-4 shadow-[0_22px_70px_rgba(0,0,0,0.18)] xl:sticky xl:top-4 xl:max-h-[calc(100dvh-7.25rem)] xl:overflow-y-auto ${className}`}>
+    <div className="mb-3 flex items-start justify-between gap-3">
       <div>
         <h2 className="text-xl font-semibold text-white">Tiến trình quy trình</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-400">Tiến trình ADB/Fastboot/EDL theo đúng thứ tự công cụ.</p>
+        <p className="mt-1 text-sm leading-6 text-slate-400">ADB/Fastboot/EDL theo đúng thứ tự.</p>
       </div>
       <CurrentPhaseBadge phase={workflow.nextPhase} />
     </div>
     <WorkflowFamilyPanel workflow={workflow} />
     {workflow.workflowFamily === "legacy-ftd" && <WorkflowModePanel workflow={workflow} />}
     <AssetPreloadPanel workflow={workflow} />
-    <ol className="grid gap-2">
+    <ol className="grid gap-1.5">
       {workflow.visiblePhaseOrder.map((phase, index) => (
         <WorkflowStep
           key={phase}
@@ -914,7 +953,7 @@ const TerminalPanel = ({
   }, [logs.length]);
 
   return (
-    <aside className={`rounded-lg border border-white/8 bg-[#12161d]/90 p-5 xl:sticky xl:top-5 xl:self-start ${className}`}>
+    <aside className={`rounded-lg border border-white/8 bg-[#12161d]/90 p-4 xl:sticky xl:top-4 xl:max-h-[calc(100dvh-7.25rem)] xl:self-start xl:overflow-hidden ${className}`}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-white">
           <Terminal className="h-4 w-4 text-sky-200" />
@@ -965,7 +1004,7 @@ const TerminalPanel = ({
           const element = event.currentTarget;
           stickToBottomRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 48;
         }}
-        className="h-[320px] overflow-auto rounded-md border border-white/8 bg-[#05070a] p-4 font-mono text-xs leading-5 shadow-inner xl:h-[calc(100dvh-210px)] xl:min-h-[420px]"
+        className="h-[320px] overflow-auto rounded-md border border-white/8 bg-[#05070a] p-4 font-mono text-xs leading-5 shadow-inner xl:h-[calc(100dvh-17rem)] xl:min-h-[360px]"
       >
         {logs.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center text-slate-600">
@@ -983,38 +1022,6 @@ const TerminalPanel = ({
   );
 };
 
-const CompactCard = ({
-  icon,
-  label,
-  value,
-  detail,
-  tone,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  detail: string;
-  tone: "good" | "bad" | "muted" | "neutral";
-}) => {
-  const toneClass = {
-    good: "border-emerald-300/20 bg-emerald-300/[0.06] text-emerald-100",
-    bad: "border-rose-300/25 bg-rose-300/[0.08] text-rose-100",
-    muted: "border-white/8 bg-white/[0.03] text-slate-300",
-    neutral: "border-sky-300/15 bg-sky-300/[0.06] text-sky-100",
-  }[tone];
-
-  return (
-    <div className={`min-h-[96px] rounded-lg border p-3 ${toneClass}`}>
-      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-current/60">
-        <span className="[&>svg]:h-3.5 [&>svg]:w-3.5">{icon}</span>
-        {label}
-      </div>
-      <div className="truncate text-sm font-semibold">{value}</div>
-      <div className="mt-1 truncate text-xs text-current/55">{detail}</div>
-    </div>
-  );
-};
-
 const WorkflowStep = ({
   index,
   phase,
@@ -1029,8 +1036,8 @@ const WorkflowStep = ({
   const styles = statusStyles[status];
 
   return (
-    <li className={`grid min-h-14 grid-cols-[42px_1fr_auto] items-center gap-3 rounded-md border px-3 transition duration-200 ${styles.row}`}>
-      <div className={`flex h-8 w-8 items-center justify-center rounded-md border font-mono text-xs ${styles.dot}`}>
+    <li className={`grid min-h-12 grid-cols-[34px_1fr_auto] items-center gap-2 rounded-md border px-2.5 transition duration-200 ${styles.row}`}>
+      <div className={`flex h-7 w-7 items-center justify-center rounded-md border font-mono text-[11px] ${styles.dot}`}>
         {status === "done" ? <Check className="h-4 w-4" /> : status === "failed" ? <XCircle className="h-4 w-4" /> : status === "running" ? <Loader2 className="h-4 w-4 animate-spin" /> : index}
       </div>
       <div className="min-w-0">
@@ -1038,7 +1045,7 @@ const WorkflowStep = ({
         <div className="mt-0.5 truncate font-mono text-[11px] text-current/45">{phase}</div>
       </div>
       <div className="flex items-center gap-2">
-        {active && <span className="hidden rounded-sm bg-sky-300/10 px-2 py-1 text-[11px] font-semibold text-sky-100 sm:inline">Hiện tại</span>}
+        {active && <span className="hidden rounded-sm bg-sky-300/10 px-2 py-1 text-[11px] font-semibold text-sky-100 2xl:inline">Hiện tại</span>}
         <span className="text-xs text-current/55">{styles.label}</span>
       </div>
     </li>
