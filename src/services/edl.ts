@@ -82,6 +82,7 @@ const USB_QUICK_READ_TIMEOUT_MS = 180;
 const SAHARA_PACKET_READ_BYTES = 4096;
 const FIREHOSE_READ_BYTES = 8192;
 const FIREHOSE_XML_PAYLOAD_BYTES = 4096;
+const FIREHOSE_XML_WRITE_TIMEOUT_MS = 5000;
 const FIREHOSE_SAFE_PAYLOAD_CANDIDATES = [32768, 16384, 4096] as const;
 const FIREHOSE_DEFAULT_PAYLOAD_BYTES = FIREHOSE_SAFE_PAYLOAD_CANDIDATES[0];
 const FIREHOSE_READY_DELAY_MS = 700;
@@ -259,12 +260,19 @@ export class BrowserEdlClient implements EdlClient {
   async configureUfs() {
     const candidates: number[] = [...FIREHOSE_SAFE_PAYLOAD_CANDIDATES];
     const errors: string[] = [];
+    let reopenedAfterSahara = false;
     let reconnectedAfterSahara = false;
 
     while (candidates.length > 0) {
       const payloadSize = candidates.shift() ?? FIREHOSE_XML_PAYLOAD_BYTES;
 
       try {
+        if (!reopenedAfterSahara) {
+          await this.reopenCurrentDevice().catch(() => undefined);
+          reopenedAfterSahara = true;
+          await delay(200);
+        }
+
         const text = await this.sendFirehoseCommand(
           buildFirehoseXml("configure", {
             MemoryName: "ufs",
@@ -275,7 +283,7 @@ export class BrowserEdlClient implements EdlClient {
             MaxXMLSizeInBytes: FIREHOSE_XML_PAYLOAD_BYTES,
             SkipStorageInit: 0,
             SkipWrite: 0,
-            ZlpAwareHost: 1,
+            ZLPAwareHost: 1,
           }),
           { label: `configure ${payloadSize}`, allowNak: true },
         );
@@ -303,6 +311,7 @@ export class BrowserEdlClient implements EdlClient {
 
         if (!reconnectedAfterSahara && this.isUsbTransportError(error) && (await this.reconnectGranted9008())) {
           reconnectedAfterSahara = true;
+          reopenedAfterSahara = true;
           await delay(FIREHOSE_READY_DELAY_MS);
           candidates.unshift(payloadSize);
         }
@@ -494,7 +503,7 @@ export class BrowserEdlClient implements EdlClient {
       allowNak?: boolean;
     },
   ) {
-    await this.write(textEncoder.encode(command));
+    await this.write(textEncoder.encode(command), FIREHOSE_XML_WRITE_TIMEOUT_MS);
     return this.readFirehoseUntil(
       (text) => hasAck(text) && (!options.rawMode || hasRawModeTrue(text)),
       15000,
@@ -584,6 +593,13 @@ export class BrowserEdlClient implements EdlClient {
     await this.write(new Uint8Array(), 5000).catch((error) => {
       throw new Error(`EDL bulk OUT ZLP thất bại: ${String(error)}`);
     });
+  }
+
+  private async reopenCurrentDevice() {
+    const device = this.requireDevice();
+
+    await this.close();
+    await this.openDevice(device);
   }
 
   private async openDevice(device: BrowserUsbDevice) {
