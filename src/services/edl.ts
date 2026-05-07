@@ -78,7 +78,6 @@ type SaharaHello = {
 const QUALCOMM_VENDOR_ID = 0x05c6;
 const EDL_9008_PRODUCT_ID = 0x9008;
 const USB_TRANSFER_TIMEOUT_MS = 300000;
-const USB_QUICK_READ_TIMEOUT_MS = 180;
 const SAHARA_PACKET_READ_BYTES = 4096;
 const FIREHOSE_READ_BYTES = 8192;
 const FIREHOSE_XML_PAYLOAD_BYTES = 4096;
@@ -251,28 +250,19 @@ export class BrowserEdlClient implements EdlClient {
     }
 
     await this.sendSaharaDone();
-    await this.waitForSaharaDoneResponse();
     await delay(FIREHOSE_READY_DELAY_MS);
-    await this.drainIncoming(4);
     onProgress?.(1);
   }
 
   async configureUfs() {
     const candidates: number[] = [...FIREHOSE_SAFE_PAYLOAD_CANDIDATES];
     const errors: string[] = [];
-    let reopenedAfterSahara = false;
     let reconnectedAfterSahara = false;
 
     while (candidates.length > 0) {
       const payloadSize = candidates.shift() ?? FIREHOSE_XML_PAYLOAD_BYTES;
 
       try {
-        if (!reopenedAfterSahara) {
-          await this.reopenCurrentDevice().catch(() => undefined);
-          reopenedAfterSahara = true;
-          await delay(200);
-        }
-
         const text = await this.sendFirehoseCommand(
           buildFirehoseXml("configure", {
             MemoryName: "ufs",
@@ -311,7 +301,6 @@ export class BrowserEdlClient implements EdlClient {
 
         if (!reconnectedAfterSahara && this.isUsbTransportError(error) && (await this.reconnectGranted9008())) {
           reconnectedAfterSahara = true;
-          reopenedAfterSahara = true;
           await delay(FIREHOSE_READY_DELAY_MS);
           candidates.unshift(payloadSize);
         }
@@ -480,21 +469,6 @@ export class BrowserEdlClient implements EdlClient {
     await this.write(new Uint8Array(done));
   }
 
-  private async waitForSaharaDoneResponse() {
-    const packet = await this.tryRead(SAHARA_PACKET_READ_BYTES, 2000).catch(() => undefined);
-
-    if (!packet || packet.byteLength < 8) {
-      return;
-    }
-
-    const view = dataViewFor(packet);
-    const command = view.getUint32(0, true);
-
-    if (command !== SAHARA.DONE_RESP) {
-      return;
-    }
-  }
-
   private async sendFirehoseCommand(
     command: string,
     options: {
@@ -547,16 +521,6 @@ export class BrowserEdlClient implements EdlClient {
     throw new Error(`Hết thời gian chờ Firehose ${label}: ${summarizeFirehoseText(text)}`);
   }
 
-  private async drainIncoming(maxReads: number) {
-    for (let index = 0; index < maxReads; index += 1) {
-      const chunk = await this.tryRead(FIREHOSE_READ_BYTES, USB_QUICK_READ_TIMEOUT_MS).catch(() => undefined);
-
-      if (!chunk?.byteLength) {
-        break;
-      }
-    }
-  }
-
   private async read(length: number, timeoutMs = USB_TRANSFER_TIMEOUT_MS) {
     const device = this.requireDevice();
     const result = await withTimeout(device.transferIn(this.endpointIn, length), timeoutMs, "EDL bulk IN hết thời gian truyền.");
@@ -593,13 +557,6 @@ export class BrowserEdlClient implements EdlClient {
     await this.write(new Uint8Array(), 5000).catch((error) => {
       throw new Error(`EDL bulk OUT ZLP thất bại: ${String(error)}`);
     });
-  }
-
-  private async reopenCurrentDevice() {
-    const device = this.requireDevice();
-
-    await this.close();
-    await this.openDevice(device);
   }
 
   private async openDevice(device: BrowserUsbDevice) {
