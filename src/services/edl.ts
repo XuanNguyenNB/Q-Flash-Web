@@ -140,6 +140,9 @@ const hasNackOrError = (text: string) => hasNack(text) || hasFirehoseError(text)
 
 const summarizeFirehoseText = (text: string) => text.replace(/\s+/g, " ").trim().slice(0, 280) || "(empty)";
 
+const isSaharaHelloTimeout = (error: unknown) =>
+  error instanceof Error && error.message.includes("Sahara HELLO");
+
 const firehoseNumberAttr = (text: string, attr: string) => {
   const pattern = new RegExp(`${attr}\\s*=\\s*["'](\\d+)["']`, "i");
   const match = pattern.exec(text);
@@ -190,7 +193,25 @@ export class BrowserEdlClient implements EdlClient {
 
   async uploadProgrammer(blob: Blob, onProgress?: (progress: number) => void) {
     const programmer = new Uint8Array(await blob.arrayBuffer());
-    const hello = await this.waitForSaharaHello();
+    const hello = await this.waitForSaharaHello().catch(async (error) => {
+      if (!isSaharaHelloTimeout(error)) {
+        throw error;
+      }
+
+      const reconnected = await this.reconnectGranted9008().catch(() => false);
+
+      if (!reconnected) {
+        throw error;
+      }
+
+      onProgress?.(1);
+      return undefined;
+    });
+
+    if (!hello) {
+      return;
+    }
+
     await this.sendSaharaHelloResponse(hello);
 
     let maxOffsetSent = 0;
@@ -420,18 +441,18 @@ export class BrowserEdlClient implements EdlClient {
   }
 
   private async waitForSaharaHello() {
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-      const packet = await this.tryRead(48, 1800).catch(() => undefined);
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const packet = await this.tryRead(48, 2200).catch(() => undefined);
 
       if (!packet || packet.byteLength < 48) {
-        await delay(250);
+        await delay(300);
         continue;
       }
 
       const view = dataViewFor(packet);
 
       if (view.getUint32(0, true) !== SAHARA.HELLO) {
-        await delay(250);
+        await delay(300);
         continue;
       }
 
