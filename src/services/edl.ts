@@ -19,10 +19,13 @@ export interface EdlClient {
 
 type BrowserUsb = {
   requestDevice(options: { filters: Array<{ vendorId: number; productId: number }> }): Promise<BrowserUsbDevice>;
+  getDevices?(): Promise<BrowserUsbDevice[]>;
 };
 
 type BrowserUsbDevice = {
   opened: boolean;
+  vendorId?: number;
+  productId?: number;
   configuration: BrowserUsbConfiguration | null;
   open(): Promise<void>;
   close(): Promise<void>;
@@ -78,8 +81,10 @@ const USB_TRANSFER_TIMEOUT_MS = 300000;
 const USB_QUICK_READ_TIMEOUT_MS = 180;
 const SAHARA_PACKET_READ_BYTES = 4096;
 const FIREHOSE_READ_BYTES = 8192;
-const FIREHOSE_DEFAULT_PAYLOAD_BYTES = 1024 * 1024;
-const FIREHOSE_FALLBACK_PAYLOAD_BYTES = 4096;
+const FIREHOSE_XML_PAYLOAD_BYTES = 4096;
+const FIREHOSE_SAFE_PAYLOAD_CANDIDATES = [32768, 16384, 4096] as const;
+const FIREHOSE_DEFAULT_PAYLOAD_BYTES = FIREHOSE_SAFE_PAYLOAD_CANDIDATES[0];
+const FIREHOSE_READY_DELAY_MS = 700;
 
 const SAHARA = {
   HELLO: 0x01,
@@ -123,13 +128,25 @@ const firehoseText = (bytes: Uint8Array) => textDecoder.decode(bytes).replace(/\
 
 const hasAck = (text: string) => /<response\b[^>]*value\s*=\s*["']ACK["']/i.test(text);
 
+const hasNack = (text: string) => /<response\b[^>]*value\s*=\s*["']NAK["']/i.test(text);
+
 const hasRawModeTrue = (text: string) => /rawmode\s*=\s*["']true["']/i.test(text);
 
 const hasRawModeFalse = (text: string) => /rawmode\s*=\s*["']false["']/i.test(text);
 
-const hasNackOrError = (text: string) => /<response\b[^>]*value\s*=\s*["']NAK["']|<log\b[^>]*value\s*=\s*["'][^"']*ERROR|ERROR/i.test(text);
+const hasFirehoseError = (text: string) => /<log\b[^>]*value\s*=\s*["'][^"']*ERROR|ERROR/i.test(text);
+
+const hasNackOrError = (text: string) => hasNack(text) || hasFirehoseError(text);
 
 const summarizeFirehoseText = (text: string) => text.replace(/\s+/g, " ").trim().slice(0, 280) || "(empty)";
+
+const firehoseNumberAttr = (text: string, attr: string) => {
+  const pattern = new RegExp(`${attr}\\s*=\\s*["'](\\d+)["']`, "i");
+  const match = pattern.exec(text);
+  const value = match ? Number.parseInt(match[1], 10) : Number.NaN;
+
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+};
 
 const xmlEscape = (value: string | number | boolean) =>
   String(value)
@@ -151,7 +168,7 @@ export class BrowserEdlClient implements EdlClient {
   private interfaceNumber: number | undefined;
   private endpointIn = 1;
   private endpointOut = 1;
-  private maxPayloadSizeToTarget = FIREHOSE_DEFAULT_PAYLOAD_BYTES;
+  private maxPayloadSizeToTarget: number = FIREHOSE_DEFAULT_PAYLOAD_BYTES;
 
   async connect9008() {
     const usb = (navigator as Navigator & { usb?: BrowserUsb }).usb;
@@ -168,22 +185,7 @@ export class BrowserEdlClient implements EdlClient {
       throw new WorkflowError("USB_PICKER_CANCELLED");
     }
 
-    this.device = device;
-    await device.open();
-
-    if (!device.configuration) {
-      await device.selectConfiguration(1);
-    }
-
-    const { interfaceNumber, alternate } = this.findBulkInterface();
-    await device.claimInterface(interfaceNumber);
-
-    if (alternate.alternateSetting !== 0) {
-      await device.selectAlternateInterface?.(interfaceNumber, alternate.alternateSetting);
-    }
-
-    this.interfaceNumber = interfaceNumber;
-    this.detectEndpoints(alternate);
+    await this.openDevice(device);
   }
 
   async uploadProgrammer(blob: Blob, onProgress?: (progress: number) => void) {
@@ -248,37 +250,66 @@ export class BrowserEdlClient implements EdlClient {
     }
 
     await this.sendSaharaDone();
-    await this.tryRead(SAHARA_PACKET_READ_BYTES, 1500).catch(() => undefined);
-    await this.drainIncoming(10);
+    await this.waitForSaharaDoneResponse();
+    await delay(FIREHOSE_READY_DELAY_MS);
+    await this.drainIncoming(4);
     onProgress?.(1);
   }
 
   async configureUfs() {
-    try {
-      await this.sendFirehoseCommand(
-        buildFirehoseXml("configure", {
-          MemoryName: "ufs",
-          MaxPayloadSizeToTargetInBytes: FIREHOSE_DEFAULT_PAYLOAD_BYTES,
-          MaxPayloadSizeFromTargetInBytes: FIREHOSE_READ_BYTES,
-          ZLPAwareHost: 1,
-        }),
-        { label: "configure" },
-      );
-      this.maxPayloadSizeToTarget = FIREHOSE_DEFAULT_PAYLOAD_BYTES;
-    } catch (firstError) {
-      await this.sendFirehoseCommand(
-        buildFirehoseXml("configure", {
-          MemoryName: "ufs",
-          MaxPayloadSizeToTargetInBytes: FIREHOSE_FALLBACK_PAYLOAD_BYTES,
-          MaxPayloadSizeFromTargetInBytes: FIREHOSE_READ_BYTES,
-          ZLPAwareHost: 1,
-        }),
-        { label: "configure fallback" },
-      ).catch((secondError) => {
-        throw new Error(`Firehose configure thất bại: ${String(firstError)}; fallback thất bại: ${String(secondError)}`);
-      });
-      this.maxPayloadSizeToTarget = FIREHOSE_FALLBACK_PAYLOAD_BYTES;
+    const candidates: number[] = [...FIREHOSE_SAFE_PAYLOAD_CANDIDATES];
+    const errors: string[] = [];
+    let reconnectedAfterSahara = false;
+
+    while (candidates.length > 0) {
+      const payloadSize = candidates.shift() ?? FIREHOSE_XML_PAYLOAD_BYTES;
+
+      try {
+        const text = await this.sendFirehoseCommand(
+          buildFirehoseXml("configure", {
+            MemoryName: "ufs",
+            Verbose: 0,
+            AlwaysValidate: 0,
+            MaxPayloadSizeToTargetInBytes: payloadSize,
+            MaxPayloadSizeFromTargetInBytes: FIREHOSE_XML_PAYLOAD_BYTES,
+            MaxXMLSizeInBytes: FIREHOSE_XML_PAYLOAD_BYTES,
+            SkipStorageInit: 0,
+            SkipWrite: 0,
+            ZlpAwareHost: 1,
+          }),
+          { label: `configure ${payloadSize}`, allowNak: true },
+        );
+
+        const supported =
+          firehoseNumberAttr(text, "MaxPayloadSizeToTargetInBytesSupported") ??
+          firehoseNumberAttr(text, "MaxPayloadSizeToTargetInBytes");
+
+        if (hasAck(text)) {
+          this.maxPayloadSizeToTarget = Math.max(4096, Math.min(payloadSize, supported ?? payloadSize));
+          return;
+        }
+
+        if (supported && supported !== payloadSize) {
+          const nextPayload = Math.max(4096, Math.min(payloadSize, supported));
+
+          if (!candidates.includes(nextPayload)) {
+            candidates.unshift(nextPayload);
+          }
+        }
+
+        errors.push(`configure ${payloadSize} NAK: ${summarizeFirehoseText(text)}`);
+      } catch (error) {
+        errors.push(`configure ${payloadSize}: ${String(error)}`);
+
+        if (!reconnectedAfterSahara && this.isUsbTransportError(error) && (await this.reconnectGranted9008())) {
+          reconnectedAfterSahara = true;
+          await delay(FIREHOSE_READY_DELAY_MS);
+          candidates.unshift(payloadSize);
+        }
+      }
     }
+
+    throw new Error(`Firehose configure thất bại sau Sahara/WinUSB: ${errors.join("; ")}`);
   }
 
   async programRaw(target: EdlProgramTarget, blob: Blob, onProgress?: (progress: number) => void) {
@@ -327,6 +358,7 @@ export class BrowserEdlClient implements EdlClient {
       onProgress?.(written / payload.byteLength);
     }
 
+    await this.writeZeroLengthPacket();
     await this.readFirehoseUntil(
       (text) => hasAck(text) || hasRawModeFalse(text),
       30000,
@@ -439,22 +471,44 @@ export class BrowserEdlClient implements EdlClient {
     await this.write(new Uint8Array(done));
   }
 
+  private async waitForSaharaDoneResponse() {
+    const packet = await this.tryRead(SAHARA_PACKET_READ_BYTES, 2000).catch(() => undefined);
+
+    if (!packet || packet.byteLength < 8) {
+      return;
+    }
+
+    const view = dataViewFor(packet);
+    const command = view.getUint32(0, true);
+
+    if (command !== SAHARA.DONE_RESP) {
+      return;
+    }
+  }
+
   private async sendFirehoseCommand(
     command: string,
     options: {
       label: string;
       rawMode?: boolean;
+      allowNak?: boolean;
     },
   ) {
     await this.write(textEncoder.encode(command));
-    await this.readFirehoseUntil(
+    return this.readFirehoseUntil(
       (text) => hasAck(text) && (!options.rawMode || hasRawModeTrue(text)),
       15000,
       `${options.label} ACK${options.rawMode ? " rawmode=true" : ""}`,
+      { allowNak: options.allowNak },
     );
   }
 
-  private async readFirehoseUntil(predicate: (text: string) => boolean, timeoutMs: number, label: string) {
+  private async readFirehoseUntil(
+    predicate: (text: string) => boolean,
+    timeoutMs: number,
+    label: string,
+    options: { allowNak?: boolean } = {},
+  ) {
     const startedAt = performance.now();
     let text = "";
 
@@ -468,12 +522,16 @@ export class BrowserEdlClient implements EdlClient {
 
       text += firehoseText(chunk);
 
-      if (hasNackOrError(text)) {
-        throw new Error(`Firehose NAK/ERROR khi chờ ${label}: ${summarizeFirehoseText(text)}`);
-      }
-
       if (predicate(text)) {
         return text;
+      }
+
+      if (options.allowNak && hasNack(text)) {
+        return text;
+      }
+
+      if (hasFirehoseError(text) || (hasNack(text) && !options.allowNak)) {
+        throw new Error(`Firehose NAK/ERROR khi chờ ${label}: ${summarizeFirehoseText(text)}`);
       }
     }
 
@@ -520,6 +578,63 @@ export class BrowserEdlClient implements EdlClient {
     if (result.status && result.status !== "ok") {
       throw new Error(`EDL bulk OUT thất bại: ${result.status}.`);
     }
+  }
+
+  private async writeZeroLengthPacket() {
+    await this.write(new Uint8Array(), 5000).catch((error) => {
+      throw new Error(`EDL bulk OUT ZLP thất bại: ${String(error)}`);
+    });
+  }
+
+  private async openDevice(device: BrowserUsbDevice) {
+    this.device = device;
+    await device.open();
+
+    if (!device.configuration) {
+      await device.selectConfiguration(1);
+    }
+
+    const { interfaceNumber, alternate } = this.findBulkInterface();
+    await device.claimInterface(interfaceNumber);
+
+    if (alternate.alternateSetting !== 0) {
+      await device.selectAlternateInterface?.(interfaceNumber, alternate.alternateSetting);
+    }
+
+    this.interfaceNumber = interfaceNumber;
+    this.detectEndpoints(alternate);
+  }
+
+  private async reconnectGranted9008() {
+    const usb = (navigator as Navigator & { usb?: BrowserUsb }).usb;
+    const devices = (await usb?.getDevices?.()) ?? [];
+    const device = devices.find((candidate) => candidate.vendorId === QUALCOMM_VENDOR_ID && candidate.productId === EDL_9008_PRODUCT_ID);
+
+    if (!device) {
+      return false;
+    }
+
+    await this.close();
+    await this.openDevice(device);
+    return true;
+  }
+
+  private isUsbTransportError(error: unknown) {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("transfer") ||
+      message.includes("disconnected") ||
+      message.includes("device unavailable") ||
+      message.includes("device unavailable") ||
+      message.includes("the device was disconnected") ||
+      message.includes("bulk in") ||
+      message.includes("bulk out") ||
+      message.includes("truyền")
+    );
   }
 
   private findBulkInterface() {
