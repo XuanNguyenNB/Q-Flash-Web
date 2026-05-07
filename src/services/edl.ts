@@ -85,6 +85,7 @@ const FIREHOSE_XML_WRITE_TIMEOUT_MS = 5000;
 const FIREHOSE_SAFE_PAYLOAD_CANDIDATES = [32768, 16384, 4096] as const;
 const FIREHOSE_DEFAULT_PAYLOAD_BYTES = FIREHOSE_SAFE_PAYLOAD_CANDIDATES[0];
 const FIREHOSE_READY_DELAY_MS = 700;
+const FIREHOSE_RECONNECT_DELAY_MS = 900;
 
 const SAHARA = {
   HELLO: 0x01,
@@ -279,6 +280,11 @@ export class BrowserEdlClient implements EdlClient {
     const candidates: number[] = [...FIREHOSE_SAFE_PAYLOAD_CANDIDATES];
     const errors: string[] = [];
     let reconnectedAfterSahara = false;
+
+    if (await this.reconnectGranted9008().catch(() => false)) {
+      reconnectedAfterSahara = true;
+      await delay(FIREHOSE_RECONNECT_DELAY_MS);
+    }
 
     while (candidates.length > 0) {
       const payloadSize = candidates.shift() ?? FIREHOSE_XML_PAYLOAD_BYTES;
