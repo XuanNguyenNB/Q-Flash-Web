@@ -14,6 +14,15 @@ npm run sync:assets:r2
 npm run verify:assets:r2
 ```
 
+## Agent handoff docs
+
+Future agents should start from:
+
+- [AGENTS.md](AGENTS.md) for the project handoff checklist.
+- [docs/DEPLOY.md](docs/DEPLOY.md) for VPS deployment.
+- [docs/ASSETS_R2.md](docs/ASSETS_R2.md) for Cloudflare R2 asset hosting.
+- [docs/WORKFLOW.md](docs/WORKFLOW.md) for workflow, safety gates, and EDL notes.
+
 `npm run build:assets` reads the current workspace layout:
 
 - `../Unlock_8E_Xiaomi/Unlock_8E_Xiaomi`
@@ -93,7 +102,7 @@ npm run build
 npm run verify:assets:r2
 ```
 
-`sync:assets:r2` uses `rclone copy`, not delete/sync, to avoid removing an active release by mistake. It uploads JSON files with `Cache-Control: no-cache`, and binary ROM/ABL/firehose files with `Cache-Control: public, max-age=31536000, immutable`.
+`sync:assets:r2` uses `rclone copy`, not delete/sync, to avoid removing an active release by mistake. It uploads JSON files with `Cache-Control: no-cache`, and binary ROM/ABL/image files with `Cache-Control: public, max-age=31536000, immutable`.
 
 R2 CORS policy for the bucket:
 
@@ -109,13 +118,13 @@ R2 CORS policy for the bucket:
 ]
 ```
 
-After upload, `npm run verify:assets:r2` fetches the manifest/hash files, checks representative ABL/firehose/ROM objects with `HEAD`, verifies CORS headers, checks `Content-Length`, and confirms the built app contains the configured `VITE_ASSET_BASE_URL`.
+After upload, `npm run verify:assets:r2` fetches the manifest/hash files, checks representative ABL/ROM objects with `HEAD`, verifies CORS headers, checks `Content-Length`, and confirms the built app contains the configured `VITE_ASSET_BASE_URL`.
 
 ## Experimental ADB/Fastboot Flow
 
 The browser does not download or extract `.rar` files. It loads the expanded `dist-assets/` layout from the configured asset base URL or the same-origin default.
 
-The entry step accepts either Android ADB or Fastboot. If the phone starts in Android, the browser connects ADB, reads `ro.product.device`, `ro.product.vendor.device`, and `ro.build.product`, then sends `adb reboot bootloader`. After the phone reaches Fastboot, the user must connect Fastboot and `fastboot getvar product` must exactly match the ADB codename before any asset download or destructive phase is allowed.
+The entry step uses one WebUSB button for both Android ADB and Fastboot. If the phone starts in Android, the browser connects ADB, reads `ro.product.device`, `ro.product.vendor.device`, and `ro.build.product`, then sends `adb reboot bootloader`. After the phone reaches Fastboot, the user presses the same connect button again and `fastboot getvar product` must exactly match the ADB codename before any asset download or destructive phase is allowed.
 
 The app has two workflow families. `efisp-8e-gen5` supports only Xiaomi 17 (`pudding`), Xiaomi 17 Pro (`pandora`), Xiaomi 17 Pro Max (`popsicle`), Xiaomi 17 Ultra (`nezha`), and Redmi K90 Pro Max / POCO F8 Ultra (`myron`); it prepares only `efisp/gbl_efi_unlock.efi`, boots Android permissive with `fastboot oem set-gpu-preemption-value 0 androidboot.selinux=permissive`, writes EFISP through MQSAS, verifies `unlocked: yes`, then erases `efisp`, `metadata`, and `userdata`.
 
