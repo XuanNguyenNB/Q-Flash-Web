@@ -211,18 +211,15 @@ export const useUnlockWorkflow = () => {
       return "connect-device";
     }
 
-    if (!isPreflightReady(preflight)) {
-      return "preflight";
-    }
-
     return (
       visiblePhaseOrder.find(
         (phase) => phase !== "preflight" && phase !== "connect-device" && !isPhaseComplete(statuses[phase]),
       ) ?? "finished"
     );
-  }, [manifest, preflight, statuses, visiblePhaseOrder]);
+  }, [manifest, statuses, visiblePhaseOrder]);
 
   const requiresConfirmation = destructivePhases.includes(nextPhase as DestructivePhase);
+  const requiresPreflightReady = destructivePhases.includes(nextPhase as DestructivePhase);
 
   const mainButton = useMemo(() => {
     if (busy) {
@@ -247,7 +244,7 @@ export const useUnlockWorkflow = () => {
     manifest !== undefined &&
     nextPhase !== "preflight" &&
     nextPhase !== "connect-device" &&
-    isPreflightReady(preflight) &&
+    (!requiresPreflightReady || isPreflightReady(preflight)) &&
     (requiresConfirmation ? phaseConfirmations[nextPhase as DestructivePhase] : true);
 
   const canConnectEntry =
