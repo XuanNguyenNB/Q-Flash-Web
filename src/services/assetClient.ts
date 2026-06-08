@@ -149,7 +149,11 @@ export class ServerAssetClient implements AssetClient {
   }
 
   async loadManifest(): Promise<Manifest> {
-    return manifestSchema.parse(await this.fetchJson("manifest.json"));
+    const manifest = manifestSchema.parse(await this.fetchJson("manifest.json"));
+    return {
+      ...manifest,
+      models: manifest.models.filter(isLegacyFtdModel),
+    };
   }
 
   async loadRootSha256() {

@@ -163,10 +163,17 @@ export class BlazerMockFastbootClient implements FastbootClient {
     if (name === "product") {
       return "xuanyuan";
     }
+    if (name === "serialno") {
+      return "MOCKFTD123456";
+    }
     if (name === "anti") {
       return "0";
     }
     return "";
+  }
+
+  async getSerial() {
+    return this.getvar("serialno");
   }
 
   async runRaw() {

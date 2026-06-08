@@ -3,17 +3,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "./App";
 
-const { workflow, setWorkflowFamily, setWorkflowMode, prepareAssetsEarly, rebootAdbToFastboot } = vi.hoisted(() => {
-  const setWorkflowFamilyMock = vi.fn();
+const { workflow, setWorkflowMode, runFastbootTerminalCommand } = vi.hoisted(() => {
   const setWorkflowModeMock = vi.fn();
-  const prepareAssetsEarlyMock = vi.fn();
-  const rebootAdbToFastbootMock = vi.fn();
+  const runFastbootTerminalCommandMock = vi.fn();
+  const statuses = {
+    preflight: "done",
+    "connect-device": "done",
+    "prepare-assets": "pending",
+    "flash-ftd": "pending",
+    "unlock-payload": "pending",
+    "restore-gpt": "pending",
+    finished: "pending",
+  };
   const visiblePhaseOrder = [
     "preflight",
     "connect-device",
     "prepare-assets",
-    "boot-permissive",
-    "downgrade-abl",
     "flash-ftd",
     "unlock-payload",
     "restore-gpt",
@@ -21,10 +26,8 @@ const { workflow, setWorkflowFamily, setWorkflowMode, prepareAssetsEarly, reboot
   ];
 
   return {
-    setWorkflowFamily: setWorkflowFamilyMock,
     setWorkflowMode: setWorkflowModeMock,
-    prepareAssetsEarly: prepareAssetsEarlyMock,
-    rebootAdbToFastboot: rebootAdbToFastbootMock,
+    runFastbootTerminalCommand: runFastbootTerminalCommandMock,
     workflow: {
       preflight: {
         isHttps: true,
@@ -34,61 +37,85 @@ const { workflow, setWorkflowFamily, setWorkflowMode, prepareAssetsEarly, reboot
         hasStockRom: true,
       },
       setPreflight: vi.fn(),
-      statuses: {
-        preflight: "done",
-        "connect-device": "pending",
-        "prepare-assets": "pending",
-        "boot-permissive": "pending",
-        "write-efisp": "pending",
-        "verify-unlock": "pending",
-        "cleanup-data": "pending",
-        "downgrade-abl": "pending",
-        "flash-ftd": "pending",
-        "unlock-payload": "pending",
-        "restore-gpt": "pending",
-        finished: "pending",
-      },
-      deviceStatus: "disconnected",
+      statuses,
+      deviceStatus: "fastboot",
       logs: [],
-      manifest: { version: 1, models: [] },
-      model: undefined,
-      detectedProduct: "",
-      targetDetection: undefined,
+      manifest: {
+        version: 1,
+        models: [
+          {
+            family: "legacy-ftd",
+            id: "xiaomi15",
+            name: "Xiaomi 15",
+            product: "dada",
+            ablFile: "abl/mi15.elf",
+            ftdPackage: "packages/xiaomi15",
+            unlock: { gptBoth4: "unlock/gpt_both4.bin", bootImage: "unlock/boot.img" },
+            finalGpt: [
+              "packages/xiaomi15/images/gpt_both0.bin",
+              "packages/xiaomi15/images/gpt_both1.bin",
+              "packages/xiaomi15/images/gpt_both2.bin",
+              "packages/xiaomi15/images/gpt_both3.bin",
+              "packages/xiaomi15/images/gpt_both4.bin",
+              "packages/xiaomi15/images/gpt_both5.bin",
+            ],
+          },
+        ],
+      },
+      model: {
+        family: "legacy-ftd",
+        id: "xiaomi15",
+        name: "Xiaomi 15",
+        product: "dada",
+        ablFile: "abl/mi15.elf",
+        ftdPackage: "packages/xiaomi15",
+        unlock: { gptBoth4: "unlock/gpt_both4.bin", bootImage: "unlock/boot.img" },
+        finalGpt: [
+          "packages/xiaomi15/images/gpt_both0.bin",
+          "packages/xiaomi15/images/gpt_both1.bin",
+          "packages/xiaomi15/images/gpt_both2.bin",
+          "packages/xiaomi15/images/gpt_both3.bin",
+          "packages/xiaomi15/images/gpt_both4.bin",
+          "packages/xiaomi15/images/gpt_both5.bin",
+        ],
+      },
+      detectedProduct: "dada",
+      targetDetection: {
+        model: undefined,
+        fastbootProduct: "dada",
+        fastbootSerial: "SERIAL123",
+        source: "fastboot",
+        verified: true,
+      },
       awaitingFastbootVerification: false,
       busy: false,
       error: undefined,
       progress: undefined,
-      workflowFamily: "legacy-ftd",
-      workflowMode: "standard-mqsas",
+      workflowMode: "standard",
       visiblePhaseOrder,
-      visibleResumePhaseOrder: ["prepare-assets", "boot-permissive", "downgrade-abl", "flash-ftd", "unlock-payload", "restore-gpt"],
+      visibleResumePhaseOrder: ["prepare-assets", "flash-ftd", "unlock-payload", "restore-gpt"],
       canRebootAdbToFastboot: false,
       canPrepareAssetsEarly: false,
-      canSwitchWorkflowFamily: true,
       canSwitchWorkflowMode: true,
-      setWorkflowFamily: setWorkflowFamilyMock,
       setWorkflowMode: setWorkflowModeMock,
       phaseConfirmations: {
-        "write-efisp": false,
-        "cleanup-data": false,
-        "downgrade-abl": false,
         "flash-ftd": false,
         "unlock-payload": false,
         "restore-gpt": false,
       },
       setPhaseConfirmations: vi.fn(),
-      nextPhase: "connect-device",
+      nextPhase: "prepare-assets",
       requiresConfirmation: false,
-      canRun: false,
-      canConnectEntry: true,
+      canRun: true,
+      canConnectEntry: false,
       canDisconnect: true,
       canRunFastbootTerminalCommand: true,
       mockMode: false,
-      mainButton: "Kết nối thiết bị",
-      rebootAdbToFastboot: rebootAdbToFastbootMock,
-      prepareAssetsEarly: prepareAssetsEarlyMock,
+      mainButton: "Tai va kiem tra ROM FTD",
+      rebootAdbToFastboot: vi.fn(),
+      prepareAssetsEarly: vi.fn(),
       runNext: vi.fn(),
-      runFastbootTerminalCommand: vi.fn(),
+      runFastbootTerminalCommand: runFastbootTerminalCommandMock,
       connectAdbEntry: vi.fn(),
       connectFastbootEntry: vi.fn(),
       resetSession: vi.fn(),
@@ -101,41 +128,16 @@ const { workflow, setWorkflowFamily, setWorkflowMode, prepareAssetsEarly, reboot
 });
 
 vi.mock("./hooks/useUnlockWorkflow", () => ({
-  phaseOrder: [
-    "preflight",
-    "connect-device",
-    "prepare-assets",
-    "boot-permissive",
-    "downgrade-abl",
-    "flash-ftd",
-    "unlock-payload",
-    "restore-gpt",
-    "finished",
-  ],
-  resumePhaseOrder: [
-    "prepare-assets",
-    "boot-permissive",
-    "write-efisp",
-    "verify-unlock",
-    "cleanup-data",
-    "downgrade-abl",
-    "flash-ftd",
-    "unlock-payload",
-    "restore-gpt",
-  ],
+  phaseOrder: ["preflight", "connect-device", "prepare-assets", "flash-ftd", "unlock-payload", "restore-gpt", "finished"],
+  resumePhaseOrder: ["prepare-assets", "flash-ftd", "unlock-payload", "restore-gpt"],
   phaseLabels: {
-    preflight: "Kiểm tra ban đầu",
-    "connect-device": "Kết nối thiết bị",
-    "prepare-assets": "Chuẩn bị asset ROM",
-    "boot-permissive": "Boot Android Permissive",
-    "write-efisp": "Ghi EFISP unlock",
-    "verify-unlock": "Xac minh unlocked",
-    "cleanup-data": "Xoa EFISP/du lieu",
-    "downgrade-abl": "Hạ ABL",
-    "flash-ftd": "Flash gói FTD",
-    "unlock-payload": "Chạy payload unlock",
-    "restore-gpt": "Khôi phục GPT cuối",
-    finished: "MiFlash ROM gốc",
+    preflight: "Kiem tra ban dau",
+    "connect-device": "Ket noi thiet bi",
+    "prepare-assets": "Chuan bi tep ROM",
+    "flash-ftd": "Flash goi FTD",
+    "unlock-payload": "Chay payload mo khoa",
+    "restore-gpt": "Khoi phuc GPT cuoi",
+    finished: "MiFlash ROM goc",
   },
   useUnlockWorkflow: () => workflow,
 }));
@@ -144,193 +146,77 @@ afterEach(() => {
   cleanup();
 });
 
-describe("App workflow selector", () => {
+describe("App simplified FTD workflow", () => {
   beforeEach(() => {
-    setWorkflowFamily.mockClear();
     setWorkflowMode.mockClear();
-    prepareAssetsEarly.mockClear();
-    rebootAdbToFastboot.mockClear();
-    workflow.runNext.mockClear();
-    workflow.workflowFamily = "legacy-ftd";
-    workflow.workflowMode = "standard-mqsas";
-    workflow.visiblePhaseOrder = [
-      "preflight",
-      "connect-device",
-      "prepare-assets",
-      "boot-permissive",
-      "downgrade-abl",
-      "flash-ftd",
-      "unlock-payload",
-      "restore-gpt",
-      "finished",
-    ];
-    workflow.visibleResumePhaseOrder = ["prepare-assets", "boot-permissive", "downgrade-abl", "flash-ftd", "unlock-payload", "restore-gpt"];
-    workflow.statuses["prepare-assets"] = "pending";
-    workflow.statuses["boot-permissive"] = "pending";
-    workflow.statuses["write-efisp"] = "pending";
-    workflow.statuses["verify-unlock"] = "pending";
-    workflow.statuses["cleanup-data"] = "pending";
-    workflow.nextPhase = "connect-device";
-    workflow.requiresConfirmation = false;
-    workflow.mainButton = "Kết nối thiết bị";
-    workflow.model = undefined;
-    workflow.targetDetection = undefined;
-    workflow.progress = undefined;
-    workflow.canRebootAdbToFastboot = false;
-    workflow.canPrepareAssetsEarly = false;
-  });
-
-  it("renders both ABL workflows and lets the user select EDL mode", () => {
-    render(<App />);
-
-    expect(screen.getByRole("button", { name: /Quy trình thường MQSAS/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Nạp ABL qua EDL mode/i })).toBeInTheDocument();
-    expect(screen.getByText(/Dành cho các thiết bị có bản cập nhật đuôi C06, C07, C08/i)).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: /Nạp ABL qua EDL mode/i }));
-
-    expect(setWorkflowMode).toHaveBeenCalledWith("c06-edl");
-  });
-
-  it("lets the user prepare ROM assets before the prepare-assets phase", () => {
-    workflow.model = { family: "legacy-ftd", id: "xiaomi15", name: "Xiaomi 15", product: "dada", ftdPackage: "packages/xiaomi15" };
-    workflow.canPrepareAssetsEarly = true;
-
-    render(<App />);
-
-    fireEvent.click(screen.getByRole("button", { name: /Chuẩn bị ROM trước/i }));
-
-    expect(prepareAssetsEarly).toHaveBeenCalled();
-  });
-
-  it("uses the EDL-specific timeline without the Android permissive step", () => {
-    workflow.workflowMode = "c06-edl";
-    workflow.visiblePhaseOrder = [
-      "preflight",
-      "connect-device",
-      "prepare-assets",
-      "downgrade-abl",
-      "flash-ftd",
-      "unlock-payload",
-      "restore-gpt",
-      "finished",
-    ];
-    workflow.statuses["boot-permissive"] = "skipped";
-
-    render(<App />);
-
-    expect(screen.queryByText("Boot Android Permissive")).not.toBeInTheDocument();
-    expect(screen.getByText("Hạ ABL")).toBeInTheDocument();
-    expect(screen.getByText("Flash gói FTD")).toBeInTheDocument();
-  });
-
-  it("shows an ADB reboot helper on Fastboot-required phases and keeps the main action separate", () => {
-    workflow.nextPhase = "boot-permissive";
-    workflow.mainButton = "Tiếp tục";
-    workflow.model = { family: "legacy-ftd", id: "xiaomi15", name: "Xiaomi 15", product: "dada", ftdPackage: "packages/xiaomi15" };
-    workflow.targetDetection = {
-      model: workflow.model,
-      fastbootProduct: "dada",
-      source: "fastboot",
-      verified: true,
-    };
-    workflow.canRun = true;
-    workflow.canRebootAdbToFastboot = true;
-
-    render(<App />);
-
-    fireEvent.click(screen.getByRole("button", { name: /Máy đang ở Android: reboot bootloader/i }));
-
-    expect(rebootAdbToFastboot).toHaveBeenCalled();
-    expect(workflow.runNext).not.toHaveBeenCalled();
-    expect(screen.getByText(/Sau khi máy vào Fastboot, bấm nút chính/i)).toBeInTheDocument();
-  });
-
-  it("hides the ADB reboot helper on phases that do not require Fastboot", () => {
-    for (const phase of ["connect-device", "prepare-assets", "downgrade-abl"] as const) {
-      workflow.nextPhase = phase;
-      workflow.canRebootAdbToFastboot = false;
-
-      render(<App />);
-
-      expect(screen.queryByRole("button", { name: /Máy đang ở Android: reboot bootloader/i })).not.toBeInTheDocument();
-      cleanup();
-    }
-  });
-
-  it("renders separate overall and current file progress bars while preparing assets", () => {
+    runFastbootTerminalCommand.mockClear();
+    runFastbootTerminalCommand.mockResolvedValue("");
+    workflow.workflowMode = "standard";
     workflow.nextPhase = "prepare-assets";
-    workflow.progress = {
-      label: "Đang tải packages/xiaomi15/images/vendor_boot.img",
-      path: "packages/xiaomi15/images/vendor_boot.img",
-      completedFiles: 44,
-      totalFiles: 56,
-      completedItems: 44,
-      totalItems: 56,
-      receivedBytes: 155_400_000,
-      totalBytes: 242_700_000,
-      fileReceivedBytes: 8_600_000,
-      fileTotalBytes: 96_000_000,
-      bytesPerSecond: 5_900_000,
-      etaSeconds: 15,
-      state: "downloading",
-      progress: 0.79,
-      overallProgress: 0.79,
-      itemProgress: 0.09,
-      itemLabel: "packages/xiaomi15/images/vendor_boot.img",
+    workflow.requiresConfirmation = false;
+    workflow.progress = undefined;
+    workflow.logs = [];
+    workflow.targetDetection.fastbootSerial = "SERIAL123";
+    workflow.statuses = {
+      preflight: "done",
+      "connect-device": "done",
+      "prepare-assets": "pending",
+      "flash-ftd": "pending",
+      "unlock-payload": "pending",
+      "restore-gpt": "pending",
+      finished: "pending",
     };
-
-    render(<App />);
-
-    expect(screen.getByText("Tổng tiến trình")).toBeInTheDocument();
-    expect(screen.getAllByText("Tệp hiện tại").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("44/56 tệp").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("79%").length).toBeGreaterThan(0);
-    expect(screen.getByText("9%")).toBeInTheDocument();
   });
 
-  it("renders current operation progress while flashing", () => {
-    workflow.nextPhase = "flash-ftd";
-    workflow.progress = {
-      label: "[3/5] Flash boot_ab",
-      state: "flashing",
-      progress: 0.42,
-      overallProgress: 0.48,
-      itemProgress: 0.42,
-      itemLabel: "[3/5] Flash boot_ab",
-      completedItems: 2,
-      totalItems: 5,
-    };
-
+  it("renders only Standard and EDL_Standard modes", () => {
     render(<App />);
 
-    expect(screen.getByText("Tổng tiến trình")).toBeInTheDocument();
-    expect(screen.getByText("Thao tác hiện tại")).toBeInTheDocument();
-    expect(screen.getAllByText("2/5 thao tác").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("48%").length).toBeGreaterThan(0);
-    expect(screen.getByText("42%")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Standard$/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /EDL_Standard/i })).toBeInTheDocument();
+    expect(screen.queryByText(/Xiaomi 17/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/EFISP/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /EDL_Standard/i }));
+
+    expect(setWorkflowMode).toHaveBeenCalledWith("edl-standard");
   });
 
-  it("shows the EDL confirmation text on the ABL phase", () => {
-    workflow.workflowMode = "c06-edl";
-    workflow.nextPhase = "downgrade-abl";
-    workflow.requiresConfirmation = true;
-    workflow.mainButton = "Nạp ABL qua EDL mode";
-
-    render(<App />);
-
-    expect(screen.getByText(/Tôi xác nhận máy đang ở EDL 9008/i)).toBeInTheDocument();
-  });
-
-  it("shows System destroyed recovery guidance before flashing FTD after EDL", () => {
-    workflow.workflowMode = "c06-edl";
+  it("shows the manual EDL note for EDL_Standard flash FTD", () => {
+    workflow.workflowMode = "edl-standard";
     workflow.nextPhase = "flash-ftd";
     workflow.requiresConfirmation = true;
-    workflow.mainButton = "Kết nối lại Fastboot và flash FTD";
 
     render(<App />);
 
-    expect(screen.getAllByText(/System destroyed/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/10-15 giây/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/ABL engineering/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/thu cong/i).length).toBeGreaterThan(0);
+  });
+
+  it("shows the simplified phase order without removed phases", () => {
+    render(<App />);
+
+    expect(screen.getAllByText("Chuan bi tep ROM").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Flash goi FTD").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Chay payload mo khoa").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Khoi phuc GPT cuoi").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Boot Android/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ha ABL/i)).not.toBeInTheDocument();
+  });
+
+  it("shows fastboot serial in the device card", () => {
+    render(<App />);
+
+    expect(screen.getByText("Serial")).toBeInTheDocument();
+    expect(screen.getByText("SERIAL123")).toBeInTheDocument();
+  });
+
+  it("uses fastboot devices as the terminal helper", () => {
+    render(<App />);
+
+    const input = screen.getByPlaceholderText("fastboot devices");
+    fireEvent.change(input, { target: { value: "fastboot devices" } });
+    fireEvent.click(screen.getByRole("button", { name: /Gui lenh/i }));
+
+    expect(runFastbootTerminalCommand).toHaveBeenCalledWith("fastboot devices");
   });
 });

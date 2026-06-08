@@ -10,7 +10,8 @@ describe("manifest schema and model matching", () => {
       models: v1ManifestModels,
     });
 
-    expect(manifest.models).toHaveLength(11);
+    expect(manifest.models).toHaveLength(6);
+    expect(manifest.models.every((model) => model.family === "legacy-ftd")).toBe(true);
   });
 
   it("treats legacy R2 manifests without family as legacy FTD models", () => {
@@ -30,11 +31,14 @@ describe("manifest schema and model matching", () => {
     expect(manifest.models[0]?.id).toBe("xiaomi15ultra");
   });
 
-  it("matches model by fastboot product and workflow family case-insensitively", () => {
-    expect(findModelByProduct(v1ManifestModels, "PUDDING", "efisp-8e-gen5")?.id).toBe("xiaomi17");
+  it("matches only legacy FTD models by fastboot product case-insensitively", () => {
+    expect(findModelByProduct(v1ManifestModels, "PUDDING")).toBeUndefined();
+    expect(findModelByProduct(v1ManifestModels, "PANDORA")).toBeUndefined();
+    expect(findModelByProduct(v1ManifestModels, "POPSICLE")).toBeUndefined();
+    expect(findModelByProduct(v1ManifestModels, "NEZHA")).toBeUndefined();
+    expect(findModelByProduct(v1ManifestModels, "MYRON")).toBeUndefined();
     expect(findModelByProduct(v1ManifestModels, "XUANYUAN")?.id).toBe("xiaomi15ultra");
     expect(findModelByProduct(v1ManifestModels, "XUANYUAN", "efisp-8e-gen5")).toBeUndefined();
-    expect(findModelByProduct(v1ManifestModels, "ANNIBALE", "efisp-8e-gen5")).toBeUndefined();
     expect(findModelByProduct(v1ManifestModels, "unknown")).toBeUndefined();
   });
 });

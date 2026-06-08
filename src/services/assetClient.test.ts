@@ -23,14 +23,14 @@ const sha256Hex = async (text: string) => {
 };
 
 describe("requiredAssetPathsForModel", () => {
-  it("keeps EDL ABL metadata in sync with rawprogram4.xml for all models", () => {
+  it("keeps only legacy FTD models in the v1 runtime manifest", () => {
     const models = v1ManifestModels.map((entry) => supportedModelSchema.parse(entry));
     const legacyModels = models.filter((model) => model.family === "legacy-ftd");
-    const phoneModels = ["xiaomi15", "xiaomi15pro", "xiaomi15ultra", "redmi-k80pro", "redmi-k90"];
 
-    expect(models).toHaveLength(11);
+    expect(models).toHaveLength(6);
     expect(legacyModels).toHaveLength(6);
     expect(legacyModels.every((model) => model.edlAbl)).toBe(true);
+    expect(models.some((model) => model.family === "efisp-8e-gen5")).toBe(false);
 
     for (const model of legacyModels) {
       expect(model.edlAbl).toMatchObject({
@@ -40,33 +40,6 @@ describe("requiredAssetPathsForModel", () => {
       });
     }
 
-    for (const modelId of phoneModels) {
-      expect(models.find((model) => model.id === modelId)?.edlAbl?.targets).toEqual([
-        { slot: "a", label: "abl_a", lun: 4, startSector: "121734", maxSectors: 2048 },
-        { slot: "b", label: "abl_b", lun: 4, startSector: "367036", maxSectors: 2048 },
-      ]);
-    }
-
-    expect(models.find((model) => model.id === "xiaomi-pad8pro")?.edlAbl?.targets).toEqual([
-      { slot: "a", label: "abl_a", lun: 4, startSector: "58758", maxSectors: 2048 },
-      { slot: "b", label: "abl_b", lun: 4, startSector: "241084", maxSectors: 2048 },
-    ]);
-  });
-
-  it("lists only the shared EFISP payload for 8E Gen 5 models", () => {
-    const model = v1ManifestModels.find((entry) => entry.id === "xiaomi17");
-    const plan: FlashPlan = {
-      modelId: "xiaomi17",
-      product: "pudding",
-      operations: [{ type: "getvar", name: "product", expect: "pudding" }],
-    };
-
-    if (!model) {
-      throw new Error("xiaomi17 model fixture missing");
-    }
-
-    expect(requiredAssetPathsForModel(model, plan)).toEqual(["efisp/gbl_efi_unlock.efi"]);
-    expect(requiredAssetPathsForPhase(model, plan, "write-efisp")).toEqual(["efisp/gbl_efi_unlock.efi"]);
   });
 
   it("lists ABL and firehose for EDL ABL phase", () => {
@@ -121,6 +94,39 @@ describe("requiredAssetPathsForModel", () => {
       "packages/xiaomi15/images/boot.img",
       "packages/xiaomi15/images/vendor_boot.img",
     ]);
+  });
+
+  it("filters EFISP models from server manifests before runtime use", async () => {
+    const originalFetch = globalThis.fetch;
+    const client = new ServerAssetClient("/dist-assets", new MemoryAssetCacheStore());
+    const legacyModel = v1ManifestModels.find((entry) => entry.id === "xiaomi15");
+
+    if (!legacyModel) {
+      throw new Error("xiaomi15 model fixture missing");
+    }
+
+    globalThis.fetch = async () =>
+      Response.json({
+        version: 1,
+        models: [
+          legacyModel,
+          {
+            id: "xiaomi17",
+            name: "Xiaomi 17",
+            product: "pudding",
+            family: "efisp-8e-gen5",
+            efispUnlockFile: "efisp/gbl_efi_unlock.efi",
+          },
+        ],
+      });
+
+    try {
+      await expect(client.loadManifest()).resolves.toMatchObject({
+        models: [expect.objectContaining({ id: "xiaomi15", family: "legacy-ftd" })],
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 
   it("lists only final GPT files for restore-gpt resume", () => {

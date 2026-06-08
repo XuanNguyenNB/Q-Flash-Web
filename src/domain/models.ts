@@ -169,7 +169,7 @@ export const v1LegacyManifestModels: readonly LegacyFtdModel[] = v1LegacyModelSo
   ({ localPackageDir: _localPackageDir, ...model }) => model,
 );
 
-export const v1ManifestModels: readonly SupportedModel[] = [...v1Efisp8eModels, ...v1LegacyManifestModels];
+export const v1ManifestModels: readonly SupportedModel[] = [...v1LegacyManifestModels];
 
 export const findModelByProduct = (
   models: readonly SupportedModel[],

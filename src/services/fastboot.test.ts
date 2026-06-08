@@ -4,6 +4,7 @@ import { BrowserFastbootClient, parseFastbootTerminalCommand } from "./fastboot"
 
 class FakeFastbootDevice {
   commands: string[] = [];
+  variables: Record<string, string> = {};
   rebootError: Error | undefined;
   waitPromise: Promise<void> = Promise.resolve();
 
@@ -23,7 +24,7 @@ class FakeFastbootDevice {
 
   async getVariable(name: string) {
     this.commands.push(`getvar:${name}`);
-    return "";
+    return this.variables[name] ?? "";
   }
 
   async reboot(target = "", wait = false) {
@@ -45,6 +46,14 @@ class FakeFastbootDevice {
 
 describe("parseFastbootTerminalCommand", () => {
   it("accepts optional fastboot prefix and maps structured text commands", () => {
+    expect(parseFastbootTerminalCommand("fastboot devices")).toEqual({
+      kind: "devices",
+      display: "fastboot devices",
+    });
+    expect(parseFastbootTerminalCommand("devices")).toEqual({
+      kind: "devices",
+      display: "fastboot devices",
+    });
     expect(parseFastbootTerminalCommand("fastboot getvar product")).toEqual({
       kind: "getvar",
       display: "fastboot getvar product",
@@ -87,6 +96,22 @@ describe("parseFastbootTerminalCommand", () => {
 });
 
 describe("BrowserFastbootClient reboot handling", () => {
+  it("reads fastboot serialno and falls back to serial", async () => {
+    const device = new FakeFastbootDevice();
+    device.variables.serialno = "SERIALNO123";
+    const client = new BrowserFastbootClient(device);
+
+    await expect(client.getSerial()).resolves.toBe("SERIALNO123");
+    expect(device.commands).toEqual(["getvar:serialno"]);
+
+    const fallbackDevice = new FakeFastbootDevice();
+    fallbackDevice.variables.serial = "SERIAL123";
+    const fallbackClient = new BrowserFastbootClient(fallbackDevice);
+
+    await expect(fallbackClient.getSerial()).resolves.toBe("SERIAL123");
+    expect(fallbackDevice.commands).toEqual(["getvar:serialno", "getvar:serial"]);
+  });
+
   it("treats disconnect during an intentional reboot command as expected", async () => {
     const device = new FakeFastbootDevice();
     device.rebootError = new DOMException("Transfer failed because device disconnected", "NetworkError");

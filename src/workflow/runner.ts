@@ -1,17 +1,15 @@
-import { findModelByProduct, isEfisp8eModel, isLegacyFtdModel } from "../domain/models";
-import type { Efisp8eModel, FlashOperation, FlashPlan, LegacyFtdModel, Manifest, SupportedModel } from "../domain/schemas";
-import { verifySha256Blob } from "../domain/hash";
+import { findModelByProduct, isLegacyFtdModel } from "../domain/models";
+import type { FlashOperation, FlashPlan, LegacyFtdModel, Manifest, SupportedModel } from "../domain/schemas";
 import type { AdbClient } from "../services/adb";
 import { requiredAssetPathsForPhase, type AssetPhase } from "../services/assetClient";
-import type { EdlClient } from "../services/edl";
 import { parseFastbootTerminalCommand, type FastbootClient } from "../services/fastboot";
 import { toWorkflowError, WorkflowError } from "./errors";
-import type { PhaseId, ProgressEvent, WorkflowDependencies, WorkflowFamily, WorkflowLog, WorkflowMode } from "./types";
+import type { PhaseId, ProgressEvent, WorkflowDependencies, WorkflowLog, WorkflowMode } from "./types";
 
-const ABL_TMP_DIR = "/data/local/tmp";
-const EFISP_TMP_FILE = "/data/local/tmp/gbl_efi_unlock.efi";
 const ADB_PRODUCT_PROPS = ["ro.product.device", "ro.product.vendor.device", "ro.build.product"] as const;
-type OperationProgressState = Extract<ProgressEvent["state"], "flashing" | "booting" | "sahara" | "configuring">;
+
+type OperationProgressState = Extract<ProgressEvent["state"], "flashing" | "booting" | "configuring">;
+
 type FetchProgressContext = {
   completedItems: number;
   totalItems: number;
@@ -40,9 +38,6 @@ export class UnlockWorkflowRunner {
   private preparedModels = new Set<string>();
   private fastboot: FastbootClient | undefined;
   private adb: AdbClient | undefined;
-  private edl: EdlClient | undefined;
-  private workflowFamily: WorkflowFamily = "legacy-ftd";
-  private workflowMode: WorkflowMode = "standard-mqsas";
   private targetVerified = false;
   private pendingAdbDetection:
     | {
@@ -61,34 +56,30 @@ export class UnlockWorkflowRunner {
   }
 
   overrideTargetModel(model: SupportedModel) {
-    this.workflowFamily = model.family;
-    this.model = model;
+    const legacyModel = this.asLegacyModel(model);
+    this.model = legacyModel;
     this.targetVerified = true;
     this.pendingAdbDetection = undefined;
     this.deps.onModelDetected?.({
-      model,
-      fastbootProduct: model.product,
+      model: legacyModel,
+      fastbootProduct: legacyModel.product,
       source: "override",
       verified: true,
     });
-    this.log("warn", `Developer override target: ${model.name} (${model.product}).`);
+    this.log("warn", `Developer override target: ${legacyModel.name} (${legacyModel.product}).`);
   }
 
   setWorkflowMode(mode: WorkflowMode) {
-    this.workflowMode = mode;
-    this.log("warn", `Workflow mode: ${mode}.`);
-  }
+    if (mode === "edl-standard") {
+      this.log("warn", "EDL_Standard: engineering ABL da duoc nap thu cong; app chi chay Fastboot/FTD.");
+      return;
+    }
 
-  setWorkflowFamily(family: WorkflowFamily) {
-    this.workflowFamily = family;
-    this.model = undefined;
-    this.pendingAdbDetection = undefined;
-    this.targetVerified = false;
-    this.log("warn", `Workflow family: ${family}.`);
+    this.log("warn", "Workflow mode: Standard Fastboot/FTD.");
   }
 
   async disconnectSession() {
-    const closeResults = await Promise.allSettled([this.adb?.close(), this.fastboot?.close(), this.edl?.close()]);
+    const closeResults = await Promise.allSettled([this.adb?.close(), this.fastboot?.close()]);
 
     for (const result of closeResults) {
       if (result.status === "rejected") {
@@ -98,7 +89,6 @@ export class UnlockWorkflowRunner {
 
     this.adb = undefined;
     this.fastboot = undefined;
-    this.edl = undefined;
     this.model = undefined;
     this.pendingAdbDetection = undefined;
     this.targetVerified = false;
@@ -113,7 +103,7 @@ export class UnlockWorkflowRunner {
       this.log("info", "Dang tai manifest va bang SHA-256 tu asset server.");
       this.manifest = await this.deps.assets.loadManifest();
       await this.deps.assets.loadRootSha256();
-      this.log("success", `Da tai manifest v${this.manifest.version}, ${this.manifest.models.length} model.`);
+      this.log("success", `Da tai manifest v${this.manifest.version}, ${this.manifest.models.length} model legacy FTD.`);
       return this.manifest;
     } catch (error) {
       throw toWorkflowError(error, "MANIFEST_INVALID");
@@ -132,38 +122,40 @@ export class UnlockWorkflowRunner {
 
       const candidates = await this.readAdbProductCandidates();
       const detected = candidates
-        .map((product) => ({ product, model: findModelByProduct(manifest.models, product, this.workflowFamily) }))
+        .map((product) => ({ product, model: findModelByProduct(manifest.models, product) }))
         .find((candidate): candidate is { product: string; model: SupportedModel } => Boolean(candidate.model));
 
       if (!detected) {
         throw new WorkflowError(
           "UNSUPPORTED_PRODUCT",
-          `ADB codename ${candidates.join(", ") || "(trống)"} không được hỗ trợ.`,
+          `ADB codename ${candidates.join(", ") || "(empty)"} khong duoc ho tro trong flow FTD.`,
         );
       }
 
-      this.model = detected.model;
+      const model = this.asLegacyModel(detected.model);
+      this.model = model;
       this.targetVerified = false;
       this.pendingAdbDetection = {
-        model: detected.model,
+        model,
         product: detected.product,
       };
       this.deps.onModelDetected?.({
-        model: detected.model,
+        model,
         adbProduct: detected.product,
         source: "adb",
         verified: false,
       });
-      this.log("success", `ADB detect: ${detected.model.name} (${detected.product}).`);
+      this.log("success", `ADB detect: ${model.name} (${detected.product}).`);
       this.log("command", "adb reboot bootloader");
       await this.adb.rebootBootloader();
       await this.adb.close();
       this.adb = undefined;
       this.deps.onDeviceStatus?.("waiting-manual-reboot");
       this.log("warn", "May dang reboot sang Fastboot. Khi thay man Fastboot, bam Ket noi Fastboot de xac minh model.");
-      return detected.model;
+      return model;
     } catch (error) {
       await this.adb?.close().catch(() => undefined);
+      this.adb = undefined;
       this.deps.onPhaseStatus?.("connect-device", "failed");
       const workflowError = toWorkflowError(error);
       this.log("error", workflowError.message);
@@ -180,21 +172,20 @@ export class UnlockWorkflowRunner {
       this.deps.onDeviceStatus?.("fastboot");
       this.log("command", "fastboot getvar product");
       const product = await this.fastboot.getvar("product");
+      this.log("command", "fastboot getvar serialno");
+      const serial = await this.readFastbootSerial(this.fastboot, false);
 
       if (this.pendingAdbDetection) {
         const pending = this.pendingAdbDetection;
 
         if (!product.trim()) {
-          throw new WorkflowError(
-            "WRONG_PRODUCT",
-            `Fastboot product trống, cần khớp ADB codename ${pending.product}.`,
-          );
+          throw new WorkflowError("WRONG_PRODUCT", `Fastboot product empty, can khop ADB codename ${pending.product}.`);
         }
 
         if (product.trim().toLowerCase() !== pending.model.product.toLowerCase()) {
           throw new WorkflowError(
             "WRONG_PRODUCT",
-            `ADB codename ${pending.product} nhưng Fastboot product ${product}; dừng để tránh sai máy.`,
+            `ADB codename ${pending.product} nhung Fastboot product ${product}; dung de tranh sai may.`,
           );
         }
 
@@ -205,6 +196,7 @@ export class UnlockWorkflowRunner {
           model: pending.model,
           adbProduct: pending.product,
           fastbootProduct: product,
+          fastbootSerial: serial || undefined,
           source: "verified",
           verified: true,
         });
@@ -212,22 +204,24 @@ export class UnlockWorkflowRunner {
         return pending.model;
       }
 
-      const model = findModelByProduct(manifest.models, product, this.workflowFamily);
+      const model = findModelByProduct(manifest.models, product);
 
       if (!model) {
-        throw new WorkflowError("UNSUPPORTED_PRODUCT", `Codename ${product || "(trống)"} không được hỗ trợ.`);
+        throw new WorkflowError("UNSUPPORTED_PRODUCT", `Codename ${product || "(empty)"} khong duoc ho tro trong flow FTD.`);
       }
 
-      this.model = model;
+      const legacyModel = this.asLegacyModel(model);
+      this.model = legacyModel;
       this.targetVerified = true;
       this.deps.onModelDetected?.({
-        model,
+        model: legacyModel,
         fastbootProduct: product,
+        fastbootSerial: serial || undefined,
         source: "fastboot",
         verified: true,
       });
-      this.log("success", `Da khoa model: ${model.name} (${model.product}).`);
-      return model;
+      this.log("success", `Da khoa model: ${legacyModel.name} (${legacyModel.product}).`);
+      return legacyModel;
     });
   }
 
@@ -238,9 +232,14 @@ export class UnlockWorkflowRunner {
 
       this.log("command", command.display);
 
+      if (command.kind === "devices") {
+        const serial = await this.readFastbootSerial(fastboot, true);
+        return `${serial || "(unknown)"}\tfastboot`;
+      }
+
       if (command.kind === "getvar") {
         const value = await fastboot.getvar(command.name);
-        this.log("success", `${command.name}=${value || "(trong)"}`);
+        this.log("success", `${command.name}=${value || "(empty)"}`);
         return value;
       }
 
@@ -280,11 +279,11 @@ export class UnlockWorkflowRunner {
 
   async prepareAssetsForSelectedModel() {
     return this.runPhase("prepare-assets", async () => {
-      const model = this.requireModel();
+      const model = this.requireLegacyModel();
       this.requireVerifiedTarget();
-      const plan = isLegacyFtdModel(model) ? await this.loadPlanForModel(model) : this.efispPlanForModel(model);
+      const plan = await this.loadPlanForModel(model);
 
-      this.log("info", `Preparing all assets for ${model.name} before ADB/Fastboot destructive phases.`);
+      this.log("info", `Preparing FTD assets for ${model.name}.`);
       await this.deps.assets.prepareModelAssets(model, plan, (event) => {
         this.deps.onProgress?.(event);
       });
@@ -293,26 +292,8 @@ export class UnlockWorkflowRunner {
     });
   }
 
-  async bootAndroidPermissive() {
-    return this.runPhase("boot-permissive", async () => {
-      const model = this.requireModel();
-      await this.ensureAssetsForPhase("boot-permissive", model);
-      const fastboot = await this.ensureFastbootForModel();
-      await this.assertFastbootProduct(fastboot, model);
-      const permissiveCommand = isEfisp8eModel(model)
-        ? "oem set-gpu-preemption-value 0 androidboot.selinux=permissive"
-        : "oem set-gpu-preemption 0 androidboot.selinux=permissive";
-      this.log("command", `fastboot ${permissiveCommand}`);
-      await fastboot.runRaw(permissiveCommand);
-      this.log("command", "fastboot continue");
-      await fastboot.runRaw("continue");
-      this.deps.onDeviceStatus?.("waiting-manual-reboot");
-      this.log("warn", "Cho Android boot len, bat USB Debugging va approve RSA prompt.");
-    });
-  }
-
   async rebootAdbToBootloaderForSelectedModel() {
-    const model = this.requireModel();
+    const model = this.requireLegacyModel();
     this.requireVerifiedTarget();
 
     await this.adb?.close().catch(() => undefined);
@@ -329,7 +310,7 @@ export class UnlockWorkflowRunner {
       if (!matched) {
         throw new WorkflowError(
           "WRONG_PRODUCT",
-          `ADB codename ${candidates.join(", ") || "(trống)"} không khớp model đã khóa ${model.product}.`,
+          `ADB codename ${candidates.join(", ") || "(empty)"} khong khop model da khoa ${model.product}.`,
         );
       }
 
@@ -347,86 +328,6 @@ export class UnlockWorkflowRunner {
       this.log("error", workflowError.message);
       throw workflowError;
     }
-  }
-
-  async downgradeAbl(confirmed: boolean) {
-    return this.runPhase("downgrade-abl", async () => {
-      this.requireConfirmation(confirmed);
-      const model = this.requireLegacyModel();
-
-      if (this.workflowMode === "c06-edl") {
-        await this.flashAblViaEdl(model);
-        return;
-      }
-
-      await this.downgradeAblViaMqsas(model);
-    });
-  }
-
-  async writeEfisp(confirmed: boolean) {
-    return this.runPhase("write-efisp", async () => {
-      this.requireConfirmation(confirmed);
-      const model = this.requireEfispModel();
-      await this.ensureAssetsForPhase("write-efisp", model);
-      this.adb = this.deps.createAdbClient();
-      this.log("info", "Mo WebUSB picker cho ADB de ghi EFISP.");
-      await this.adb.connect();
-      this.deps.onDeviceStatus?.("adb");
-
-      await this.assertAdbProduct(model);
-      const enforce = await this.shell("getenforce");
-
-      if (enforce.stdout.trim() !== "Permissive") {
-        throw new WorkflowError("SELINUX_NOT_PERMISSIVE", `getenforce tra ve: ${enforce.stdout.trim() || "(trong)"}`);
-      }
-
-      const efispBlob = await this.fetch(model.efispUnlockFile, `Tai EFISP unlock ${model.efispUnlockFile}`);
-      this.log("command", `adb push ${model.efispUnlockFile} ${EFISP_TMP_FILE}`);
-      await this.adb.push(EFISP_TMP_FILE, efispBlob);
-      await this.shell(
-        `service call miui.mqsas.IMQSNative 21 i32 1 s16 "dd" i32 1 s16 "if=${EFISP_TMP_FILE} of=/dev/block/by-name/efisp" s16 "/data/mqsas/log.txt" i32 60`,
-      );
-
-      this.log("command", "adb reboot bootloader");
-      await this.adb.rebootBootloader();
-      await this.adb.close();
-      this.adb = undefined;
-      this.deps.onDeviceStatus?.("waiting-manual-reboot");
-      this.log("warn", "Sau khi ghi EFISP, cho may ve Fastboot roi chay buoc xac minh unlock.");
-    });
-  }
-
-  async verifyUnlock() {
-    return this.runPhase("verify-unlock", async () => {
-      const model = this.requireEfispModel();
-      const fastboot = await this.ensureFastbootForModel();
-      await this.assertFastbootProduct(fastboot, model);
-      this.log("command", "fastboot getvar unlocked");
-      const unlocked = await fastboot.getvar("unlocked");
-
-      if (unlocked.trim().toLowerCase() !== "yes") {
-        throw new WorkflowError("FASTBOOT_FAILED", `unlocked=${unlocked || "(trong)"}; bootloader chua bao unlocked.`);
-      }
-
-      this.log("success", "Bootloader unlocked: yes.");
-    });
-  }
-
-  async cleanupData(confirmed: boolean) {
-    return this.runPhase("cleanup-data", async () => {
-      this.requireConfirmation(confirmed);
-      const model = this.requireEfispModel();
-      const fastboot = await this.ensureFastbootForModel();
-      await this.assertFastbootProduct(fastboot, model);
-
-      for (const partition of ["efisp", "metadata", "userdata"]) {
-        this.log("command", `fastboot erase ${partition}`);
-        await fastboot.erase(partition);
-        this.log("success", `Erased ${partition}`);
-      }
-
-      this.log("success", "Da cleanup EFISP/metadata/userdata cho flow 8E Gen 5.");
-    });
   }
 
   async flashFtdPackage(confirmed: boolean) {
@@ -482,6 +383,7 @@ export class UnlockWorkflowRunner {
         this.emitOperationProgress("Flash partition:4", progress, "flashing", 1, totalOperations, "Flash partition:4"),
       );
       this.emitOperationProgress("Flash partition:4", 1, "flashing", 1, totalOperations, "Flash partition:4");
+
       this.log("command", `fastboot boot ${model.unlock.bootImage}`);
       const unlockBoot = await this.fetch(model.unlock.bootImage, "Tai unlock boot.img", {
         completedItems: 2,
@@ -523,145 +425,26 @@ export class UnlockWorkflowRunner {
       }
 
       this.log("command", "fastboot reboot bootloader");
-      this.emitOperationProgress("Reboot bootloader", 0, "configuring", model.finalGpt.length, totalOperations, "fastboot reboot bootloader");
+      this.emitOperationProgress(
+        "Reboot bootloader",
+        0,
+        "configuring",
+        model.finalGpt.length,
+        totalOperations,
+        "fastboot reboot bootloader",
+      );
       await fastboot.reboot("bootloader");
-      this.emitOperationProgress("Reboot bootloader", 1, "configuring", model.finalGpt.length, totalOperations, "fastboot reboot bootloader");
+      this.emitOperationProgress(
+        "Reboot bootloader",
+        1,
+        "configuring",
+        model.finalGpt.length,
+        totalOperations,
+        "fastboot reboot bootloader",
+      );
       this.deps.onDeviceStatus?.("fastboot");
       this.log("success", "Hoan tat GPT cuoi. Mo MiFlash, chon ROM goc dung model, chon Clean All.");
     });
-  }
-
-  private async downgradeAblViaMqsas(model: LegacyFtdModel) {
-    await this.ensureAssetsForPhase("downgrade-abl", model);
-    this.adb = this.deps.createAdbClient();
-    this.log("info", "Mo WebUSB picker cho ADB.");
-    await this.adb.connect();
-    this.deps.onDeviceStatus?.("adb");
-
-    const enforce = await this.shell("getenforce");
-
-    if (enforce.stdout.trim() !== "Permissive") {
-      throw new WorkflowError("SELINUX_NOT_PERMISSIVE", `getenforce trả về: ${enforce.stdout.trim() || "(trống)"}`);
-    }
-
-    const ablName = model.ablFile.split("/").at(-1) ?? "abl.elf";
-    const remotePath = `${ABL_TMP_DIR}/${ablName}`;
-    const ablBlob = await this.fetch(model.ablFile, `Tai ABL ${ablName}`);
-    this.log("command", `adb push ${model.ablFile} ${remotePath}`);
-    await this.adb.push(remotePath, ablBlob);
-
-    await this.shell(
-      `service call miui.mqsas.IMQSNative 21 i32 1 s16 "dd" i32 1 s16 "if=${remotePath} of=/dev/block/by-name/abl_a" s16 "/data/mqsas/log.txt" i32 60`,
-    );
-    await this.shell(
-      `service call miui.mqsas.IMQSNative 21 i32 1 s16 "dd" i32 1 s16 "if=${remotePath} of=/dev/block/by-name/abl_b" s16 "/data/mqsas/log.txt" i32 60`,
-    );
-
-    this.log("command", "adb reboot bootloader");
-    await this.adb.rebootBootloader();
-    await this.adb.close();
-    this.deps.onDeviceStatus?.("waiting-manual-reboot");
-    this.log("warn", "Neu browser mat USB session, bam Reconnect Fastboot o buoc sau.");
-  }
-
-  private async flashAblViaEdl(model: LegacyFtdModel) {
-    this.requireVerifiedTarget();
-
-    if (!model.edlAbl) {
-      throw new WorkflowError("UNSUPPORTED_PRODUCT", `Mẫu máy ${model.name} chưa có metadata EDL ABL.`);
-    }
-
-    await this.ensureAssetsForPhase("edl-abl", model);
-
-    const edlAbl = model.edlAbl;
-    const totalOperations = edlAbl.targets.length + 2;
-    const ablBlob = await this.fetch(model.ablFile, `Tai ABL verified ${model.ablFile}`, {
-      completedItems: 0,
-      totalItems: totalOperations,
-      itemLabel: `Tai ABL verified ${model.ablFile}`,
-    });
-    const firehoseBlob = await this.fetch(edlAbl.firehoseFile, `Tai firehose verified ${edlAbl.firehoseFile}`, {
-      completedItems: 0,
-      totalItems: totalOperations,
-      itemLabel: `Tai firehose verified ${edlAbl.firehoseFile}`,
-    });
-
-    await verifySha256Blob(firehoseBlob, edlAbl.firehoseSha256);
-
-    const paddedSectors = Math.ceil(ablBlob.size / edlAbl.sectorSize);
-
-    for (const target of edlAbl.targets) {
-      if (paddedSectors > target.maxSectors) {
-        throw new WorkflowError(
-          "ASSET_PREFETCH_FAILED",
-          `${target.label} ABL sau padding cần ${paddedSectors} sector, vượt giới hạn ${target.maxSectors}.`,
-        );
-      }
-    }
-
-    this.edl = this.deps.createEdlClient();
-
-    try {
-      this.log("info", "Mo WebUSB picker cho Qualcomm HS-USB QDLoader 9008.");
-      await this.edl.connect9008();
-      this.deps.onDeviceStatus?.("edl");
-
-      this.log("command", `sahara upload ${edlAbl.firehoseFile}`);
-      this.emitOperationProgress("Sahara upload firehose programmer", 0, "sahara", 0, totalOperations, "Sahara upload firehose programmer");
-      await this.edl.uploadProgrammer(firehoseBlob, (progress) =>
-        this.emitOperationProgress(
-          "Sahara upload firehose programmer",
-          progress,
-          "sahara",
-          0,
-          totalOperations,
-          "Sahara upload firehose programmer",
-        ),
-      );
-      this.emitOperationProgress("Sahara upload firehose programmer", 1, "sahara", 0, totalOperations, "Sahara upload firehose programmer");
-      this.deps.onDeviceStatus?.("firehose");
-
-      this.log("command", "firehose configure MemoryName=ufs");
-      this.emitOperationProgress("Configure Firehose UFS", 0, "configuring", 1, totalOperations, "Configure Firehose UFS");
-      await this.edl.configureUfs();
-      this.emitOperationProgress("Configure Firehose UFS", 1, "configuring", 1, totalOperations, "Configure Firehose UFS");
-
-      for (const [index, target] of edlAbl.targets.entries()) {
-        const completedBefore = index + 2;
-        const itemLabel = `Flash ${target.label} via EDL`;
-        this.log(
-          "command",
-          `firehose program ${target.label} lun=${target.lun} start_sector=${target.startSector} sectors=${paddedSectors}/${target.maxSectors}`,
-        );
-        this.emitOperationProgress(itemLabel, 0, "flashing", completedBefore, totalOperations, itemLabel);
-        await this.edl.programRaw(
-          {
-            label: target.label,
-            lun: target.lun,
-            startSector: target.startSector,
-            maxSectors: target.maxSectors,
-            sectorSize: edlAbl.sectorSize,
-          },
-          ablBlob,
-          (progress) => this.emitOperationProgress(itemLabel, progress, "flashing", completedBefore, totalOperations, itemLabel),
-        );
-        this.emitOperationProgress(itemLabel, 1, "flashing", completedBefore, totalOperations, itemLabel);
-        this.log("success", `Da flash ${target.label} qua EDL.`);
-      }
-
-      this.log("command", "firehose power reset");
-      await this.edl.reset();
-      this.deps.onDeviceStatus?.("waiting-manual-reboot");
-      this.log(
-        "warn",
-        `Sau reset EDL, neu man hinh hien System destroyed thi yen tam. Bam Power 1 lan de tat, giu Volume Down 10-15 giay de vao lai Fastboot, sau do connect Fastboot va verify product=${model.product} truoc khi flash FTD.`,
-      );
-    } finally {
-      await this.edl?.close().catch((error) => {
-        this.log("warn", `Best-effort EDL close warning: ${String(error)}`);
-      });
-      this.edl = undefined;
-    }
   }
 
   private async loadPlanForModel(model: LegacyFtdModel) {
@@ -675,7 +458,7 @@ export class UnlockWorkflowRunner {
     const plan = await this.deps.assets.loadFlashPlan(model.ftdPackage);
 
     if (plan.product.toLowerCase() !== model.product.toLowerCase()) {
-      throw new WorkflowError("WRONG_PRODUCT", `Product trong plan ${plan.product} không khớp ${model.product}.`);
+      throw new WorkflowError("WRONG_PRODUCT", `Product trong plan ${plan.product} khong khop ${model.product}.`);
     }
 
     this.plans.set(model.id, plan);
@@ -699,13 +482,10 @@ export class UnlockWorkflowRunner {
       const actual = await fastboot.getvar(operation.name);
 
       if (operation.expect && actual.toLowerCase() !== operation.expect.toLowerCase()) {
-        throw new WorkflowError(
-          "WRONG_PRODUCT",
-          `${operation.name}=${actual || "(trống)"} không khớp ${operation.expect}.`,
-        );
+        throw new WorkflowError("WRONG_PRODUCT", `${operation.name}=${actual || "(empty)"} khong khop ${operation.expect}.`);
       }
 
-      this.log("success", `${prefix} ${operation.name}=${actual || "(trong)"}`);
+      this.log("success", `${prefix} ${operation.name}=${actual || "(empty)"}`);
       this.emitOperationProgress(itemLabel, 1, "configuring", completedBefore, total, itemLabel);
       return;
     }
@@ -767,10 +547,7 @@ export class UnlockWorkflowRunner {
     const deviceAnti = Number((await fastboot.getvar("anti")) || "0");
 
     if (deviceAnti > packageAnti) {
-      throw new WorkflowError(
-        "ANTIROLLBACK_FAILED",
-        `anti device=${deviceAnti}, package=${packageAnti}; dừng flash.`,
-      );
+      throw new WorkflowError("ANTIROLLBACK_FAILED", `anti device=${deviceAnti}, package=${packageAnti}; dung flash.`);
     }
 
     this.log("success", `Antirollback OK: device=${deviceAnti}, package=${packageAnti}.`);
@@ -781,7 +558,7 @@ export class UnlockWorkflowRunner {
     const product = await fastboot.getvar("product");
 
     if (product.toLowerCase() !== model.product.toLowerCase()) {
-      throw new WorkflowError("WRONG_PRODUCT", `Đang kết nối ${product || "(trống)"}, cần ${model.product}.`);
+      throw new WorkflowError("WRONG_PRODUCT", `Dang ket noi ${product || "(empty)"}, can ${model.product}.`);
     }
   }
 
@@ -796,27 +573,8 @@ export class UnlockWorkflowRunner {
     return this.fastboot;
   }
 
-  private async ensureAssetsForPhase(phase: AssetPhase, model: SupportedModel) {
+  private async ensureAssetsForPhase(phase: AssetPhase, model: LegacyFtdModel) {
     this.requireVerifiedTarget();
-
-    if (isEfisp8eModel(model)) {
-      const plan = this.efispPlanForModel(model);
-      const paths = requiredAssetPathsForPhase(model, plan, phase);
-      this.log("info", `Verify/cache ${paths.length} asset cho phase ${phase}.`);
-      await this.deps.assets.prepareAssetPaths(paths, (event) => {
-        this.deps.onProgress?.(event);
-      });
-      return;
-    }
-
-    if (phase === "edl-abl") {
-      const paths = [model.ablFile, model.edlAbl?.firehoseFile].filter((path): path is string => Boolean(path));
-      this.log("info", `Verify/cache ${paths.length} asset cho phase ${phase}.`);
-      await this.deps.assets.prepareAssetPaths(paths, (event) => {
-        this.deps.onProgress?.(event);
-      });
-      return;
-    }
 
     if (this.preparedModels.has(model.id)) {
       return;
@@ -828,10 +586,23 @@ export class UnlockWorkflowRunner {
     await this.deps.assets.prepareAssetPaths(paths, (event) => {
       this.deps.onProgress?.(event);
     });
+  }
 
-    if (phase === "boot-permissive") {
-      this.preparedModels.add(model.id);
+  private async readFastbootSerial(fastboot: FastbootClient, emitDevicesLine: boolean) {
+    const serial = await fastboot.getSerial();
+
+    if (emitDevicesLine) {
+      this.log("success", `${serial || "(unknown)"}\tfastboot`);
+      return serial;
     }
+
+    if (serial) {
+      this.log("success", `Fastboot serial: ${serial}`);
+    } else {
+      this.log("warn", "Fastboot serial unavailable; fastboot devices se hien (unknown).");
+    }
+
+    return serial;
   }
 
   private async readAdbProductCandidates() {
@@ -849,27 +620,13 @@ export class UnlockWorkflowRunner {
     return candidates;
   }
 
-  private async assertAdbProduct(model: SupportedModel) {
-    const candidates = await this.readAdbProductCandidates();
-    const matched = candidates.some((product) => product.toLowerCase() === model.product.toLowerCase());
-
-    if (!matched) {
-      throw new WorkflowError(
-        "WRONG_PRODUCT",
-        `ADB codename ${candidates.join(", ") || "(trong)"} khong khop model da khoa ${model.product}.`,
-      );
-    }
-
-    this.log("success", `ADB da khop model da khoa: ${model.name} (${model.product}).`);
-  }
-
   private async shell(command: string) {
     const adb = this.requireAdb();
     this.log("command", `adb shell ${command}`);
     const result = await adb.shell(command);
 
     if (result.exitCode !== 0) {
-      throw new WorkflowError("ADB_UNAUTHORIZED", `Lệnh ADB thất bại (${result.exitCode}): ${result.stderr}`);
+      throw new WorkflowError("ADB_UNAUTHORIZED", `Lenh ADB that bai (${result.exitCode}): ${result.stderr}`);
     }
 
     if (result.stderr.trim()) {
@@ -937,7 +694,7 @@ export class UnlockWorkflowRunner {
 
   private requireManifest() {
     if (!this.manifest) {
-      throw new WorkflowError("MANIFEST_INVALID", "Manifest chưa tải.");
+      throw new WorkflowError("MANIFEST_INVALID", "Manifest chua tai.");
     }
 
     return this.manifest;
@@ -945,15 +702,17 @@ export class UnlockWorkflowRunner {
 
   private requireModel() {
     if (!this.model) {
-      throw new WorkflowError("UNSUPPORTED_PRODUCT", "Chưa khóa mẫu máy.");
+      throw new WorkflowError("UNSUPPORTED_PRODUCT", "Chua khoa mau may.");
     }
 
     return this.model;
   }
 
   private requireLegacyModel() {
-    const model = this.requireModel();
+    return this.asLegacyModel(this.requireModel());
+  }
 
+  private asLegacyModel(model: SupportedModel): LegacyFtdModel {
     if (!isLegacyFtdModel(model)) {
       throw new WorkflowError("UNSUPPORTED_PRODUCT", `Mau may ${model.name} khong dung flow legacy FTD.`);
     }
@@ -961,33 +720,15 @@ export class UnlockWorkflowRunner {
     return model;
   }
 
-  private requireEfispModel() {
-    const model = this.requireModel();
-
-    if (!isEfisp8eModel(model)) {
-      throw new WorkflowError("UNSUPPORTED_PRODUCT", `Mau may ${model.name} khong dung flow EFISP 8E Gen 5.`);
-    }
-
-    return model;
-  }
-
-  private efispPlanForModel(model: Efisp8eModel): FlashPlan {
-    return {
-      modelId: model.id,
-      product: model.product,
-      operations: [{ type: "getvar", name: "product", expect: model.product }],
-    };
-  }
-
   private requireVerifiedTarget() {
     if (!this.targetVerified) {
-      throw new WorkflowError("WRONG_PRODUCT", "Fastboot product chưa được xác minh khớp mẫu máy.");
+      throw new WorkflowError("WRONG_PRODUCT", "Fastboot product chua duoc xac minh khop mau may.");
     }
   }
 
   private requireAdb() {
     if (!this.adb) {
-      throw new WorkflowError("DEVICE_NOT_FOUND", "ADB chưa kết nối.");
+      throw new WorkflowError("DEVICE_NOT_FOUND", "ADB chua ket noi.");
     }
 
     return this.adb;

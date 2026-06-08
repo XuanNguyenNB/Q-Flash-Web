@@ -6,6 +6,7 @@ export interface FastbootClient {
   connect(): Promise<void>;
   close(): Promise<void>;
   getvar(name: string): Promise<string>;
+  getSerial(): Promise<string>;
   runRaw(command: string): Promise<string>;
   erase(partition: string): Promise<void>;
   flash(partition: string, blob: Blob, onProgress?: (progress: number) => void): Promise<void>;
@@ -40,6 +41,7 @@ type BrowserUsbDevice = {
 };
 
 export type ParsedFastbootTerminalCommand =
+  | { kind: "devices"; display: string }
   | { kind: "getvar"; display: string; name: string }
   | { kind: "erase"; display: string; partition: string }
   | { kind: "setActive"; display: string; slot: "a" | "b" }
@@ -123,6 +125,11 @@ export const parseFastbootTerminalCommand = (input: string): ParsedFastbootTermi
 
   const command = tokens[0].toLowerCase();
   const display = `fastboot ${tokens.join(" ")}`;
+
+  if (command === "devices") {
+    assertArity("devices", tokens, 1);
+    return { kind: "devices", display };
+  }
 
   if (command === "getvar") {
     assertArity("getvar <name>", tokens, 2);
@@ -241,6 +248,16 @@ export class BrowserFastbootClient implements FastbootClient {
 
   async getvar(name: string) {
     return (await this.device.getVariable(name)) ?? "";
+  }
+
+  async getSerial() {
+    const serialno = (await this.getvar("serialno")).trim();
+
+    if (serialno) {
+      return serialno;
+    }
+
+    return (await this.getvar("serial")).trim();
   }
 
   async runRaw(command: string) {

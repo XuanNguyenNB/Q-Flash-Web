@@ -1,6 +1,5 @@
 import {
   Check,
-  CheckCircle2,
   ChevronDown,
   Circle,
   Cpu,
@@ -28,67 +27,49 @@ import type { PhaseId, PhaseStatus, ProgressEvent, WorkflowLog } from "./workflo
 type WorkflowState = ReturnType<typeof useUnlockWorkflow>;
 
 const operationProgressStates = new Set(["flashing", "booting", "sahara", "configuring"]);
-
 const preferredLegacyModelId = "xiaomi15ultra";
 
 const destructiveCopy = (workflow: WorkflowState): Partial<Record<PhaseId, string>> => ({
-  "write-efisp": "Toi xac nhan dang ghi gbl_efi_unlock.efi vao phan vung efisp dung model 8E Gen 5 da nhan dien.",
-  "cleanup-data": "Toi xac nhan xoa efisp, metadata va userdata sau khi fastboot da bao unlocked: yes.",
-  "downgrade-abl":
-    workflow.workflowMode === "c06-edl"
-      ? "Tôi xác nhận máy đang ở EDL 9008 và đang ghi ABL đúng mẫu máy qua Firehose SM8750."
-      : "Tôi xác nhận đang ghi ABL cho đúng mẫu máy đã nhận diện.",
   "flash-ftd":
-    workflow.workflowMode === "c06-edl"
-      ? "Tôi xác nhận đã xử lý màn System destroyed sau EDL: bấm nguồn 1 lần để tắt, giữ Giảm âm 10-15 giây để vào lại Fastboot, rồi flash FTD đúng mẫu máy."
-      : "Tôi xác nhận flash gói FTD đúng mẫu máy và chấp nhận mất dữ liệu.",
-  "unlock-payload": "Tôi xác nhận máy đang ở Fastboot từ FTD để chạy payload unlock.",
-  "restore-gpt": "Tôi xác nhận khôi phục GPT cuối, sau đó flash ROM gốc bằng MiFlash Clean All.",
+    workflow.workflowMode === "edl-standard"
+      ? "Toi xac nhan ABL engineering da duoc nap thu cong, may dang o Fastboot, va se flash FTD dung mau may."
+      : "Toi xac nhan flash goi FTD dung mau may va chap nhan mat du lieu.",
+  "unlock-payload": "Toi xac nhan may dang o Fastboot tu FTD de chay payload unlock.",
+  "restore-gpt": "Toi xac nhan khoi phuc GPT cuoi, sau do flash ROM goc bang MiFlash Clean All.",
 });
 
 const workflowModeCopy = {
-  "standard-mqsas": {
-    title: "Quy trình thường MQSAS",
-    detail: "Boot Android permissive rồi ghi ABL qua MQSAS.",
+  standard: {
+    title: "Standard",
+    detail: "Detect product, tai ROM FTD, flash FTD, chay payload unlock va restore GPT.",
   },
-  "c06-edl": {
-    title: "Nạp ABL qua EDL mode",
-    detail: "Ghi ABL_A/ABL_B bằng Firehose khi máy đang ở Qualcomm 9008.",
-  },
-};
-
-const workflowFamilyCopy = {
-  "legacy-ftd": {
-    title: "Xiaomi 15 Ultra / Legacy FTD",
-    detail: "Dùng flow ABL + FTD + unlock payload + GPT như bản v1.",
-  },
-  "efisp-8e-gen5": {
-    title: "Xiaomi 17 / K90 Pro Max 8E Gen 5",
-    detail: "Chỉ ghi EFISP unlock, không dùng ABL/FTD/GPT của Mi15.",
+  "edl-standard": {
+    title: "EDL_Standard",
+    detail: "Flow Fastboot/FTD binh thuong sau khi ABL engineering da duoc nap thu cong.",
   },
 };
 
-const edlModeInfo = "Dành cho các thiết bị có bản cập nhật đuôi C06, C07, C08.";
+const edlModeInfo =
+  "EDL_Standard khong nap ABL qua browser; hay nap ABL engineering thu cong truoc, roi quay lai Fastboot de chay flow FTD.";
 
 const fixedWarnings = [
-  "Sai mẫu máy hoặc sai gói có thể brick máy.",
-  "Web v1 không flash ROM gốc 8-12GB; bước cuối dùng MiFlash.",
-  "Không chọn Clean All and Lock trong MiFlash.",
-  "Không rút cáp khi đang flash phân vùng hoặc GPT.",
-  "Flow 8E Gen 5 chi ho tro pudding, pandora, popsicle, nezha, myron.",
-  "Legacy flow chi ho tro dada, haotian, xuanyuan, miro, annibale, piano.",
+  "Sai mau may hoac sai goi co the brick may.",
+  "Web khong flash ROM goc 8-12GB; buoc cuoi dung MiFlash.",
+  "Khong chon Clean All and Lock trong MiFlash.",
+  "Khong rut cap khi dang flash phan vung hoac GPT.",
+  "Chi ho tro legacy FTD: dada, haotian, xuanyuan, miro, annibale, piano.",
 ];
 
 const statusStyles: Record<PhaseStatus, { row: string; dot: string; label: string }> = {
   pending: {
     row: "border-white/8 bg-white/[0.025] text-slate-500",
     dot: "border-slate-600 text-slate-600",
-    label: "Chờ",
+    label: "Cho",
   },
   running: {
     row: "border-sky-300/35 bg-sky-300/[0.08] text-sky-100 shadow-[0_0_26px_rgba(56,189,248,0.08)]",
     dot: "border-sky-300 bg-sky-300/15 text-sky-200",
-    label: "Đang chạy",
+    label: "Dang chay",
   },
   done: {
     row: "border-emerald-300/25 bg-emerald-300/[0.07] text-emerald-100",
@@ -98,12 +79,12 @@ const statusStyles: Record<PhaseStatus, { row: string; dot: string; label: strin
   failed: {
     row: "border-rose-300/35 bg-rose-400/[0.09] text-rose-100",
     dot: "border-rose-300 bg-rose-300/15 text-rose-200",
-    label: "Lỗi",
+    label: "Loi",
   },
   skipped: {
     row: "border-slate-500/20 bg-white/[0.018] text-slate-500",
     dot: "border-slate-600 text-slate-600",
-    label: "Bỏ qua",
+    label: "Bo qua",
   },
 };
 
@@ -118,45 +99,37 @@ function App() {
   const mainDisabled = workflow.nextPhase === "finished" ? workflow.logs.length === 0 : !workflow.canRun;
   const connectButtonLabel =
     workflow.busy && workflow.nextPhase === "connect-device"
-      ? "Đang mở WebUSB"
+      ? "Dang mo WebUSB"
       : workflow.statuses["connect-device"] === "done"
-        ? "Đã kết nối thiết bị"
+        ? "Da ket noi thiet bi"
         : workflow.awaitingFastbootVerification
-          ? "Chờ xác minh Fastboot"
-          : "Kết nối WebUSB";
+          ? "Cho xac minh Fastboot"
+          : "Ket noi WebUSB";
   const connectHint =
     workflow.statuses["connect-device"] === "done"
-      ? "Thiết bị đã được nhận diện và mẫu máy đã xác minh."
+      ? "Thiet bi da duoc nhan dien, product va serial Fastboot da duoc ghi lai neu bootloader tra ve."
       : workflow.awaitingFastbootVerification
-        ? "Máy đã reboot từ Android sang Fastboot. Bấm Kết nối Fastboot và chọn lại thiết bị."
-      : !workflow.manifest
-        ? "Đang tải danh sách tệp trước khi mở hộp chọn thiết bị."
-        : !workflow.preflight.isHttps || !workflow.preflight.hasWebUsb
-          ? "Cần HTTPS/localhost và Chrome hoặc Edge có WebUSB."
-          : "Chọn ADB Android nếu máy đang vào hệ điều hành, hoặc Fastboot nếu máy đã ở bootloader.";
-  const actionHint = workflow.busy
-    ? "Đang chạy bước hiện tại."
-    : workflow.awaitingFastbootVerification
-      ? "Máy đang reboot sang Fastboot. Khi thấy màn Fastboot, bấm Kết nối Fastboot để xác minh mẫu máy."
-      : workflow.nextPhase === "flash-ftd" && workflow.workflowMode === "c06-edl"
-        ? "Sau khi nạp EDL, màn System destroyed là bình thường. Yên tâm, không sao: bấm nút nguồn 1 lần để tắt, giữ Giảm âm 10-15 giây để vào Fastboot, rồi bấm Kết nối lại Fastboot và flash FTD."
-      : workflow.nextPhase === "write-efisp"
-        ? "Ket noi ADB Android, kiem tra codename va SELinux Permissive truoc khi ghi gbl_efi_unlock.efi vao efisp."
-        : workflow.nextPhase === "verify-unlock"
-          ? "Ket noi lai Fastboot de doc unlocked. Chi tiep tuc cleanup khi fastboot bao unlocked: yes."
-          : workflow.nextPhase === "cleanup-data"
-            ? "Xoa efisp, metadata va userdata sau khi unlock thanh cong."
-    : workflow.nextPhase === "connect-device"
-      ? "Kết nối ADB Android để nhận diện và reboot bootloader, hoặc kết nối Fastboot nếu máy đã ở Fastboot."
-      : !preflightReady
-        ? "Tick đủ kiểm tra ban đầu để bật bước tiếp theo sau khi đã nhận diện máy."
+        ? "May da reboot tu Android sang Fastboot. Bam Ket noi Fastboot va chon lai thiet bi."
         : !workflow.manifest
-          ? "Đang tải danh sách tệp từ máy chủ."
-          : workflow.requiresConfirmation && !workflow.canRun
-            ? "Tick xác nhận của bước nguy hiểm để tiếp tục."
-            : workflow.nextPhase === "finished"
-              ? "Có thể tải nhật ký sau khi quy trình hoàn tất."
-              : "Sẵn sàng chạy bước hiện tại.";
+          ? "Dang tai danh sach file truoc khi mo hop chon thiet bi."
+          : !workflow.preflight.isHttps || !workflow.preflight.hasWebUsb
+            ? "Can HTTPS/localhost va Chrome hoac Edge co WebUSB."
+            : "Chon ADB Android neu may dang vao he dieu hanh, hoac Fastboot neu may da o bootloader.";
+  const actionHint = workflow.busy
+    ? "Dang chay buoc hien tai."
+    : workflow.awaitingFastbootVerification
+      ? "May dang reboot sang Fastboot. Khi thay man Fastboot, bam Ket noi Fastboot de xac minh mau may."
+      : workflow.nextPhase === "connect-device"
+        ? "Ket noi ADB Android de nhan dien va reboot bootloader, hoac ket noi Fastboot neu may da o bootloader."
+        : workflow.workflowMode === "edl-standard" && workflow.nextPhase === "flash-ftd"
+          ? "ABL engineering phai duoc nap thu cong truoc. Web chi tiep tuc flow Fastboot/FTD tu day."
+          : !preflightReady
+            ? "Tick du kiem tra ban dau de bat buoc tiep theo sau khi da nhan dien may."
+            : workflow.requiresConfirmation && !workflow.canRun
+              ? "Tick xac nhan cua buoc nguy hiem de tiep tuc."
+              : workflow.nextPhase === "finished"
+                ? "Co the tai nhat ky sau khi quy trinh hoan tat."
+                : "San sang chay buoc hien tai.";
 
   return (
     <main className="min-h-dvh overflow-hidden bg-[#0b0d10] text-slate-100">
@@ -166,9 +139,9 @@ function App() {
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="max-w-3xl">
               <div className="mb-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                <span>Công cụ WebUSB thử nghiệm</span>
+                <span>Cong cu WebUSB thu nghiem</span>
                 <span className="h-1 w-1 rounded-full bg-slate-700" />
-                <span>ADB + Fastboot</span>
+                <span>Legacy FTD only</span>
                 {workflow.mockMode && (
                   <>
                     <span className="h-1 w-1 rounded-full bg-amber-500/70" />
@@ -178,7 +151,7 @@ function App() {
               </div>
               <h1 className="text-2xl font-semibold leading-tight text-white sm:text-3xl">Xiaomi WebUSB Unlock</h1>
               <p className="mt-1 max-w-3xl truncate text-sm leading-6 text-slate-400">
-                Quy trình Xiaomi 15 Ultra / Legacy FTD, kiểm tra SHA-256 trước khi chạy lệnh nguy hiểm.
+                Flow Xiaomi 8 Elite / FTD: detect product, flash FTD, unlock payload, restore GPT.
               </p>
             </div>
 
@@ -189,7 +162,6 @@ function App() {
               connectHint={connectHint}
             />
           </div>
-
         </header>
 
         <StatusStrip
@@ -256,7 +228,7 @@ const ConnectionCard = ({
         className="mt-2 inline-flex min-h-9 w-full items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm font-medium text-slate-200 transition duration-200 hover:border-white/20 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:text-slate-600"
       >
         <RefreshCcw className="h-4 w-4" />
-        Ngắt kết nối / đặt lại phiên
+        Ngat ket noi / dat lai phien
       </button>
     </div>
     <p className="text-xs leading-5 text-slate-500">{connectHint}</p>
@@ -291,7 +263,7 @@ const EntryConnectActions = ({
         ) : (
           <Usb className="h-4 w-4" />
         )}
-        Kết nối ADB Android
+        Ket noi ADB Android
       </button>
       <button
         type="button"
@@ -304,7 +276,7 @@ const EntryConnectActions = ({
         ) : (
           <PlugZap className="h-4 w-4" />
         )}
-        Kết nối Fastboot
+        Ket noi Fastboot
       </button>
     </div>
   );
@@ -338,31 +310,31 @@ const StatusStrip = ({
       <div className="flex gap-2 overflow-x-auto pb-1 xl:pb-0">
         <StatusChip
           icon={<LockKeyhole />}
-          label="Kiểm tra"
+          label="Kiem tra"
           value={`${preflightCount}/5`}
-          detail="Cổng an toàn"
+          detail="Cong an toan"
           tone={preflightCount === 5 ? "good" : "muted"}
         />
         <StatusChip
           icon={<Cpu />}
-          label="Thiết bị"
-          value={workflow.model?.name ?? "Chưa khóa"}
+          label="Thiet bi"
+          value={workflow.model?.name ?? "Chua khoa"}
           detail={targetDetail(workflow)}
           tone={workflow.model ? "good" : "muted"}
         />
         <StatusChip
           icon={<HardDrive />}
           label="ROM"
-          value={progressPercent === undefined ? "Chờ tiến trình" : `${progressPercent}%`}
+          value={progressPercent === undefined ? "Cho tien trinh" : `${progressPercent}%`}
           detail={assetDetail(workflow)}
           tone="neutral"
         />
         <RiskStatusChip riskOpen={riskOpen} setRiskOpen={setRiskOpen} />
         <StatusChip
           icon={<Database />}
-          label="Bước"
+          label="Buoc"
           value={`${completedSteps}/${totalSteps}`}
-          detail={`${workflow.manifest?.models.length.toString() ?? "--"} mẫu máy`}
+          detail={`${workflow.manifest?.models.length.toString() ?? "--"} mau may`}
           tone="neutral"
         />
       </div>
@@ -381,23 +353,25 @@ const StatusStrip = ({
 
 const targetDetail = (workflow: WorkflowState) => {
   if (!workflow.targetDetection) {
-    return "Kết nối trước";
+    return "Ket noi truoc";
   }
+
+  const serial = workflow.targetDetection.fastbootSerial ? ` / ${workflow.targetDetection.fastbootSerial}` : "";
 
   if (workflow.targetDetection.verified) {
-    return `Đã xác minh ${workflow.targetDetection.fastbootProduct ?? workflow.detectedProduct}`;
+    return `Da xac minh ${workflow.targetDetection.fastbootProduct ?? workflow.detectedProduct}${serial}`;
   }
 
-  return `ADB ${workflow.targetDetection.adbProduct ?? workflow.detectedProduct}; chờ Fastboot`;
+  return `ADB ${workflow.targetDetection.adbProduct ?? workflow.detectedProduct}; cho Fastboot`;
 };
 
 const assetDetail = (workflow: WorkflowState) => {
   if (!workflow.progress) {
-    return "Đường dẫn tệp tĩnh";
+    return "Duong dan tep tinh";
   }
 
   if (workflow.progress.bytesPerSecond) {
-    return `${formatRate(workflow.progress.bytesPerSecond)} / còn lại ${formatEta(workflow.progress.etaSeconds)}`;
+    return `${formatRate(workflow.progress.bytesPerSecond)} / con lai ${formatEta(workflow.progress.etaSeconds)}`;
   }
 
   return workflow.progress.state ?? workflow.progress.label;
@@ -412,7 +386,7 @@ const ProgressPanel = ({
 }) => {
   const progress = workflow.progress;
   const itemIsOperation = operationProgressStates.has(progress?.state ?? "");
-  const itemTitle = itemIsOperation ? "Thao tác hiện tại" : "Tệp hiện tại";
+  const itemTitle = itemIsOperation ? "Thao tac hien tai" : "Tep hien tai";
   const itemLabel = progress?.itemLabel ?? progress?.path ?? progress?.label ?? "--";
   const itemProgress = progressToPercent(progress?.itemProgress ?? progress?.progress);
   const progressCount = formatProgressCount(progress, itemIsOperation);
@@ -420,34 +394,19 @@ const ProgressPanel = ({
   return (
     <div className="mt-5 rounded-md border border-white/8 bg-black/10 p-4">
       <div className="mb-3 flex min-h-6 justify-between gap-3 text-sm">
-        <span className="min-w-0 truncate leading-5 text-slate-300">{progress?.label ?? "Chưa có tác vụ tệp"}</span>
+        <span className="min-w-0 truncate leading-5 text-slate-300">{progress?.label ?? "Chua co tac vu tep"}</span>
         <span className="shrink-0 font-mono text-slate-400">{formatPercent(progressPercent)}</span>
       </div>
       <div className="space-y-3">
-        <ProgressMeter
-          title="Tổng tiến trình"
-          detail={progressCount}
-          percent={progressPercent}
-          barClassName="bg-sky-300"
-        />
-        <ProgressMeter
-          title={itemTitle}
-          detail={itemLabel}
-          percent={itemProgress}
-          barClassName={itemIsOperation ? "bg-emerald-300" : "bg-cyan-300"}
-        />
+        <ProgressMeter title="Tong tien trinh" detail={progressCount} percent={progressPercent} barClassName="bg-sky-300" />
+        <ProgressMeter title={itemTitle} detail={itemLabel} percent={itemProgress} barClassName={itemIsOperation ? "bg-emerald-300" : "bg-cyan-300"} />
       </div>
       <div className="mt-3 grid gap-2 text-xs text-slate-500 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric label="Trạng thái" value={progress?.state ?? "--"} />
-        <Metric label="Tệp" value={progressCount} />
-        <Metric label="Dữ liệu" value={formatBytePair(progress?.receivedBytes, progress?.totalBytes)} />
-        <Metric label="Tốc độ" value={progress?.bytesPerSecond ? formatRate(progress.bytesPerSecond) : "--"} />
+        <Metric label="Trang thai" value={progress?.state ?? "--"} />
+        <Metric label="Tep" value={progressCount} />
+        <Metric label="Du lieu" value={formatBytePair(progress?.receivedBytes, progress?.totalBytes)} />
+        <Metric label="Toc do" value={progress?.bytesPerSecond ? formatRate(progress.bytesPerSecond) : "--"} />
       </div>
-      <div className="mt-2 grid gap-2 text-xs text-slate-500 sm:grid-cols-2">
-        <Metric label="Tệp hiện tại" value={progress?.path ?? progress?.itemLabel ?? "--"} />
-        <Metric label="Dung lượng tệp" value={formatBytePair(progress?.fileReceivedBytes, progress?.fileTotalBytes)} />
-      </div>
-      <div className="mt-2 text-xs text-slate-500">Còn lại: {formatEta(progress?.etaSeconds)}</div>
     </div>
   );
 };
@@ -481,11 +440,9 @@ const DeveloperOverridePanel = ({ workflow }: { workflow: WorkflowState }) => {
   const [phase, setPhase] = useState<ResumePhase>("prepare-assets");
   const [modelId, setModelId] = useState("");
 
-  const selectableModels = (workflow.manifest?.models ?? []).filter((model) => model.family === workflow.workflowFamily);
+  const selectableModels = workflow.manifest?.models ?? [];
   const preferredModel = selectableModels.find((model) => model.id === preferredLegacyModelId) ?? selectableModels[0];
-  const canApply = Boolean(
-    workflow.manifest && modelId && selectableModels.some((model) => model.id === modelId) && accepted && !workflow.busy,
-  );
+  const canApply = Boolean(workflow.manifest && modelId && selectableModels.some((model) => model.id === modelId) && accepted && !workflow.busy);
 
   useEffect(() => {
     if (selectableModels.length === 0) {
@@ -494,29 +451,27 @@ const DeveloperOverridePanel = ({ workflow }: { workflow: WorkflowState }) => {
     }
 
     if (!selectableModels.some((model) => model.id === modelId)) {
-      setModelId(
-        workflow.model?.family === workflow.workflowFamily ? workflow.model.id : preferredModel?.id || "",
-      );
+      setModelId(workflow.model?.id ?? preferredModel?.id ?? "");
     }
 
     if (!(workflow.visibleResumePhaseOrder as readonly ResumePhase[]).includes(phase)) {
       setPhase(workflow.visibleResumePhaseOrder[0] ?? "prepare-assets");
     }
-  }, [modelId, phase, selectableModels, workflow.model, workflow.visibleResumePhaseOrder, workflow.workflowFamily]);
+  }, [modelId, phase, selectableModels, workflow.model, workflow.visibleResumePhaseOrder, preferredModel]);
 
   return (
     <div className="mt-4 rounded-md border border-amber-300/15 bg-amber-300/[0.045] p-3">
       <button type="button" onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left">
         <span className="flex items-center gap-2 text-sm font-semibold text-amber-100">
           <Wrench className="h-4 w-4" />
-          Ghi đè lập trình viên / tiếp tục từ bước
+          Ghi de lap trinh vien / tiep tuc tu buoc
         </span>
         <ChevronDown className={`h-4 w-4 text-amber-100/70 transition ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <div className="mt-3 space-y-3 border-t border-amber-200/10 pt-3">
           <p className="text-xs leading-5 text-amber-100/70">
-            Chỉ dùng khi cần tiếp tục thủ công hoặc gỡ lỗi. Ứng dụng vẫn kiểm tra và lưu tệp vào bộ nhớ đệm trước khi chạy lệnh, nhưng mẫu máy/bước do bạn tự chọn.
+            Chi dung khi can tiep tuc thu cong hoac go loi. App van kiem tra va cache file truoc khi chay lenh nguy hiem.
           </p>
           <button
             type="button"
@@ -525,11 +480,11 @@ const DeveloperOverridePanel = ({ workflow }: { workflow: WorkflowState }) => {
             className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-amber-200/20 bg-amber-200/10 px-4 py-2 text-sm font-semibold text-amber-100 transition hover:bg-amber-200/15 disabled:cursor-not-allowed disabled:text-slate-500"
           >
             <Wrench className="h-4 w-4" />
-            Chạy mô phỏng blazer {"->"} Xiaomi 15 Ultra
+            Chay mo phong blazer {"->"} Xiaomi 15 Ultra
           </button>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="space-y-1 text-xs font-medium text-amber-100/80">
-              Mẫu máy
+              Mau may
               <select
                 value={modelId}
                 onChange={(event) => setModelId(event.target.value)}
@@ -543,7 +498,7 @@ const DeveloperOverridePanel = ({ workflow }: { workflow: WorkflowState }) => {
               </select>
             </label>
             <label className="space-y-1 text-xs font-medium text-amber-100/80">
-              Bước cần tiếp tục
+              Buoc can tiep tuc
               <select
                 value={phase}
                 onChange={(event) => setPhase(event.target.value as ResumePhase)}
@@ -564,7 +519,7 @@ const DeveloperOverridePanel = ({ workflow }: { workflow: WorkflowState }) => {
               onChange={(event) => setAccepted(event.target.checked)}
               className="mt-1 h-4 w-4 rounded border-amber-200/40 bg-transparent accent-amber-300"
             />
-            Tôi hiểu ghi đè có thể làm sai thứ tự thao tác nếu chọn nhầm mẫu máy/bước.
+            Toi hieu ghi de co the lam sai thu tu thao tac neu chon nham mau may/buoc.
           </label>
           <button
             type="button"
@@ -573,7 +528,7 @@ const DeveloperOverridePanel = ({ workflow }: { workflow: WorkflowState }) => {
             className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
           >
             <Wrench className="h-4 w-4" />
-            Áp dụng ghi đè tiếp tục
+            Ap dung ghi de tiep tuc
           </button>
         </div>
       )}
@@ -588,39 +543,6 @@ const Metric = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-const StatusChip = ({
-  icon,
-  label,
-  value,
-  detail,
-  tone,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  detail: string;
-  tone: "good" | "bad" | "muted" | "neutral";
-}) => {
-  const toneClass = {
-    good: "border-emerald-300/18 bg-emerald-300/[0.06] text-emerald-100",
-    bad: "border-rose-300/25 bg-rose-300/[0.08] text-rose-100",
-    muted: "border-white/8 bg-white/[0.03] text-slate-300",
-    neutral: "border-sky-300/15 bg-sky-300/[0.055] text-sky-100",
-  }[tone];
-
-  return (
-    <div className={`grid h-12 min-w-[188px] grid-cols-[18px_1fr] items-center gap-x-2 rounded-md border px-3 ${toneClass}`}>
-      <span className="row-span-2 text-current/70 [&>svg]:h-4 [&>svg]:w-4">{icon}</span>
-      <div className="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-current/55">
-        <span>{label}</span>
-        <span className="h-1 w-1 rounded-full bg-current/40" />
-        <span className="truncate font-mono tracking-normal">{value}</span>
-      </div>
-      <div className="min-w-0 truncate text-xs font-medium text-current/78">{detail}</div>
-    </div>
-  );
-};
-
 const RiskStatusChip = ({ riskOpen, setRiskOpen }: { riskOpen: boolean; setRiskOpen: (value: boolean) => void }) => (
   <button
     type="button"
@@ -628,63 +550,25 @@ const RiskStatusChip = ({ riskOpen, setRiskOpen }: { riskOpen: boolean; setRiskO
     className="grid h-12 min-w-[230px] grid-cols-[18px_1fr_16px] items-center gap-x-2 rounded-md border border-amber-300/20 bg-amber-300/[0.06] px-3 text-left text-amber-50 transition hover:border-amber-200/35 hover:bg-amber-300/[0.09]"
   >
     <ShieldAlert className="row-span-2 h-4 w-4 text-amber-100/75" />
-    <div className="min-w-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-100/60">Rủi ro</div>
+    <div className="min-w-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-100/60">Rui ro</div>
     <ChevronDown className={`row-span-2 h-4 w-4 text-amber-100/70 transition ${riskOpen ? "rotate-180" : ""}`} />
-    <div className="min-w-0 truncate text-xs font-medium text-amber-50/80">Sai mẫu máy có thể brick máy</div>
+    <div className="min-w-0 truncate text-xs font-medium text-amber-50/80">Sai mau may co the brick may</div>
   </button>
-);
-
-const WorkflowFamilyPanel = ({ workflow }: { workflow: WorkflowState }) => (
-  <div className="mb-3 rounded-md border border-white/8 bg-black/10 p-2.5">
-    <div className="mb-2 flex items-center justify-between gap-3">
-      <div>
-        <div className="text-sm font-semibold text-white">Dòng quy trình</div>
-        <div className="text-xs leading-5 text-slate-500">Legacy FTD hoặc 8E Gen 5.</div>
-      </div>
-      <span className="hidden rounded-sm border border-white/10 px-2 py-1 text-[10px] font-semibold text-slate-400 sm:inline">
-        {workflowFamilyCopy[workflow.workflowFamily].title}
-      </span>
-    </div>
-    <div className="grid rounded-md border border-white/8 bg-white/[0.025] p-1 sm:grid-cols-2">
-      {(["legacy-ftd", "efisp-8e-gen5"] as const).map((family) => {
-        const active = workflow.workflowFamily === family;
-        const copy = workflowFamilyCopy[family];
-
-        return (
-          <button
-            key={family}
-            type="button"
-            disabled={!workflow.canSwitchWorkflowFamily}
-            title={copy.detail}
-            onClick={() => workflow.setWorkflowFamily(family)}
-            className={`inline-flex min-h-10 items-center justify-center gap-2 rounded px-2.5 text-center text-xs font-semibold transition disabled:cursor-not-allowed ${
-              active
-                ? "bg-emerald-300 text-slate-950 shadow-[0_8px_24px_rgba(16,185,129,0.14)]"
-                : "text-slate-400 hover:bg-white/[0.045] hover:text-slate-200"
-            } ${!workflow.canSwitchWorkflowFamily && !active ? "opacity-45" : ""}`}
-          >
-            {family === "efisp-8e-gen5" ? <Cpu className="h-3.5 w-3.5" /> : <HardDrive className="h-3.5 w-3.5" />}
-            <span className="truncate">{copy.title}</span>
-          </button>
-        );
-      })}
-    </div>
-  </div>
 );
 
 const WorkflowModePanel = ({ workflow }: { workflow: WorkflowState }) => (
   <div className="mb-3 rounded-md border border-white/8 bg-black/10 p-2.5">
     <div className="mb-2 flex items-center justify-between gap-3">
       <div>
-        <div className="text-sm font-semibold text-white">Quy trình ABL</div>
-        <div className="text-xs leading-5 text-slate-500">MQSAS thường hoặc EDL cho C06/C07/C08.</div>
+        <div className="text-sm font-semibold text-white">Quy trinh FTD</div>
+        <div className="text-xs leading-5 text-slate-500">Standard hoac EDL_Standard sau khi nap ABL thu cong.</div>
       </div>
       <span className="hidden rounded-sm border border-white/10 px-2 py-1 text-[10px] font-semibold text-slate-400 sm:inline">
         {workflowModeCopy[workflow.workflowMode].title}
       </span>
     </div>
     <div className="grid rounded-md border border-white/8 bg-white/[0.025] p-1 sm:grid-cols-2">
-      {(["standard-mqsas", "c06-edl"] as const).map((mode) => {
+      {(["standard", "edl-standard"] as const).map((mode) => {
         const active = workflow.workflowMode === mode;
         const copy = workflowModeCopy[mode];
 
@@ -701,9 +585,9 @@ const WorkflowModePanel = ({ workflow }: { workflow: WorkflowState }) => (
                 : "text-slate-400 hover:bg-white/[0.045] hover:text-slate-200"
             } ${!workflow.canSwitchWorkflowMode && !active ? "opacity-45" : ""}`}
           >
-            {mode === "c06-edl" ? <Usb className="h-3.5 w-3.5" /> : <PlugZap className="h-3.5 w-3.5" />}
+            {mode === "edl-standard" ? <Usb className="h-3.5 w-3.5" /> : <PlugZap className="h-3.5 w-3.5" />}
             <span className="truncate">{copy.title}</span>
-            {mode === "c06-edl" && (
+            {mode === "edl-standard" && (
               <span className="group relative inline-flex" title={edlModeInfo}>
                 <Info className="h-3.5 w-3.5" aria-hidden="true" />
                 <span className="pointer-events-none absolute left-1/2 top-6 z-20 w-56 -translate-x-1/2 rounded-md border border-white/10 bg-[#05070a] px-2.5 py-2 text-xs font-medium leading-5 text-slate-200 opacity-0 shadow-xl transition group-hover:opacity-100">
@@ -715,9 +599,6 @@ const WorkflowModePanel = ({ workflow }: { workflow: WorkflowState }) => (
         );
       })}
     </div>
-    {!workflow.canSwitchWorkflowMode && (
-      <p className="mt-2 text-xs leading-5 text-slate-500">Không đổi quy trình sau khi đã bắt đầu bước hạ ABL.</p>
-    )}
   </div>
 );
 
@@ -725,14 +606,14 @@ const AssetPreloadPanel = ({ workflow }: { workflow: WorkflowState }) => {
   const status = workflow.statuses["prepare-assets"];
   const done = status === "done";
   const running = status === "running";
-  const title = done ? "ROM đã chuẩn bị" : running ? "Đang chuẩn bị ROM" : "Chuẩn bị ROM trước";
+  const title = done ? "ROM da chuan bi" : running ? "Dang chuan bi ROM" : "Chuan bi ROM truoc";
   const detail = done
-    ? "Tệp ROM đã được tải, kiểm tra SHA-256 và lưu trong bộ nhớ đệm."
+    ? "Tep ROM da duoc tai, kiem tra SHA-256 va luu trong bo nho dem."
     : running
-      ? "Đang tải và kiểm tra ROM; bước Chuẩn bị tệp ROM sẽ tự hoàn tất khi xong."
+      ? "Dang tai va kiem tra ROM; buoc Chuan bi tep ROM se tu hoan tat khi xong."
       : workflow.model
-        ? "Có thể tải và kiểm tra ROM ngay sau khi đã khóa mẫu máy, không cần chờ tới bước Chuẩn bị tệp ROM."
-        : "Khóa và xác minh mẫu máy trước để biết đúng gói ROM cần tải.";
+        ? "Co the tai va kiem tra ROM ngay sau khi da khoa mau may."
+        : "Khoa va xac minh mau may truoc de biet dung goi ROM can tai.";
 
   return (
     <div className="mb-3 rounded-md border border-white/8 bg-white/[0.025] p-2.5">
@@ -751,7 +632,7 @@ const AssetPreloadPanel = ({ workflow }: { workflow: WorkflowState }) => {
           className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-sky-300/20 bg-sky-300/10 px-3 py-1.5 text-xs font-semibold text-sky-100 transition hover:bg-sky-300/15 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.025] disabled:text-slate-500"
         >
           {running ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <HardDrive className="h-3.5 w-3.5" />}
-          {done ? "Đã chuẩn bị" : running ? "Đang tải" : "Chuẩn bị"}
+          {done ? "Da chuan bi" : running ? "Dang tai" : "Chuan bi"}
         </button>
       </div>
     </div>
@@ -762,23 +643,16 @@ const WorkflowRail = ({ workflow, className = "" }: { workflow: WorkflowState; c
   <aside className={`rounded-lg border border-white/8 bg-[#12161d]/90 p-4 shadow-[0_22px_70px_rgba(0,0,0,0.18)] xl:sticky xl:top-4 xl:max-h-[calc(100dvh-7.25rem)] xl:overflow-y-auto ${className}`}>
     <div className="mb-3 flex items-start justify-between gap-3">
       <div>
-        <h2 className="text-xl font-semibold text-white">Tiến trình quy trình</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-400">ADB/Fastboot/EDL theo đúng thứ tự.</p>
+        <h2 className="text-xl font-semibold text-white">Tien trinh quy trinh</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-400">ADB/Fastboot theo dung thu tu FTD.</p>
       </div>
       <CurrentPhaseBadge phase={workflow.nextPhase} />
     </div>
-    <WorkflowFamilyPanel workflow={workflow} />
-    {workflow.workflowFamily === "legacy-ftd" && <WorkflowModePanel workflow={workflow} />}
+    <WorkflowModePanel workflow={workflow} />
     <AssetPreloadPanel workflow={workflow} />
     <ol className="grid gap-1.5">
       {workflow.visiblePhaseOrder.map((phase, index) => (
-        <WorkflowStep
-          key={phase}
-          index={index + 1}
-          phase={phase}
-          status={workflow.statuses[phase]}
-          active={workflow.nextPhase === phase}
-        />
+        <WorkflowStep key={phase} index={index + 1} phase={phase} status={workflow.statuses[phase]} active={workflow.nextPhase === phase} />
       ))}
     </ol>
   </aside>
@@ -804,7 +678,7 @@ const ControlPanel = ({
       <div>
         <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
           <PlugZap className="h-4 w-4 text-sky-200" />
-          Điều khiển chính
+          Dieu khien chinh
         </div>
         <h2 className="text-2xl font-semibold text-white">{phaseLabels[workflow.nextPhase]}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">{actionHint}</p>
@@ -854,24 +728,9 @@ const ControlPanel = ({
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-slate-200 transition duration-200 hover:border-white/20 hover:bg-white/[0.06] active:translate-y-px"
           >
             <Download className="h-4 w-4" />
-            Tải nhật ký
+            Tai nhat ky
           </button>
         </div>
-        {workflow.canRebootAdbToFastboot && (
-          <div className="rounded-md border border-white/8 bg-white/[0.025] p-3">
-            <button
-              type="button"
-              onClick={workflow.rebootAdbToFastboot}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-emerald-300/20 bg-emerald-300/10 px-4 py-2.5 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-300/15"
-            >
-              <Usb className="h-4 w-4" />
-              Máy đang ở Android: reboot bootloader
-            </button>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Dùng khi máy vẫn vào Android/ADB. Sau khi máy vào Fastboot, bấm nút chính để chạy tiếp bước hiện tại.
-            </p>
-          </div>
-        )}
       </div>
     )}
 
@@ -882,26 +741,21 @@ const ControlPanel = ({
       <div className="mt-4 rounded-md border border-white/8 bg-white/[0.025] p-4">
         <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
           <Cpu className="h-4 w-4 text-sky-200" />
-          Thiết bị đã nhận diện
+          Thiet bi da nhan dien
         </div>
         <InfoGrid
           rows={[
-            ["Mẫu máy", workflow.model.name],
+            ["Mau may", workflow.model.name],
             ["ADB", workflow.targetDetection?.adbProduct ?? "--"],
             ["Fastboot", workflow.targetDetection?.fastbootProduct ?? "--"],
-            ["Trạng thái", workflow.targetDetection?.verified ? "Đã xác minh khớp" : "Chờ xác minh Fastboot"],
-            workflow.model.family === "legacy-ftd"
-              ? ["Gói", workflow.model.ftdPackage]
-              : ["EFISP", workflow.model.efispUnlockFile],
+            ["Serial", workflow.targetDetection?.fastbootSerial ?? "--"],
+            ["Trang thai", workflow.targetDetection?.verified ? "Da xac minh khop" : "Cho xac minh Fastboot"],
+            ["Goi", "ftdPackage" in workflow.model ? workflow.model.ftdPackage : "--"],
           ]}
         />
       </div>
     ) : (
-      <EmptyState
-        icon={<Cpu className="h-4 w-4" />}
-        title="Mẫu máy chưa khóa"
-        text="Kết nối ADB Android hoặc Fastboot để nhận diện mẫu máy."
-      />
+      <EmptyState icon={<Cpu className="h-4 w-4" />} title="Mau may chua khoa" text="Ket noi ADB Android hoac Fastboot de nhan dien mau may." />
     )}
 
     <div className="mt-4">
@@ -910,12 +764,8 @@ const ControlPanel = ({
       ) : (
         <InlineNotice
           tone={preflightReady ? "good" : "muted"}
-          title={preflightReady ? "Kiểm tra ban đầu sẵn sàng" : "Kiểm tra ban đầu chưa xong"}
-          text={
-            preflightReady
-              ? "Có thể chạy bước tiếp theo khi danh sách tệp tải xong."
-              : "Hoàn tất các ô xác nhận trước khi chạy bước sau kết nối."
-          }
+          title={preflightReady ? "Kiem tra ban dau san sang" : "Kiem tra ban dau chua xong"}
+          text={preflightReady ? "Co the chay buoc tiep theo khi danh sach tep tai xong." : "Hoan tat cac o xac nhan truoc khi chay buoc sau ket noi."}
         />
       )}
     </div>
@@ -944,11 +794,9 @@ const TerminalPanel = ({
 
   useEffect(() => {
     const element = scrollRef.current;
-
     if (!element || !stickToBottomRef.current) {
       return;
     }
-
     element.scrollTop = element.scrollHeight;
   }, [logs.length]);
 
@@ -957,18 +805,16 @@ const TerminalPanel = ({
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-white">
           <Terminal className="h-4 w-4 text-sky-200" />
-          Nhật ký terminal
+          Nhat ky terminal
         </div>
-        <span className="font-mono text-xs text-slate-500">{logs.length} dòng</span>
+        <span className="font-mono text-xs text-slate-500">{logs.length} dong</span>
       </div>
       <form
         onSubmit={(event) => {
           event.preventDefault();
-
           if (!canSubmit) {
             return;
           }
-
           const nextCommand = trimmedCommand;
           setCommand("");
           void onRunCommand(nextCommand).catch(() => undefined);
@@ -976,14 +822,14 @@ const TerminalPanel = ({
         className="mb-3 grid grid-cols-[minmax(0,1fr)_44px] gap-2"
       >
         <label className="sr-only" htmlFor="fastboot-terminal-command">
-          Lệnh Fastboot
+          Lenh Fastboot
         </label>
         <input
           id="fastboot-terminal-command"
           value={command}
           onChange={(event) => setCommand(event.target.value)}
           disabled={commandDisabled}
-          placeholder="fastboot getvar product"
+          placeholder="fastboot devices"
           autoComplete="off"
           spellCheck={false}
           className="h-11 min-w-0 rounded-md border border-white/8 bg-[#05070a] px-3 font-mono text-xs text-slate-100 outline-none transition placeholder:text-slate-700 focus:border-sky-300/45 disabled:cursor-not-allowed disabled:text-slate-600"
@@ -991,8 +837,8 @@ const TerminalPanel = ({
         <button
           type="submit"
           disabled={!canSubmit}
-          title="Gửi lệnh Fastboot"
-          aria-label="Gửi lệnh Fastboot"
+          title="Gui lenh Fastboot"
+          aria-label="Gui lenh Fastboot"
           className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-sky-300/20 bg-sky-300 text-slate-950 transition hover:bg-sky-200 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-slate-800 disabled:text-slate-600"
         >
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
@@ -1008,7 +854,7 @@ const TerminalPanel = ({
       >
         {logs.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center text-slate-600">
-            Nhật ký ADB/Fastboot sẽ xuất hiện ở đây theo từng lệnh.
+            Nhat ky ADB/Fastboot se xuat hien o day. Go fastboot devices de lay serial.
           </div>
         ) : (
           logs.map((log, index) => (
@@ -1045,7 +891,7 @@ const WorkflowStep = ({
         <div className="mt-0.5 truncate font-mono text-[11px] text-current/45">{phase}</div>
       </div>
       <div className="flex items-center gap-2">
-        {active && <span className="hidden rounded-sm bg-sky-300/10 px-2 py-1 text-[11px] font-semibold text-sky-100 2xl:inline">Hiện tại</span>}
+        {active && <span className="hidden rounded-sm bg-sky-300/10 px-2 py-1 text-[11px] font-semibold text-sky-100 2xl:inline">Hien tai</span>}
         <span className="text-xs text-current/55">{styles.label}</span>
       </div>
     </li>
@@ -1081,17 +927,8 @@ const InfoGrid = ({ rows }: { rows: Array<[string, string]> }) => (
 );
 
 const InlineNotice = ({ title, text, tone }: { title: string; text: string; tone: "good" | "muted" }) => (
-  <div
-    className={
-      tone === "good"
-        ? "rounded-md border border-emerald-300/20 bg-emerald-300/[0.06] p-3"
-        : "rounded-md border border-white/8 bg-white/[0.03] p-3"
-    }
-  >
-    <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-white">
-      <CheckCircle2 className={tone === "good" ? "h-4 w-4 text-emerald-200" : "h-4 w-4 text-slate-500"} />
-      {title}
-    </div>
+  <div className={tone === "good" ? "rounded-md border border-emerald-300/20 bg-emerald-300/[0.06] p-3" : "rounded-md border border-white/8 bg-white/[0.03] p-3"}>
+    <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-white">{title}</div>
     <p className="text-sm leading-6 text-slate-400">{text}</p>
   </div>
 );
@@ -1106,11 +943,42 @@ const ErrorBox = ({ message, advice }: { message: string; advice?: string }) => 
   </div>
 );
 
+const StatusChip = ({
+  icon,
+  label,
+  value,
+  detail,
+  tone,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  detail: string;
+  tone: "good" | "bad" | "muted" | "neutral";
+}) => {
+  const toneClass = {
+    good: "border-emerald-300/20 bg-emerald-300/[0.06] text-emerald-100",
+    bad: "border-rose-300/25 bg-rose-300/[0.08] text-rose-100",
+    muted: "border-white/8 bg-white/[0.03] text-slate-300",
+    neutral: "border-sky-300/15 bg-sky-300/[0.06] text-sky-100",
+  }[tone];
+
+  return (
+    <div className={`grid h-12 min-w-[190px] grid-cols-[18px_1fr] items-center gap-x-2 rounded-md border px-3 ${toneClass}`}>
+      <span className="[&>svg]:h-4 [&>svg]:w-4">{icon}</span>
+      <div className="min-w-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-current/60">{label}</div>
+      <div />
+      <div className="min-w-0 truncate text-xs font-semibold">{value}</div>
+      <div />
+      <div className="min-w-0 truncate text-[11px] text-current/55">{detail}</div>
+    </div>
+  );
+};
+
 const progressToPercent = (progress?: number) => {
   if (progress === undefined || !Number.isFinite(progress)) {
     return undefined;
   }
-
   return Math.round(Math.max(0, Math.min(1, progress)) * 100);
 };
 
@@ -1118,13 +986,11 @@ const formatPercent = (percent?: number) => (percent === undefined ? "--" : `${p
 
 const formatProgressCount = (progress: ProgressEvent | undefined, operationMode: boolean) => {
   if (progress?.completedItems !== undefined && progress.totalItems !== undefined) {
-    return `${progress.completedItems}/${progress.totalItems} ${operationMode ? "thao tác" : "tệp"}`;
+    return `${progress.completedItems}/${progress.totalItems} ${operationMode ? "thao tac" : "tep"}`;
   }
-
   if (progress?.completedFiles !== undefined && progress.totalFiles !== undefined) {
-    return `${progress.completedFiles}/${progress.totalFiles} tệp`;
+    return `${progress.completedFiles}/${progress.totalFiles} tep`;
   }
-
   return "--";
 };
 
@@ -1132,19 +998,15 @@ const formatBytes = (bytes?: number) => {
   if (bytes === undefined) {
     return "--";
   }
-
   if (bytes >= 1024 * 1024 * 1024) {
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
   }
-
   if (bytes >= 1024 * 1024) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
-
   if (bytes >= 1024) {
     return `${(bytes / 1024).toFixed(1)} KB`;
   }
-
   return `${bytes} B`;
 };
 
@@ -1152,7 +1014,6 @@ const formatBytePair = (received?: number, total?: number) => {
   if (received === undefined && total === undefined) {
     return "--";
   }
-
   return `${formatBytes(received)} / ${formatBytes(total)}`;
 };
 
@@ -1162,11 +1023,9 @@ const formatEta = (seconds?: number) => {
   if (seconds === undefined || !Number.isFinite(seconds)) {
     return "--";
   }
-
   if (seconds < 60) {
     return `${Math.ceil(seconds)}s`;
   }
-
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.ceil(seconds % 60);
   return `${minutes}m ${remainingSeconds}s`;
@@ -1176,19 +1035,15 @@ const logColor = (level: WorkflowLog["level"]) => {
   if (level === "error") {
     return "text-rose-300";
   }
-
   if (level === "warn") {
     return "text-amber-300";
   }
-
   if (level === "success") {
     return "text-emerald-300";
   }
-
   if (level === "command") {
     return "text-sky-300";
   }
-
   return "text-slate-300";
 };
 
