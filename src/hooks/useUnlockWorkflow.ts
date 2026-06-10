@@ -187,7 +187,7 @@ export const useUnlockWorkflow = () => {
     return () => {
       cancelled = true;
     };
-  }, [createRunner, workflowMode]);
+  }, [createRunner]);
 
   useEffect(() => {
     setStatuses((current) => ({
