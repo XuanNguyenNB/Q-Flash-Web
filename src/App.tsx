@@ -123,7 +123,7 @@ function App() {
         ? "Ket noi ADB Android de nhan dien va reboot bootloader, hoac ket noi Fastboot neu may da o bootloader."
         : workflow.nextPhase === "flash-ftd"
           ? "Truoc khi flash FTD, app se chay fastboot erase frp. Neu fail thi ABL engineering/parcel chua OK hoac Fastboot chua dung trang thai."
-          : !preflightReady
+          : workflow.workflowMode !== "edl-standard" && !preflightReady
             ? "Tick du kiem tra ban dau de bat buoc tiep theo sau khi da nhan dien may."
             : workflow.requiresConfirmation && !workflow.canRun
               ? "Tick xac nhan cua buoc nguy hiem de tiep tuc."

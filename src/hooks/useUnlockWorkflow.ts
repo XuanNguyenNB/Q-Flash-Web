@@ -12,7 +12,7 @@ import {
 } from "../services/blazerMock";
 import { BrowserFastbootClient } from "../services/fastboot";
 import { errorAdvice, toWorkflowError, type WorkflowErrorCode } from "../workflow/errors";
-import { detectPreflight, isPreflightReady } from "../workflow/preflight";
+import { detectPreflight, isPreflightReady, isWorkflowSafetyReady } from "../workflow/preflight";
 import { UnlockWorkflowRunner } from "../workflow/runner";
 import type {
   DeviceStatus,
@@ -217,6 +217,7 @@ export const useUnlockWorkflow = () => {
 
   const requiresConfirmation = destructivePhases.includes(nextPhase as DestructivePhase);
   const requiresPreflightReady = destructivePhases.includes(nextPhase as DestructivePhase);
+  const destructiveSafetyReady = isWorkflowSafetyReady(preflight, workflowMode);
 
   const mainButton = useMemo(() => {
     if (busy) {
@@ -241,7 +242,7 @@ export const useUnlockWorkflow = () => {
     manifest !== undefined &&
     nextPhase !== "preflight" &&
     nextPhase !== "connect-device" &&
-    (!requiresPreflightReady || isPreflightReady(preflight)) &&
+    (!requiresPreflightReady || destructiveSafetyReady) &&
     (requiresConfirmation ? phaseConfirmations[nextPhase as DestructivePhase] : true);
 
   const canConnectEntry =

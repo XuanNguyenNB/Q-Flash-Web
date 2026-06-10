@@ -1,4 +1,5 @@
 import type { PreflightState } from "./types";
+import type { WorkflowMode } from "./types";
 
 export const detectPreflight = (): Pick<PreflightState, "isHttps" | "hasWebUsb"> => ({
   isHttps:
@@ -14,3 +15,6 @@ export const isPreflightReady = (preflight: PreflightState) =>
   preflight.backedUp &&
   preflight.acceptsDataLoss &&
   preflight.hasStockRom;
+
+export const isWorkflowSafetyReady = (preflight: PreflightState, workflowMode: WorkflowMode) =>
+  workflowMode === "edl-standard" ? preflight.isHttps && preflight.hasWebUsb : isPreflightReady(preflight);
