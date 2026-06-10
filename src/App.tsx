@@ -32,8 +32,8 @@ const preferredLegacyModelId = "xiaomi15ultra";
 const destructiveCopy = (workflow: WorkflowState): Partial<Record<PhaseId, string>> => ({
   "flash-ftd":
     workflow.workflowMode === "edl-standard"
-      ? "Toi xac nhan ABL engineering da duoc nap thu cong, may dang o Fastboot, va se flash FTD dung mau may."
-      : "Toi xac nhan flash goi FTD dung mau may va chap nhan mat du lieu.",
+      ? "Toi xac nhan ABL engineering da duoc nap thu cong, dong y chay fastboot erase frp de verify, roi flash FTD dung mau may."
+      : "Toi xac nhan ABL/parcel da san sang, dong y chay fastboot erase frp de verify, roi flash FTD dung mau may.",
   "unlock-payload": "Toi xac nhan may dang o Fastboot tu FTD de chay payload unlock.",
   "restore-gpt": "Toi xac nhan khoi phuc GPT cuoi, sau do flash ROM goc bang MiFlash Clean All.",
 });
@@ -45,12 +45,12 @@ const workflowModeCopy = {
   },
   "edl-standard": {
     title: "EDL_Standard",
-    detail: "Flow Fastboot/FTD binh thuong sau khi ABL engineering da duoc nap thu cong.",
+    detail: "Flow Fastboot/FTD sau khi ABL engineering da nap thu cong; app verify bang fastboot erase frp truoc khi flash.",
   },
 };
 
 const edlModeInfo =
-  "EDL_Standard khong nap ABL qua browser; hay nap ABL engineering thu cong truoc, roi quay lai Fastboot de chay flow FTD.";
+  "EDL_Standard khong nap ABL qua browser; hay nap ABL engineering thu cong truoc, roi app se verify bang fastboot erase frp truoc khi flash FTD.";
 
 const fixedWarnings = [
   "Sai mau may hoac sai goi co the brick may.",
@@ -121,8 +121,8 @@ function App() {
       ? "May dang reboot sang Fastboot. Khi thay man Fastboot, bam Ket noi Fastboot de xac minh mau may."
       : workflow.nextPhase === "connect-device"
         ? "Ket noi ADB Android de nhan dien va reboot bootloader, hoac ket noi Fastboot neu may da o bootloader."
-        : workflow.workflowMode === "edl-standard" && workflow.nextPhase === "flash-ftd"
-          ? "ABL engineering phai duoc nap thu cong truoc. Web chi tiep tuc flow Fastboot/FTD tu day."
+        : workflow.nextPhase === "flash-ftd"
+          ? "Truoc khi flash FTD, app se chay fastboot erase frp. Neu fail thi ABL engineering/parcel chua OK hoac Fastboot chua dung trang thai."
           : !preflightReady
             ? "Tick du kiem tra ban dau de bat buoc tiep theo sau khi da nhan dien may."
             : workflow.requiresConfirmation && !workflow.canRun

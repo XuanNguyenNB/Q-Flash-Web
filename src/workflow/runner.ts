@@ -334,12 +334,13 @@ export class UnlockWorkflowRunner {
     return this.runPhase("flash-ftd", async () => {
       this.requireConfirmation(confirmed);
       const model = this.requireLegacyModel();
-      await this.ensureAssetsForPhase("flash-ftd", model);
       const fastboot = await this.ensureFastbootForModel();
-      const plan = await this.loadPlanForModel(model);
-      const totalOperations = plan.operations.length;
 
       await this.assertFastbootProduct(fastboot, model);
+      await this.verifyAblEngineeringProbe(fastboot);
+      await this.ensureAssetsForPhase("flash-ftd", model);
+      const plan = await this.loadPlanForModel(model);
+      const totalOperations = plan.operations.length;
       await this.runAntirollbackCheck(plan, fastboot, model);
 
       for (const [index, operation] of plan.operations.entries()) {
@@ -349,6 +350,22 @@ export class UnlockWorkflowRunner {
       this.deps.onDeviceStatus?.("waiting-manual-reboot");
       this.log("warn", "Neu may vao man hinh den/xanh, giu Power + Volume Down de ve Fastboot.");
     });
+  }
+
+  private async verifyAblEngineeringProbe(fastboot: FastbootClient) {
+    this.log("command", "fastboot erase frp");
+
+    try {
+      await fastboot.erase("frp");
+    } catch (error) {
+      throw new WorkflowError(
+        "ABL_PROBE_FAILED",
+        "fastboot erase frp failed; ABL engineering/parcel chua hoat dong hoac Fastboot chua dung trang thai.",
+        error,
+      );
+    }
+
+    this.log("success", "ABL engineering OK: erase frp thanh cong.");
   }
 
   async runUnlockPayload(confirmed: boolean) {

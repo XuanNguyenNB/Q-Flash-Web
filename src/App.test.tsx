@@ -189,7 +189,7 @@ describe("App simplified FTD workflow", () => {
     render(<App />);
 
     expect(screen.getAllByText(/ABL engineering/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/thu cong/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/fastboot erase frp/i).length).toBeGreaterThan(0);
   });
 
   it("shows the simplified phase order without removed phases", () => {

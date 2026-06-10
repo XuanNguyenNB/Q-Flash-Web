@@ -110,6 +110,7 @@ class TestFastboot implements FastbootClient {
   product = "dada";
   anti = "0";
   serial = "FB123456";
+  failEraseFrp = false;
 
   async connect() {}
 
@@ -140,6 +141,10 @@ class TestFastboot implements FastbootClient {
   }
 
   async erase(partition: string) {
+    if (partition === "frp" && this.failEraseFrp) {
+      throw new Error("fastboot erase frp failed");
+    }
+
     this.commands.push(`erase:${partition}`);
   }
 
@@ -284,6 +289,7 @@ describe("UnlockWorkflowRunner", () => {
     expect(fastboot.commands).toEqual(
       expect.arrayContaining([
         "getvar:product",
+        "erase:frp",
         "erase:boot_ab",
         "flash:boot_ab",
         "set_active:a",
@@ -305,5 +311,38 @@ describe("UnlockWorkflowRunner", () => {
         "packages/xiaomi15/images/gpt_both5.bin",
       ]),
     );
+  });
+
+  it("probes ABL engineering with erase frp before antirollback and FTD flash", async () => {
+    const { runner, fastboot } = createRunner();
+
+    await runner.initialize();
+    await runner.connectFastboot();
+    await runner.flashFtdPackage(true);
+
+    const probeIndex = fastboot.commands.indexOf("erase:frp");
+    const antiIndex = fastboot.commands.indexOf("getvar:anti");
+    const flashIndex = fastboot.commands.indexOf("flash:boot_ab");
+
+    expect(probeIndex).toBeGreaterThan(-1);
+    expect(antiIndex).toBeGreaterThan(probeIndex);
+    expect(flashIndex).toBeGreaterThan(probeIndex);
+  });
+
+  it("stops flash FTD when erase frp probe fails", async () => {
+    const fastboot = new TestFastboot();
+    fastboot.failEraseFrp = true;
+    const { runner, phaseStatuses, assets } = createRunner(fastboot);
+
+    await runner.initialize();
+    await runner.connectFastboot();
+    await expect(runner.flashFtdPackage(true)).rejects.toMatchObject({ code: "ABL_PROBE_FAILED" });
+
+    expect(phaseStatuses).toContainEqual(["flash-ftd", "failed"]);
+    expect(fastboot.commands).toContain("getvar:product");
+    expect(fastboot.commands).not.toContain("getvar:anti");
+    expect(fastboot.commands.some((command) => command.startsWith("flash:"))).toBe(false);
+    expect(assets.prepareCalls).toEqual([]);
+    expect(assets.fetches).toEqual([]);
   });
 });

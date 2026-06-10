@@ -9,6 +9,7 @@ export type WorkflowErrorCode =
   | "SELINUX_NOT_PERMISSIVE"
   | "HASH_MISMATCH"
   | "FASTBOOT_FAILED"
+  | "ABL_PROBE_FAILED"
   | "USB_DISCONNECTED"
   | "ANTIROLLBACK_FAILED"
   | "CONFIRMATION_REQUIRED"
@@ -30,6 +31,7 @@ const defaultMessages: Record<WorkflowErrorCode, string> = {
   SELINUX_NOT_PERMISSIVE: "SELinux không ở trạng thái Permissive, dừng để tránh ghi ABL sai ngữ cảnh.",
   HASH_MISMATCH: "Hash tệp tải về không khớp danh sách SHA-256. Không flash tệp này.",
   FASTBOOT_FAILED: "Fastboot trả lời lỗi khi chạy lệnh.",
+  ABL_PROBE_FAILED: "ABL engineering/parcel chưa sẵn sàng: fastboot erase frp thất bại.",
   USB_DISCONNECTED: "USB bị ngắt giữa chừng. Cắm lại và dùng nút reconnect.",
   ANTIROLLBACK_FAILED: "Antirollback của máy cao hơn package, không được flash gói này.",
   CONFIRMATION_REQUIRED: "Cần tick xác nhận cho bước phá dữ liệu trước khi chạy.",
@@ -106,6 +108,8 @@ export const errorAdvice: Record<WorkflowErrorCode, string> = {
   SELINUX_NOT_PERMISSIVE: "Quay lại Fastboot và chạy lại Boot Android Permissive trước khi ghi ABL qua MQSAS.",
   HASH_MISMATCH: "Kiểm tra lại tệp asset đã upload và sha256sums.json trước khi thử lại.",
   FASTBOOT_FAILED: "Không thử lại mù. Đọc dòng lệnh cuối trong nhật ký và kiểm tra cáp/đúng chế độ.",
+  ABL_PROBE_FAILED:
+    "Nạp lại ABL engineering/parcel hoặc đưa máy về đúng Fastboot rồi kết nối lại. Không flash FTD khi erase frp chưa thành công.",
   USB_DISCONNECTED: "Sau reboot hoặc đổi mode, bấm reconnect rồi chọn lại thiết bị.",
   ANTIROLLBACK_FAILED: "Dừng quy trình; package hạ cấp không an toàn cho antirollback hiện tại.",
   CONFIRMATION_REQUIRED: "Tick xác nhận riêng của bước hiện tại rồi chạy tiếp.",
