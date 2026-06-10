@@ -51,10 +51,7 @@ export const phaseLabels: Record<PhaseId, string> = {
 };
 
 const initialStatuses = () =>
-  Object.fromEntries(phaseOrder.map((phase) => [phase, phase === "preflight" ? "running" : "pending"])) as Record<
-    PhaseId,
-    PhaseStatus
-  >;
+  Object.fromEntries(phaseOrder.map((phase) => [phase, "pending"])) as Record<PhaseId, PhaseStatus>;
 
 const initialPreflight = (): PreflightState => ({
   ...detectPreflight(),
@@ -174,7 +171,7 @@ export const useUnlockWorkflow = () => {
         setManifest(loadedManifest);
         setStatuses((current) => ({
           ...current,
-          preflight: isPreflightReady(nextPreflight) ? "done" : "running",
+          preflight: isPreflightReady(nextPreflight) ? "done" : "pending",
         }));
       })
       .catch((cause) => {
@@ -195,7 +192,7 @@ export const useUnlockWorkflow = () => {
   useEffect(() => {
     setStatuses((current) => ({
       ...current,
-      preflight: isPreflightReady(preflight) && manifest ? "done" : current.preflight === "failed" ? "failed" : "running",
+      preflight: isPreflightReady(preflight) && manifest ? "done" : current.preflight === "failed" ? "failed" : "pending",
     }));
   }, [manifest, preflight]);
 
@@ -317,7 +314,7 @@ export const useUnlockWorkflow = () => {
       setManifest(loadedManifest);
       setStatuses((current) => ({
         ...current,
-        preflight: isPreflightReady(nextPreflight) ? "done" : "running",
+        preflight: isPreflightReady(nextPreflight) ? "done" : "pending",
       }));
     } catch (cause) {
       const workflowError = toWorkflowError(cause, "MANIFEST_INVALID");
