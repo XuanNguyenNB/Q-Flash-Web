@@ -263,7 +263,7 @@ export class ServerAssetClient implements AssetClient {
       let blob: Blob;
 
       try {
-        blob = await this.fetchBlob(path, (current, total) => {
+        blob = await this.fetchBlob(path, expected, (current, total) => {
           receivedBytes += Math.max(0, current - lastReceivedForFile);
           lastReceivedForFile = current;
           expectedTotalForFile = total;
@@ -367,8 +367,10 @@ export class ServerAssetClient implements AssetClient {
     return response.json();
   }
 
-  private async fetchBlob(path: string, onProgress?: ProgressHandler) {
-    const response = await fetch(buildAssetUrl(this.baseUrl, path));
+  private async fetchBlob(path: string, expectedSha256: string, onProgress?: ProgressHandler) {
+    const url = new URL(buildAssetUrl(this.baseUrl, path), globalThis.location?.href ?? "https://asset.local/");
+    url.searchParams.set("sha", expectedSha256.slice(0, 16));
+    const response = await fetch(url.toString(), { cache: "no-store" });
 
     if (!response.ok) {
       throw new WorkflowError("ASSET_FETCH_FAILED", `Không tải được ${path}: HTTP ${response.status}`);

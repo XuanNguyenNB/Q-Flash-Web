@@ -157,15 +157,17 @@ describe("requiredAssetPathsForModel", () => {
     const client = new ServerAssetClient("/dist-assets", cacheStore);
     const originalFetch = globalThis.fetch;
     const progress: unknown[] = [];
+    const blobRequests: Array<{ url: string; cache?: RequestCache }> = [];
 
-    globalThis.fetch = async (input) => {
-      const url = String(input);
+    globalThis.fetch = async (input, init) => {
+      const url = new URL(String(input), "https://assets.test");
 
-      if (url.endsWith("/sha256sums.json")) {
+      if (url.pathname.endsWith("/sha256sums.json")) {
         return Response.json({ "images/boot.img": hash });
       }
 
-      if (url.endsWith("/images/boot.img")) {
+      if (url.pathname.endsWith("/images/boot.img")) {
+        blobRequests.push({ url: url.toString(), cache: init?.cache });
         return new Response("boot", {
           headers: {
             "Content-Length": "4",
@@ -202,6 +204,12 @@ describe("requiredAssetPathsForModel", () => {
       ]),
     );
     expect(cacheStore.records.size).toBe(1);
+    expect(blobRequests).toEqual([
+      expect.objectContaining({
+        cache: "no-store",
+        url: expect.stringContaining(`sha=${hash.slice(0, 16)}`),
+      }),
+    ]);
   });
 
   it("keeps overall prepare progress monotonic across multiple files", async () => {
@@ -213,20 +221,20 @@ describe("requiredAssetPathsForModel", () => {
     const progress: Array<number | undefined> = [];
 
     globalThis.fetch = async (input) => {
-      const url = String(input);
+      const url = new URL(String(input), "https://assets.test");
 
-      if (url.endsWith("/sha256sums.json")) {
+      if (url.pathname.endsWith("/sha256sums.json")) {
         return Response.json({
           "images/boot.img": bootHash,
           "images/vendor_boot.img": vendorHash,
         });
       }
 
-      if (url.endsWith("/images/boot.img")) {
+      if (url.pathname.endsWith("/images/boot.img")) {
         return new Response("boot", { headers: { "Content-Length": "4" } });
       }
 
-      if (url.endsWith("/images/vendor_boot.img")) {
+      if (url.pathname.endsWith("/images/vendor_boot.img")) {
         return new Response("vendor", { headers: { "Content-Length": "6" } });
       }
 
