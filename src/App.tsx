@@ -31,9 +31,11 @@ const preferredLegacyModelId = "xiaomi15ultra";
 
 const destructiveCopy = (workflow: WorkflowState): Partial<Record<PhaseId, string>> => ({
   "flash-ftd":
-    workflow.workflowMode === "edl-standard"
-      ? "Toi xac nhan ABL engineering da duoc nap thu cong, dong y chay fastboot erase frp de verify, roi flash FTD dung mau may."
-      : "Toi xac nhan ABL/parcel da san sang, dong y chay fastboot erase frp de verify, roi flash FTD dung mau may.",
+    workflow.model?.family === "legacy-ftd" && workflow.model.adbExploit
+      ? "Toi xac nhan thiet bi dang o man hinh Android chinh, da bat USB Debugging, dong y chay ADB Exploit va flash FTD."
+      : workflow.workflowMode === "edl-standard"
+        ? "Toi xac nhan ABL engineering da duoc nap thu cong, dong y chay fastboot erase frp de verify, roi flash FTD dung mau may."
+        : "Toi xac nhan ABL/parcel da san sang, dong y chay fastboot erase frp de verify, roi flash FTD dung mau may.",
   "unlock-payload": "Toi xac nhan may dang o Fastboot tu FTD de chay payload unlock.",
   "restore-gpt": "Toi xac nhan khoi phuc GPT cuoi, sau do flash ROM goc bang MiFlash Clean All.",
 });
@@ -114,15 +116,17 @@ function App() {
           ? "Dang tai danh sach file truoc khi mo hop chon thiet bi."
           : !workflow.preflight.isHttps || !workflow.preflight.hasWebUsb
             ? "Can HTTPS/localhost va Chrome hoac Edge co WebUSB."
-            : "Chon ADB Android neu may dang vao he dieu hanh, hoac Fastboot neu may da o bootloader.";
+            : "Chon ADB Android (yeu cau bat USB Debugging) de bat dau. Doi voi Xiaomi 13/14, Redmi K60/K70/K80 (HyperOS 2.0), quy trinh bat dau tu man hinh Android chinh.";
   const actionHint = workflow.busy
     ? "Dang chay buoc hien tai."
     : workflow.awaitingFastbootVerification
       ? "May dang reboot sang Fastboot. Khi thay man Fastboot, bam Ket noi Fastboot de xac minh mau may."
       : workflow.nextPhase === "connect-device"
-        ? "Ket noi ADB Android de nhan dien va reboot bootloader, hoac ket noi Fastboot neu may da o bootloader."
+        ? "Ket noi ADB Android de nhan dien, hoac ket noi Fastboot neu may da o bootloader."
         : workflow.nextPhase === "flash-ftd"
-          ? "Truoc khi flash FTD, app se chay fastboot erase frp. Neu fail thi ABL engineering/parcel chua OK hoac Fastboot chua dung trang thai."
+          ? (workflow.model?.family === "legacy-ftd" && workflow.model.adbExploit
+            ? "Thiet bi se chay ADB Exploit de lay root va nap engineering ABL, sau do tu reboot vao Fastboot de tiep tuc flash FTD."
+            : "Truoc khi flash FTD, app se chay fastboot erase frp. Neu fail thi ABL engineering/parcel chua OK hoac Fastboot chua dung trang thai.")
           : workflow.workflowMode !== "edl-standard" && !preflightReady
             ? "Tick du kiem tra ban dau de bat buoc tiep theo sau khi da nhan dien may."
             : workflow.requiresConfirmation && !workflow.canRun

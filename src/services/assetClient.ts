@@ -84,6 +84,10 @@ export const requiredAssetPathsForModel = (model: SupportedModel, plan: FlashPla
       .map((operation) => `${model.ftdPackage}/${operation.file}`),
   ];
 
+  if (isLegacyFtdModel(model) && model.adbExploit) {
+    paths.push(model.adbExploit.exploitFile, model.adbExploit.suFile);
+  }
+
   return [...new Set(paths.map(normalizePath))];
 };
 
@@ -118,12 +122,16 @@ export const requiredAssetPathsForPhase = (model: SupportedModel, plan: FlashPla
   }
 
   if (phase === "flash-ftd") {
-    return [
+    const flashPaths = [
       ...(plan.antiRollbackFile ? [`${model.ftdPackage}/${plan.antiRollbackFile}`] : []),
       ...plan.operations
         .filter((operation) => operation.type === "flash")
         .map((operation) => `${model.ftdPackage}/${operation.file}`),
-    ].map(normalizePath);
+    ];
+    if (model.adbExploit) {
+      flashPaths.push(model.adbExploit.exploitFile, model.adbExploit.suFile, model.ablFile);
+    }
+    return flashPaths.map(normalizePath);
   }
 
   if (phase === "unlock-payload") {

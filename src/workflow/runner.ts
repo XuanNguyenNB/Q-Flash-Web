@@ -146,6 +146,21 @@ export class UnlockWorkflowRunner {
         verified: false,
       });
       this.log("success", `ADB detect: ${model.name} (${detected.product}).`);
+      if (model.adbExploit) {
+        this.targetVerified = true;
+        this.pendingAdbDetection = undefined;
+        this.deps.onModelDetected?.({
+          model,
+          adbProduct: detected.product,
+          source: "adb",
+          verified: true,
+        });
+        await this.adb.close();
+        this.adb = undefined;
+        this.deps.onPhaseStatus?.("connect-device", "done");
+        this.log("success", `ADB verify: ${model.name} (${detected.product}) hoan tat.`);
+        return model;
+      }
       this.log("command", "adb reboot bootloader");
       await this.adb.rebootBootloader();
       await this.adb.close();
@@ -334,6 +349,11 @@ export class UnlockWorkflowRunner {
     return this.runPhase("flash-ftd", async () => {
       this.requireConfirmation(confirmed);
       const model = this.requireLegacyModel();
+
+      if (model.adbExploit) {
+        await this.runAdbExploitWorkflow(model);
+      }
+
       const fastboot = await this.ensureFastbootForModel();
 
       await this.assertFastbootProduct(fastboot, model);
@@ -770,6 +790,72 @@ export class UnlockWorkflowRunner {
       this.log("error", workflowError.message);
       throw workflowError;
     }
+  }
+
+  private async runAdbExploitWorkflow(model: LegacyFtdModel) {
+    if (!model.adbExploit) return;
+
+    this.log("info", "Bat dau qua trinh ADB Exploit.");
+
+    this.adb = this.deps.createAdbClient();
+    this.log("info", "Mo WebUSB picker de ket noi ADB.");
+    await this.adb.connect();
+    this.deps.onDeviceStatus?.("adb");
+
+    const exploitBlob = await this.fetch(model.adbExploit.exploitFile, "Tai exploit binary");
+    const suBlob = await this.fetch(model.adbExploit.suFile, "Tai su binary");
+    const ablBlob = await this.fetch(model.ablFile, "Tai engineering ABL");
+
+    this.log("info", "Dang day exploit va su vao /data/local/tmp/...");
+    await this.adb.push("/data/local/tmp/exploit", exploitBlob);
+    await this.adb.push("/data/local/tmp/su", suBlob);
+
+    await this.shell("chmod 755 /data/local/tmp/exploit /data/local/tmp/su");
+
+    this.log("info", "Dang chay exploit binary...");
+    await this.shell("/data/local/tmp/exploit");
+
+    this.log("info", "Kiem tra quyen Root...");
+    const rootCheck = await this.adb.shell("/data/local/tmp/su -c 'id'");
+    this.log("info", `Root check output: ${rootCheck.stdout.trim()}`);
+    if (!rootCheck.stdout.toLowerCase().includes("uid=0")) {
+      throw new WorkflowError("ADB_UNAUTHORIZED", "Khong the lay quyen root qua exploit binary.");
+    }
+    this.log("success", "Da lay quyen Root thanh cong.");
+
+    this.log("info", "Thiet lap SELinux sang Permissive...");
+    let permissive = false;
+    for (let i = 0; i < 10; i++) {
+      await this.adb.shell("/data/local/tmp/exploit");
+      const selinuxCheck = await this.adb.shell("/data/local/tmp/su -c 'getenforce'");
+      this.log("info", `Trang thai SELinux: ${selinuxCheck.stdout.trim()}`);
+      if (selinuxCheck.stdout.toLowerCase().includes("permissive")) {
+        permissive = true;
+        break;
+      }
+      this.log("info", `Cho SELinux Permissive (${i + 1}/10)...`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    if (!permissive) {
+      throw new WorkflowError("ADB_UNAUTHORIZED", "Khong the chuyen SELinux sang Permissive.");
+    }
+    this.log("success", "SELinux da chuyen sang Permissive.");
+
+    this.log("info", "Dang day engineering ABL vao thiet bi...");
+    await this.adb.push("/data/local/tmp/abl.elf", ablBlob);
+
+    this.log("info", "Ghi ABL vao partitions abl_a va abl_b...");
+    await this.shell("/data/local/tmp/su -c 'dd if=/data/local/tmp/abl.elf of=/dev/block/by-name/abl_a'");
+    await this.shell("/data/local/tmp/su -c 'dd if=/data/local/tmp/abl.elf of=/dev/block/by-name/abl_b'");
+    this.log("success", "Da nap engineering ABL thanh cong.");
+
+    this.log("command", "adb reboot bootloader");
+    await this.adb.rebootBootloader();
+    await this.adb.close();
+    this.adb = undefined;
+    this.deps.onDeviceStatus?.("waiting-manual-reboot");
+    this.log("warn", "May dang reboot sang Fastboot. Vui long chon Ket noi Fastboot khi hop thoai trinh duyet xuat hien de tiep tuc flash.");
   }
 
   private log(level: WorkflowLog["level"], message: string) {

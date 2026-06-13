@@ -64,6 +64,10 @@ export const legacyFtdModelSchema = modelBaseSchema.extend({
   }),
   finalGpt: z.array(z.string().min(1)).length(6),
   edlAbl: edlAblSchema.optional(),
+  adbExploit: z.object({
+    exploitFile: z.string().min(1),
+    suFile: z.string().min(1),
+  }).optional(),
 });
 
 export const efisp8eModelSchema = modelBaseSchema.extend({

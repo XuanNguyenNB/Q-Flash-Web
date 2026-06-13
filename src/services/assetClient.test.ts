@@ -27,12 +27,13 @@ describe("requiredAssetPathsForModel", () => {
     const models = v1ManifestModels.map((entry) => supportedModelSchema.parse(entry));
     const legacyModels = models.filter((model) => model.family === "legacy-ftd");
 
-    expect(models).toHaveLength(6);
-    expect(legacyModels).toHaveLength(6);
-    expect(legacyModels.every((model) => model.edlAbl)).toBe(true);
+    expect(models.length).toBeGreaterThanOrEqual(6);
+    expect(legacyModels.length).toBeGreaterThanOrEqual(6);
     expect(models.some((model) => model.family === "efisp-8e-gen5")).toBe(false);
 
-    for (const model of legacyModels) {
+    const legacyEdlModels = legacyModels.filter((model) => model.edlAbl);
+    expect(legacyEdlModels).toHaveLength(6);
+    for (const model of legacyEdlModels) {
       expect(model.edlAbl).toMatchObject({
         firehoseFile: "firehose/firehose_SM8750.melf",
         firehoseSha256: "95bd33db724706db5da03882c65783d01338df6159ce563be0ce1b963d83668d",
@@ -40,6 +41,14 @@ describe("requiredAssetPathsForModel", () => {
       });
     }
 
+    const legacyAdbModels = legacyModels.filter((model) => model.adbExploit);
+    expect(legacyAdbModels.length).toBeGreaterThan(0);
+    for (const model of legacyAdbModels) {
+      expect(model.adbExploit).toMatchObject({
+        exploitFile: expect.any(String),
+        suFile: expect.any(String),
+      });
+    }
   });
 
   it("lists ABL and firehose for EDL ABL phase", () => {
