@@ -1,5 +1,6 @@
 import { verifySha256Blob } from "../domain/hash";
 import { buildAssetUrl, normalizePath } from "../domain/assets";
+import { isAssetTrustEnabled, verifyDetachedSignature } from "../domain/assetTrust";
 import { isEfisp8eModel, isLegacyFtdModel } from "../domain/models";
 import {
   flashPlanSchema,
@@ -135,7 +136,13 @@ export const requiredAssetPathsForPhase = (model: SupportedModel, plan: FlashPla
   }
 
   if (phase === "unlock-payload") {
-    return [model.unlock.gptBoth4, model.unlock.bootImage].map(normalizePath);
+    const payload = model.unlock.payloadFile ?? model.unlock.gptBoth4;
+    const ennea = model.unlock.enneaFile ?? model.unlock.bootImage;
+    return [payload, ennea].map(normalizePath);
+  }
+
+  if (model.unlock.finalGptFile) {
+    return [normalizePath(model.unlock.finalGptFile)];
   }
 
   return model.finalGpt.map(normalizePath);
@@ -147,8 +154,8 @@ export const assetCacheKey = (baseUrl: string, path: string, sha256: string) =>
 export class ServerAssetClient implements AssetClient {
   private rootSha256: Sha256Sums | undefined;
   private packageSha256 = new Map<string, Sha256Sums>();
-  private preparedAssetKeys = new Map<string, string>();
-  private readonly baseUrl: string;
+  private readonly preparedAssetKeys = new Map<string, string>();
+  protected readonly baseUrl: string;
   private readonly cacheStore: AssetCacheStore;
 
   constructor(baseUrl: string, cacheStore: AssetCacheStore = new IndexedDbAssetCacheStore()) {
@@ -157,7 +164,7 @@ export class ServerAssetClient implements AssetClient {
   }
 
   async loadManifest(): Promise<Manifest> {
-    const manifest = manifestSchema.parse(await this.fetchJson("manifest.json"));
+    const manifest = manifestSchema.parse(await this.fetchSignedJson("manifest.json"));
     return {
       ...manifest,
       models: manifest.models.filter(isLegacyFtdModel),
@@ -165,17 +172,17 @@ export class ServerAssetClient implements AssetClient {
   }
 
   async loadRootSha256() {
-    this.rootSha256 = sha256SumsSchema.parse(await this.fetchJson("sha256sums.json"));
+    this.rootSha256 = sha256SumsSchema.parse(await this.fetchSignedJson("sha256sums.json"));
     return this.rootSha256;
   }
 
   async loadFlashPlan(packagePath: string): Promise<FlashPlan> {
-    return flashPlanSchema.parse(await this.fetchJson(`${packagePath}/flash-plan.json`));
+    return flashPlanSchema.parse(await this.fetchSignedJson(`${packagePath}/flash-plan.json`));
   }
 
   async loadPackageSha256(packagePath: string) {
     const normalizedPackage = normalizePath(packagePath);
-    const sums = sha256SumsSchema.parse(await this.fetchJson(`${normalizedPackage}/sha256sums.json`));
+    const sums = sha256SumsSchema.parse(await this.fetchSignedJson(`${normalizedPackage}/sha256sums.json`));
     this.packageSha256.set(normalizedPackage, sums);
     return sums;
   }
@@ -270,8 +277,10 @@ export class ServerAssetClient implements AssetClient {
 
       let blob: Blob;
 
+      const fetchPath = this.resolveFetchPath(path);
+
       try {
-        blob = await this.fetchBlob(path, expected, (current, total) => {
+        blob = await this.fetchBlob(fetchPath, expected, (current, total) => {
           receivedBytes += Math.max(0, current - lastReceivedForFile);
           lastReceivedForFile = current;
           expectedTotalForFile = total;
@@ -284,6 +293,15 @@ export class ServerAssetClient implements AssetClient {
         });
       } catch (error) {
         throw new WorkflowError("ASSET_PREFETCH_FAILED", `Không tải được ${path}.`, error);
+      }
+
+      try {
+        blob = await this.decodeBlob(path, blob);
+      } catch (error) {
+        if (error instanceof WorkflowError) {
+          throw error;
+        }
+        throw new WorkflowError("ASSET_DECRYPT_FAILED", `Không giải mã được ${path}.`, error);
       }
 
       if (lastReceivedForFile === 0) {
@@ -365,14 +383,49 @@ export class ServerAssetClient implements AssetClient {
     return undefined;
   }
 
-  private async fetchJson(path: string) {
-    const response = await fetch(buildAssetUrl(this.baseUrl, path), { cache: "no-store" });
+  protected resolveFetchPath(path: string) {
+    return path;
+  }
 
-    if (!response.ok) {
-      throw new WorkflowError("ASSET_FETCH_FAILED", `Không tải được ${path}: HTTP ${response.status}`);
+  protected async decodeBlob(_path: string, blob: Blob) {
+    return blob;
+  }
+
+  protected async fetchSignedJson(path: string) {
+    const url = buildAssetUrl(this.baseUrl, path);
+    const sigUrl = `${url}.sig`;
+
+    const [bodyResponse, sigResponse] = await Promise.all([
+      fetch(url, { cache: "no-store" }),
+      fetch(sigUrl, { cache: "no-store" }),
+    ]);
+
+    if (!bodyResponse.ok) {
+      throw new WorkflowError("ASSET_FETCH_FAILED", `Không tải được ${path}: HTTP ${bodyResponse.status}`);
     }
 
-    return response.json();
+    if (!isAssetTrustEnabled()) {
+      return bodyResponse.json();
+    }
+
+    if (sigResponse.status === 404) {
+      throw new WorkflowError("ASSET_SIGNATURE_MISSING", `Thiếu chữ ký cho ${path} (${sigUrl}).`);
+    }
+
+    if (!sigResponse.ok) {
+      throw new WorkflowError("ASSET_FETCH_FAILED", `Không tải được chữ ký cho ${path}: HTTP ${sigResponse.status}`);
+    }
+
+    const bodyBytes = new Uint8Array(await bodyResponse.arrayBuffer());
+    const sigB64 = (await sigResponse.text()).trim();
+
+    await verifyDetachedSignature(bodyBytes, sigB64);
+
+    try {
+      return JSON.parse(new TextDecoder().decode(bodyBytes));
+    } catch (error) {
+      throw new WorkflowError("MANIFEST_INVALID", `JSON không hợp lệ ở ${path}.`, error);
+    }
   }
 
   private async fetchBlob(path: string, expectedSha256: string, onProgress?: ProgressHandler) {

@@ -13,6 +13,11 @@ dist-ssr
 dist-assets
 *.local
 
+# Firmware source (binaries, populated locally — see firmware-source/README.md)
+firmware-source/*
+!firmware-source/README.md
+!firmware-source/.gitkeep
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

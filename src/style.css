@@ -4,12 +4,27 @@
   color-scheme: dark;
   font-family:
     Geist, "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0b0d10;
+  background: #07090c;
   letter-spacing: 0;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Surfaces */
+  --bg-base: #07090c;
+  --bg-panel: #0d1117;
+  --bg-elevated: #11161d;
+  --bg-inset: #04060a;
+
+  /* Accent neon */
+  --accent: #22d3ee;
+  --accent-2: #2dd4bf;
+  --accent-soft: rgba(34, 211, 238, 0.12);
+  --border-glow: rgba(34, 211, 238, 0.4);
+
+  /* Mono stack for technical data */
+  --font-mono: ui-monospace, "Geist Mono", "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
 }
 
 * {
@@ -20,13 +35,47 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px),
-    #0b0d10;
+    linear-gradient(rgba(34, 211, 238, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.018) 1px, transparent 1px),
+    radial-gradient(circle at 18% -8%, rgba(34, 211, 238, 0.06), transparent 32%),
+    radial-gradient(circle at 84% 4%, rgba(45, 212, 191, 0.05), transparent 28%),
+    var(--bg-base);
   background-size:
-    38px 38px,
-    38px 38px,
+    34px 34px,
+    34px 34px,
+    auto,
+    auto,
     auto;
+  background-attachment: fixed;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.35), 0 0 22px rgba(34, 211, 238, 0.12);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.6), 0 0 34px rgba(34, 211, 238, 0.26);
+  }
+}
+
+.phase-glow {
+  animation: pulse-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-glow {
+    animation: none;
+  }
 }
 
 button,
@@ -36,12 +85,12 @@ input {
 
 button:focus-visible,
 input:focus-visible {
-  outline: 2px solid #7dd3fc;
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
 ::selection {
-  background: rgba(125, 211, 252, 0.28);
+  background: rgba(34, 211, 238, 0.3);
   color: #f8fafc;
 }
 

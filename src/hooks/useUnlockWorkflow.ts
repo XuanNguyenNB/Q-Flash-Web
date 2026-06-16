@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAssetBaseUrl } from "../domain/assets";
 import type { Manifest, SupportedModel } from "../domain/schemas";
 import { BrowserAdbClient } from "../services/adb";
-import { ServerAssetClient } from "../services/assetClient";
+import { CryptoAssetClient } from "../services/cryptoAssetClient";
 import {
   BlazerMockAdbClient,
   BlazerMockAssetClient,
@@ -124,7 +124,7 @@ export const useUnlockWorkflow = () => {
   const createRunner = useCallback(
     () =>
       new UnlockWorkflowRunner({
-        assets: new ServerAssetClient(getAssetBaseUrl()),
+        assets: new CryptoAssetClient(getAssetBaseUrl()),
         createAdbClient: () => new BrowserAdbClient(),
         createFastbootClient: () => new BrowserFastbootClient(),
         onDeviceStatus: setDeviceStatus,
@@ -480,12 +480,12 @@ export const useUnlockWorkflow = () => {
   }, []);
 
   const runFastbootTerminalCommand = useCallback(
-    async (command: string) => {
+    async (command: string, confirmed = false) => {
       if (!runnerRef.current || !canRunFastbootTerminalCommand) {
         return;
       }
 
-      await runWorkflowAction(() => runnerRef.current!.runFastbootTerminalCommand(command));
+      await runWorkflowAction(() => runnerRef.current!.runFastbootTerminalCommand(command, confirmed));
     },
     [canRunFastbootTerminalCommand, runWorkflowAction],
   );

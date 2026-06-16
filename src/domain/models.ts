@@ -2,10 +2,24 @@ import type { Efisp8eModel, LegacyFtdModel, SupportedModel } from "./schemas";
 
 type LegacyModelSource = LegacyFtdModel & {
   localPackageDir: string;
+  skipFtdPackage?: boolean;
 };
 
 const finalGpt = (packagePath: string) =>
   Array.from({ length: 6 }, (_, index) => `${packagePath}/images/gpt_both${index}.bin`);
+
+const enneaByChip = {
+  sm8550: "ennea/8550-Ennea.img",
+  sm8650: "ennea/8650-Ennea.img",
+  sm8635: "ennea/8635-Ennea.img",
+  sm8735: "ennea/8735-Ennea.img",
+} as const;
+
+const perDeviceUnlock = (chip: keyof typeof enneaByChip, slug: string) => ({
+  payloadFile: `unlock/payloads/${slug}.bin`,
+  enneaFile: enneaByChip[chip],
+  finalGptFile: `unlock/gpt/${slug}.bin`,
+});
 
 const commonEdlAbl = {
   firehoseFile: "firehose/firehose_SM8750.melf",
@@ -75,6 +89,7 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi15",
     name: "Xiaomi 15",
     product: "dada",
+    chip: "8E",
     ablFile: "abl/mi15.elf",
     ftdPackage: "packages/xiaomi15",
     unlock: {
@@ -90,6 +105,7 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi15pro",
     name: "Xiaomi 15 Pro",
     product: "haotian",
+    chip: "8E",
     ablFile: "abl/mi15p.elf",
     ftdPackage: "packages/xiaomi15pro",
     unlock: {
@@ -105,6 +121,7 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi15ultra",
     name: "Xiaomi 15 Ultra",
     product: "xuanyuan",
+    chip: "8E",
     ablFile: "abl/mi15u.elf",
     ftdPackage: "packages/xiaomi15ultra",
     unlock: {
@@ -120,6 +137,7 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "redmi-k80pro",
     name: "Redmi K80 Pro",
     product: "miro",
+    chip: "8E",
     ablFile: "abl/k80pro.elf",
     ftdPackage: "packages/redmi-k80pro",
     unlock: {
@@ -136,6 +154,7 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "redmi-k90",
     name: "Redmi K90",
     product: "annibale",
+    chip: "8E",
     ablFile: "abl/K90.elf",
     ftdPackage: "packages/redmi-k90",
     unlock: {
@@ -151,6 +170,7 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi-pad8pro",
     name: "Xiaomi Pad 8 Pro",
     product: "piano",
+    chip: "8E",
     ablFile: "abl/pad8.elf",
     ftdPackage: "packages/xiaomi-pad8pro",
     unlock: {
@@ -166,11 +186,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi14",
     name: "Xiaomi 14",
     product: "houji",
+    chip: "8G3",
     ablFile: "abl/mi14.elf",
     ftdPackage: "packages/xiaomi14",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8650", "14"),
     },
     finalGpt: finalGpt("packages/xiaomi14"),
     adbExploit: {
@@ -184,11 +206,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi14pro",
     name: "Xiaomi 14 Pro",
     product: "shennong",
+    chip: "8G3",
     ablFile: "abl/mi14p.elf",
     ftdPackage: "packages/xiaomi14pro",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8650", "14p"),
     },
     finalGpt: finalGpt("packages/xiaomi14pro"),
     adbExploit: {
@@ -202,11 +226,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi14ultra",
     name: "Xiaomi 14 Ultra",
     product: "aurora",
+    chip: "8G3",
     ablFile: "abl/mi14u.elf",
     ftdPackage: "packages/xiaomi14ultra",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8650", "14u"),
     },
     finalGpt: finalGpt("packages/xiaomi14ultra"),
     adbExploit: {
@@ -220,11 +246,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "redmi-k70pro",
     name: "Redmi K70 Pro",
     product: "manet",
+    chip: "8G3",
     ablFile: "abl/k70pro.elf",
     ftdPackage: "packages/redmi-k70pro",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8650", "k70p"),
     },
     finalGpt: finalGpt("packages/redmi-k70pro"),
     adbExploit: {
@@ -238,11 +266,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "redmi-k80",
     name: "Redmi K80",
     product: "zorn",
+    chip: "8G3",
     ablFile: "abl/k80.elf",
     ftdPackage: "packages/redmi-k80",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8650", "k80"),
     },
     finalGpt: finalGpt("packages/redmi-k80"),
     adbExploit: {
@@ -256,11 +286,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomimixfold4",
     name: "Xiaomi MIX Fold 4",
     product: "goku",
+    chip: "8G3",
     ablFile: "abl/mixfold4.elf",
     ftdPackage: "packages/xiaomimixfold4",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8650", "fold4"),
     },
     finalGpt: finalGpt("packages/xiaomimixfold4"),
     adbExploit: {
@@ -274,11 +306,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomimixflip",
     name: "Xiaomi MIX Flip",
     product: "ruyi",
+    chip: "8G3",
     ablFile: "abl/mixflip.elf",
     ftdPackage: "packages/xiaomimixflip",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8650", "flip"),
     },
     finalGpt: finalGpt("packages/xiaomimixflip"),
     adbExploit: {
@@ -292,11 +326,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi13",
     name: "Xiaomi 13",
     product: "fuxi",
+    chip: "8G2",
     ablFile: "abl/mi13.elf",
     ftdPackage: "packages/xiaomi13",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8550", "13"),
     },
     finalGpt: finalGpt("packages/xiaomi13"),
     adbExploit: {
@@ -310,11 +346,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi13pro",
     name: "Xiaomi 13 Pro",
     product: "nuwa",
+    chip: "8G2",
     ablFile: "abl/mi13p.elf",
     ftdPackage: "packages/xiaomi13pro",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8550", "13p"),
     },
     finalGpt: finalGpt("packages/xiaomi13pro"),
     adbExploit: {
@@ -328,11 +366,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi13ultra",
     name: "Xiaomi 13 Ultra",
     product: "ishtar",
+    chip: "8G2",
     ablFile: "abl/mi13u.elf",
     ftdPackage: "packages/xiaomi13ultra",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8550", "13u"),
     },
     finalGpt: finalGpt("packages/xiaomi13ultra"),
     adbExploit: {
@@ -346,11 +386,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "redmi-k60pro",
     name: "Redmi K60 Pro",
     product: "socrates",
+    chip: "8G2",
     ablFile: "abl/k60pro.elf",
     ftdPackage: "packages/redmi-k60pro",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8550", "k60p"),
     },
     finalGpt: finalGpt("packages/redmi-k60pro"),
     adbExploit: {
@@ -364,11 +406,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "redmi-k70",
     name: "Redmi K70",
     product: "vermeer",
+    chip: "8G2",
     ablFile: "abl/k70.elf",
     ftdPackage: "packages/redmi-k70",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8550", "k70"),
     },
     finalGpt: finalGpt("packages/redmi-k70"),
     adbExploit: {
@@ -382,11 +426,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi-pad6spro",
     name: "Xiaomi Pad 6S Pro",
     product: "sheng",
+    chip: "8G2",
     ablFile: "abl/pad6spro.elf",
     ftdPackage: "packages/xiaomi-pad6spro",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8550", "pad6sp"),
     },
     finalGpt: finalGpt("packages/xiaomi-pad6spro"),
     adbExploit: {
@@ -400,11 +446,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi-pad7pro",
     name: "Xiaomi Pad 7 Pro",
     product: "mulan",
+    chip: "8SG3",
     ablFile: "abl/pad7pro.elf",
     ftdPackage: "packages/xiaomi-pad7pro",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8635", "pad7p"),
     },
     finalGpt: finalGpt("packages/xiaomi-pad7pro"),
     adbExploit: {
@@ -418,11 +466,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi-civi4pro",
     name: "Xiaomi Civi 4 Pro",
     product: "chenfeng",
+    chip: "8SG3",
     ablFile: "abl/civi4pro.elf",
     ftdPackage: "packages/xiaomi-civi4pro",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8635", "civi4"),
     },
     finalGpt: finalGpt("packages/xiaomi-civi4pro"),
     adbExploit: {
@@ -436,11 +486,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "redmi-turbo3",
     name: "Redmi Turbo 3",
     product: "peridot",
+    chip: "8SG3",
     ablFile: "abl/turbo3.elf",
     ftdPackage: "packages/redmi-turbo3",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8635", "tb3"),
     },
     finalGpt: finalGpt("packages/redmi-turbo3"),
     adbExploit: {
@@ -454,11 +506,13 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     id: "xiaomi-pad7",
     name: "Xiaomi Pad 7",
     product: "dizi",
+    chip: "8SG3",
     ablFile: "abl/pad7.elf",
     ftdPackage: "packages/xiaomi-pad7",
     unlock: {
       gptBoth4: "unlock/gpt_both4.bin",
       bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8635", "pad7"),
     },
     finalGpt: finalGpt("packages/xiaomi-pad7"),
     adbExploit: {
@@ -467,12 +521,65 @@ export const v1LegacyModelSources: readonly LegacyModelSource[] = [
     },
     localPackageDir: "XiaomiPad7_ADB_Exploit",
   },
+  {
+    family: "legacy-ftd",
+    id: "redmi-turbo4pro",
+    name: "Redmi Turbo 4 Pro / POCO F7",
+    product: "onyx",
+    chip: "8SG4",
+    ablFile: "abl/turbo4pro.elf",
+    ftdPackage: "packages/redmi-turbo4pro",
+    unlock: {
+      gptBoth4: "unlock/gpt_both4.bin",
+      bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8735", "onyx"),
+    },
+    finalGpt: finalGpt("packages/redmi-turbo4pro"),
+    notes: ["Chua co exploit/su SM8735; dung workflow EDL_Standard sau khi nap ABL_ENG thu cong."],
+    localPackageDir: "turbo4pro_minieng",
+  },
+  {
+    family: "legacy-ftd",
+    id: "xiaomi-civi5pro",
+    name: "Xiaomi Civi 5 Pro",
+    product: "luming",
+    chip: "8SG4",
+    ablFile: "abl/civi5pro.elf",
+    ftdPackage: "packages/xiaomi-civi5pro",
+    unlock: {
+      gptBoth4: "unlock/gpt_both4.bin",
+      bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8735", "luming"),
+    },
+    finalGpt: finalGpt("packages/xiaomi-civi5pro"),
+    notes: ["Chua co exploit/su SM8735; dung workflow EDL_Standard sau khi nap ABL_ENG thu cong.", "Dang cho FTD package."],
+    localPackageDir: "xiaomi-civi5pro_pending",
+    skipFtdPackage: true,
+  },
+  {
+    family: "legacy-ftd",
+    id: "xiaomi-pad8",
+    name: "Xiaomi Pad 8",
+    product: "yupei",
+    chip: "8SG4",
+    ablFile: "abl/pad8.elf",
+    ftdPackage: "packages/xiaomi-pad8",
+    unlock: {
+      gptBoth4: "unlock/gpt_both4.bin",
+      bootImage: "unlock/boot.img",
+      ...perDeviceUnlock("sm8735", "yupei"),
+    },
+    finalGpt: finalGpt("packages/xiaomi-pad8"),
+    notes: ["Chua co exploit/su SM8735; dung workflow EDL_Standard sau khi nap ABL_ENG thu cong.", "Dang cho FTD package."],
+    localPackageDir: "xiaomi-pad8_pending",
+    skipFtdPackage: true,
+  },
 ] as const;
 
 export const v1ModelSources: readonly LegacyModelSource[] = v1LegacyModelSources;
 
 export const v1LegacyManifestModels: readonly LegacyFtdModel[] = v1LegacyModelSources.map(
-  ({ localPackageDir: _localPackageDir, ...model }) => model,
+  ({ localPackageDir: _localPackageDir, skipFtdPackage: _skipFtdPackage, ...model }) => model,
 );
 
 export const v1ManifestModels: readonly SupportedModel[] = [...v1LegacyManifestModels];

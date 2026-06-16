@@ -13,33 +13,43 @@
     "sync:assets:r2": "tsx scripts/sync-assets-r2.ts",
     "sync:assets:r2:dry-run": "tsx scripts/sync-assets-r2.ts --dry-run",
     "verify:assets:r2": "tsx scripts/verify-assets-r2.ts",
-    "verify:assets:r2:dry-run": "tsx scripts/verify-assets-r2.ts --dry-run"
+    "verify:assets:r2:dry-run": "tsx scripts/verify-assets-r2.ts --dry-run",
+    "audit:deps": "npm audit signatures && npm audit --omit=dev",
+    "check:csp": "node scripts/check-csp.mjs"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.4",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "jsdom": "^29.0.2",
-    "tailwindcss": "^4.2.4",
-    "tsx": "^4.21.0",
+    "@tailwindcss/vite": "~4.2.4",
+    "@testing-library/jest-dom": "~6.9.1",
+    "@testing-library/react": "~16.3.2",
+    "@testing-library/user-event": "~14.6.1",
+    "@types/node": "~25.6.0",
+    "@types/react": "~19.2.14",
+    "@types/react-dom": "~19.2.3",
+    "@vitejs/plugin-react": "~6.0.1",
+    "jsdom": "~29.0.2",
+    "tailwindcss": "~4.2.4",
+    "tsx": "~4.21.0",
     "typescript": "~6.0.2",
-    "vite": "^8.0.10",
-    "vitest": "^4.1.5"
+    "vite": "~8.0.10",
+    "vite-plugin-sri3": "^2.0.0",
+    "vitest": "~4.1.5"
   },
   "dependencies": {
-    "@yume-chan/adb": "^2.6.0",
-    "@yume-chan/adb-credential-web": "^2.1.0",
-    "@yume-chan/adb-daemon-webusb": "^2.3.2",
-    "@yume-chan/stream-extra": "^2.5.3",
-    "android-fastboot": "^1.1.3",
-    "lucide-react": "^1.9.0",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "zod": "^4.3.6"
+    "@yume-chan/adb": "2.6.0",
+    "@yume-chan/adb-credential-web": "2.1.0",
+    "@yume-chan/adb-daemon-webusb": "2.3.2",
+    "@yume-chan/stream-extra": "2.5.3",
+    "android-fastboot": "1.1.3",
+    "lucide-react": "~1.9.0",
+    "react": "~19.2.5",
+    "react-dom": "~19.2.5",
+    "zod": "~4.3.6"
+  },
+  "overrides": {
+    "@yume-chan/adb": "2.6.0",
+    "@yume-chan/adb-credential-web": "2.1.0",
+    "@yume-chan/adb-daemon-webusb": "2.3.2",
+    "@yume-chan/stream-extra": "2.5.3",
+    "android-fastboot": "1.1.3"
   }
 }

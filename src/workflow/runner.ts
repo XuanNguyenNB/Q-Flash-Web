@@ -8,6 +8,13 @@ import type { PhaseId, ProgressEvent, WorkflowDependencies, WorkflowLog, Workflo
 
 const ADB_PRODUCT_PROPS = ["ro.product.device", "ro.product.vendor.device", "ro.build.product"] as const;
 
+const SECURITY_PATCH_CUTOFFS: Partial<Record<LegacyFtdModel["chip"], string>> = {
+  "8E": "2026-02-01",
+  "8G2": "2026-02-01",
+  "8G3": "2026-02-01",
+  "8SG3": "2026-02-01",
+};
+
 type OperationProgressState = Extract<ProgressEvent["state"], "flashing" | "booting" | "configuring">;
 
 type FetchProgressContext = {
@@ -56,6 +63,10 @@ export class UnlockWorkflowRunner {
   }
 
   overrideTargetModel(model: SupportedModel) {
+    if (import.meta.env.VITE_ALLOW_TARGET_OVERRIDE !== "true") {
+      throw new WorkflowError("DEV_OVERRIDE_DISABLED");
+    }
+
     const legacyModel = this.asLegacyModel(model);
     this.model = legacyModel;
     this.targetVerified = true;
@@ -146,6 +157,7 @@ export class UnlockWorkflowRunner {
         verified: false,
       });
       this.log("success", `ADB detect: ${model.name} (${detected.product}).`);
+      await this.checkSecurityPatch(model);
       if (model.adbExploit) {
         this.targetVerified = true;
         this.pendingAdbDetection = undefined;
@@ -240,7 +252,7 @@ export class UnlockWorkflowRunner {
     });
   }
 
-  async runFastbootTerminalCommand(input: string) {
+  async runFastbootTerminalCommand(input: string, confirmed = false) {
     try {
       const command = parseFastbootTerminalCommand(input);
       const fastboot = await this.ensureFastbootForModel();
@@ -256,6 +268,15 @@ export class UnlockWorkflowRunner {
         const value = await fastboot.getvar(command.name);
         this.log("success", `${command.name}=${value || "(empty)"}`);
         return value;
+      }
+
+      const isDestructive =
+        command.kind === "erase" || command.kind === "setActive" || command.kind === "raw";
+
+      if (isDestructive) {
+        this.requireConfirmation(confirmed);
+        const model = this.requireLegacyModel();
+        await this.assertFastbootProduct(fastboot, model);
       }
 
       if (command.kind === "erase") {
@@ -395,43 +416,37 @@ export class UnlockWorkflowRunner {
       await this.ensureAssetsForPhase("unlock-payload", model);
       const fastboot = await this.ensureFastbootForModel();
       await this.assertFastbootProduct(fastboot, model);
-      const totalOperations = 3;
+      const totalOperations = 2;
+      const payloadPath = model.unlock.payloadFile ?? model.unlock.gptBoth4;
+      const enneaPath = model.unlock.enneaFile ?? model.unlock.bootImage;
 
-      this.log("command", "fastboot reboot bootloader");
-      this.emitOperationProgress("Reboot bootloader", 0, "configuring", 0, totalOperations, "fastboot reboot bootloader");
-      this.deps.onDeviceStatus?.("waiting-manual-reboot");
-      await fastboot.rebootBootloaderAndWait(() => {
-        this.deps.onDeviceStatus?.("waiting-manual-reboot");
-        this.log("warn", "Cho may ve lai Fastboot sau reboot bootloader. Neu browser hien picker, chon lai thiet bi.");
+      this.log("command", `fastboot flash partition:4 ${payloadPath}`);
+      const payload = await this.fetch(payloadPath, "Tai unlock payload", {
+        completedItems: 0,
+        totalItems: totalOperations,
+        itemLabel: "Tai unlock payload",
       });
-      this.emitOperationProgress("Reboot bootloader", 1, "configuring", 0, totalOperations, "fastboot reboot bootloader");
-      this.deps.onDeviceStatus?.("fastboot");
-      this.log("success", "Fastboot da reconnect sau reboot bootloader.");
-      await this.assertFastbootProduct(fastboot, model);
+      this.emitOperationProgress("Flash partition:4", 0, "flashing", 0, totalOperations, "Flash partition:4");
+      await fastboot.flash("partition:4", payload, (progress) =>
+        this.emitOperationProgress("Flash partition:4", progress, "flashing", 0, totalOperations, "Flash partition:4"),
+      );
+      this.emitOperationProgress("Flash partition:4", 1, "flashing", 0, totalOperations, "Flash partition:4");
+      this.log("success", "Da nap unlock payload vao partition:4.");
 
-      this.log("command", `fastboot flash partition:4 ${model.unlock.gptBoth4}`);
-      const unlockGpt = await this.fetch(model.unlock.gptBoth4, "Tai unlock GPT partition:4", {
+      this.log("info", "Cho 5s sau khi nap unlock payload truoc khi boot Ennea.");
+      await new Promise((r) => setTimeout(r, 5000));
+
+      this.log("command", `fastboot boot ${enneaPath}`);
+      const ennea = await this.fetch(enneaPath, "Tai Ennea image", {
         completedItems: 1,
         totalItems: totalOperations,
-        itemLabel: "Tai unlock GPT partition:4",
+        itemLabel: "Tai Ennea image",
       });
-      this.emitOperationProgress("Flash partition:4", 0, "flashing", 1, totalOperations, "Flash partition:4");
-      await fastboot.flash("partition:4", unlockGpt, (progress) =>
-        this.emitOperationProgress("Flash partition:4", progress, "flashing", 1, totalOperations, "Flash partition:4"),
+      this.emitOperationProgress("Boot Ennea", 0, "booting", 1, totalOperations, "Boot Ennea");
+      await fastboot.boot(ennea, (progress) =>
+        this.emitOperationProgress("Boot Ennea", progress, "booting", 1, totalOperations, "Boot Ennea"),
       );
-      this.emitOperationProgress("Flash partition:4", 1, "flashing", 1, totalOperations, "Flash partition:4");
-
-      this.log("command", `fastboot boot ${model.unlock.bootImage}`);
-      const unlockBoot = await this.fetch(model.unlock.bootImage, "Tai unlock boot.img", {
-        completedItems: 2,
-        totalItems: totalOperations,
-        itemLabel: "Tai unlock boot.img",
-      });
-      this.emitOperationProgress("Boot unlock payload", 0, "booting", 2, totalOperations, "Boot unlock payload");
-      await fastboot.boot(unlockBoot, (progress) =>
-        this.emitOperationProgress("Boot unlock payload", progress, "booting", 2, totalOperations, "Boot unlock payload"),
-      );
-      this.emitOperationProgress("Boot unlock payload", 1, "booting", 2, totalOperations, "Boot unlock payload");
+      this.emitOperationProgress("Boot Ennea", 1, "booting", 1, totalOperations, "Boot Ennea");
       this.deps.onDeviceStatus?.("waiting-manual-reboot");
       this.log("warn", "Sau man hinh trang, giu Power + Volume Down de ve Fastboot.");
     });
@@ -444,6 +459,30 @@ export class UnlockWorkflowRunner {
       await this.ensureAssetsForPhase("restore-gpt", model);
       const fastboot = await this.ensureFastbootForModel();
       await this.assertFastbootProduct(fastboot, model);
+
+      if (model.unlock.finalGptFile) {
+        const totalOperations = 2;
+        this.log("command", `fastboot flash partition:4 ${model.unlock.finalGptFile}`);
+        const blob = await this.fetch(model.unlock.finalGptFile, "Tai GPT cuoi", {
+          completedItems: 0,
+          totalItems: totalOperations,
+          itemLabel: "Tai GPT cuoi",
+        });
+        this.emitOperationProgress("Flash partition:4", 0, "flashing", 0, totalOperations, "Flash partition:4");
+        await fastboot.flash("partition:4", blob, (progress) =>
+          this.emitOperationProgress("Flash partition:4", progress, "flashing", 0, totalOperations, "Flash partition:4"),
+        );
+        this.emitOperationProgress("Flash partition:4", 1, "flashing", 0, totalOperations, "Flash partition:4");
+
+        this.log("command", "fastboot reboot bootloader");
+        this.emitOperationProgress("Reboot bootloader", 0, "configuring", 1, totalOperations, "fastboot reboot bootloader");
+        await fastboot.reboot("bootloader");
+        this.emitOperationProgress("Reboot bootloader", 1, "configuring", 1, totalOperations, "fastboot reboot bootloader");
+        this.deps.onDeviceStatus?.("fastboot");
+        this.log("success", "Hoan tat GPT cuoi. Mo MiFlash, chon ROM goc dung model, chon Clean All.");
+        return;
+      }
+
       const totalOperations = model.finalGpt.length + 1;
 
       for (const [index, file] of model.finalGpt.entries()) {
@@ -655,6 +694,29 @@ export class UnlockWorkflowRunner {
     }
 
     return candidates;
+  }
+
+  private async checkSecurityPatch(model: LegacyFtdModel) {
+    const cutoff = SECURITY_PATCH_CUTOFFS[model.chip];
+    if (!cutoff) return;
+
+    let patch = "";
+    try {
+      const result = await this.shell("getprop ro.build.version.security_patch");
+      patch = result.stdout.trim();
+    } catch {
+      return;
+    }
+
+    if (!patch) return;
+    this.log("info", `Security patch: ${patch}`);
+
+    if (patch >= cutoff) {
+      this.log(
+        "warn",
+        `Canh bao: security patch ${patch} >= ${cutoff} (chip ${model.chip}). Permissive vector co the bi block boi Fastboot, exploit co the fail. Neu ADB exploit khong vao duoc Permissive, can EDL Firehose fallback (chua implement trong web).`,
+      );
+    }
   }
 
   private async shell(command: string) {

@@ -176,6 +176,7 @@ class TestAdb implements AdbClient {
     "ro.product.device": "dada",
     "ro.product.vendor.device": "dada",
     "ro.build.product": "dada",
+    "ro.build.version.security_patch": "2024-12-01",
   };
   commands: string[] = [];
 
@@ -274,43 +275,54 @@ describe("UnlockWorkflowRunner", () => {
   });
 
   it("runs only the simplified FTD phase order", async () => {
-    const { runner, phaseStatuses, fastboot, assets } = createRunner();
+    vi.useFakeTimers();
 
-    runner.setWorkflowMode("edl-standard");
-    await runner.initialize();
-    await runner.connectFastboot();
-    await runner.prepareAssetsForSelectedModel();
-    await runner.flashFtdPackage(true);
-    await runner.runUnlockPayload(true);
-    await runner.restoreFinalGpt(true);
+    try {
+      const { runner, phaseStatuses, fastboot, assets } = createRunner();
 
-    const completedPhases = phaseStatuses.filter(([, status]) => status === "done").map(([phase]) => phase);
-    expect(completedPhases).toEqual(["connect-device", "prepare-assets", "flash-ftd", "unlock-payload", "restore-gpt"]);
-    expect(fastboot.commands).toEqual(
-      expect.arrayContaining([
-        "getvar:product",
-        "erase:frp",
-        "erase:boot_ab",
-        "flash:boot_ab",
-        "set_active:a",
-        "reboot",
-        "reboot:bootloader",
-        "flash:partition:4",
-        "boot",
-        "flash:partition:0",
-        "flash:partition:5",
-      ]),
-    );
-    expect(assets.fetches).toEqual(
-      expect.arrayContaining([
-        "packages/xiaomi15/images/anti_version.txt",
-        "packages/xiaomi15/images/boot.img",
-        "unlock/gpt_both4.bin",
-        "unlock/boot.img",
-        "packages/xiaomi15/images/gpt_both0.bin",
-        "packages/xiaomi15/images/gpt_both5.bin",
-      ]),
-    );
+      runner.setWorkflowMode("edl-standard");
+      await runner.initialize();
+      await runner.connectFastboot();
+      await runner.prepareAssetsForSelectedModel();
+      await runner.flashFtdPackage(true);
+
+      // runUnlockPayload has a 5 s delay; advance timers concurrently so the test doesn't hang.
+      const unlockPromise = runner.runUnlockPayload(true);
+      await vi.runAllTimersAsync();
+      await unlockPromise;
+
+      await runner.restoreFinalGpt(true);
+
+      const completedPhases = phaseStatuses.filter(([, status]) => status === "done").map(([phase]) => phase);
+      expect(completedPhases).toEqual(["connect-device", "prepare-assets", "flash-ftd", "unlock-payload", "restore-gpt"]);
+      expect(fastboot.commands).toEqual(
+        expect.arrayContaining([
+          "getvar:product",
+          "erase:frp",
+          "erase:boot_ab",
+          "flash:boot_ab",
+          "set_active:a",
+          "reboot",
+          "reboot:bootloader",
+          "flash:partition:4",
+          "boot",
+          "flash:partition:0",
+          "flash:partition:5",
+        ]),
+      );
+      expect(assets.fetches).toEqual(
+        expect.arrayContaining([
+          "packages/xiaomi15/images/anti_version.txt",
+          "packages/xiaomi15/images/boot.img",
+          "unlock/gpt_both4.bin",
+          "unlock/boot.img",
+          "packages/xiaomi15/images/gpt_both0.bin",
+          "packages/xiaomi15/images/gpt_both5.bin",
+        ]),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("probes ABL engineering with erase frp before antirollback and FTD flash", async () => {
@@ -329,6 +341,44 @@ describe("UnlockWorkflowRunner", () => {
     expect(flashIndex).toBeGreaterThan(probeIndex);
   });
 
+  it("warns when security patch is at or after the chip cutoff", async () => {
+    const adb = new TestAdb();
+    adb.props["ro.product.device"] = "fuxi";
+    adb.props["ro.product.vendor.device"] = "fuxi";
+    adb.props["ro.build.product"] = "fuxi";
+    adb.props["ro.build.version.security_patch"] = "2026-03-05";
+
+    const { runner, logs } = createRunner(new TestFastboot(), adb);
+
+    await runner.initialize();
+    await runner.connectInitialAdb();
+
+    expect(logs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ level: "info", message: "Security patch: 2026-03-05" }),
+        expect.objectContaining({
+          level: "warn",
+          message: expect.stringContaining("security patch 2026-03-05 >= 2026-02-01"),
+        }),
+      ]),
+    );
+  });
+
+  it("does not warn when security patch is before the chip cutoff", async () => {
+    const adb = new TestAdb();
+    adb.props["ro.product.device"] = "fuxi";
+    adb.props["ro.product.vendor.device"] = "fuxi";
+    adb.props["ro.build.product"] = "fuxi";
+    adb.props["ro.build.version.security_patch"] = "2025-08-01";
+
+    const { runner, logs } = createRunner(new TestFastboot(), adb);
+
+    await runner.initialize();
+    await runner.connectInitialAdb();
+
+    expect(logs.some((log) => log.level === "warn" && log.message.includes("security patch"))).toBe(false);
+  });
+
   it("stops flash FTD when erase frp probe fails", async () => {
     const fastboot = new TestFastboot();
     fastboot.failEraseFrp = true;
@@ -344,5 +394,77 @@ describe("UnlockWorkflowRunner", () => {
     expect(fastboot.commands.some((command) => command.startsWith("flash:"))).toBe(false);
     expect(assets.prepareCalls).toEqual([]);
     expect(assets.fetches).toEqual([]);
+  });
+
+  it("blocks a raw terminal command without confirmation", async () => {
+    const { runner, fastboot } = createRunner();
+
+    await runner.initialize();
+    await runner.connectFastboot();
+    await expect(runner.runFastbootTerminalCommand("oem unlock")).rejects.toMatchObject({
+      code: "CONFIRMATION_REQUIRED",
+    });
+    expect(fastboot.commands).not.toContain("oem unlock");
+  });
+
+  it("blocks erase against a mismatched product even when confirmed", async () => {
+    const fastboot = new TestFastboot();
+    fastboot.product = "wrongdevice";
+    const { runner } = createRunner(fastboot);
+
+    await runner.initialize();
+    fastboot.product = "dada";
+    await runner.connectFastboot();
+    fastboot.product = "wrongdevice";
+
+    await expect(runner.runFastbootTerminalCommand("erase userdata", true)).rejects.toMatchObject({
+      code: "WRONG_PRODUCT",
+    });
+    expect(fastboot.commands).not.toContain("erase:userdata");
+  });
+
+  it("runs a confirmed destructive command on the matched product", async () => {
+    const { runner, fastboot } = createRunner();
+
+    await runner.initialize();
+    await runner.connectFastboot();
+    await runner.runFastbootTerminalCommand("erase cache", true);
+
+    expect(fastboot.commands).toContain("erase:cache");
+  });
+
+  it("allows read-only terminal commands without confirmation", async () => {
+    const { runner, fastboot } = createRunner();
+
+    await runner.initialize();
+    await runner.connectFastboot();
+    await expect(runner.runFastbootTerminalCommand("getvar product")).resolves.toBe("dada");
+    await expect(runner.runFastbootTerminalCommand("reboot bootloader")).resolves.toBe("");
+
+    expect(fastboot.commands).toContain("reboot:bootloader");
+  });
+
+  it("rejects developer target override when the flag is unset", () => {
+    const { runner } = createRunner();
+    const target = newTestManifest().models[0];
+
+    expect(() => runner.overrideTargetModel(target)).toThrowError(
+      expect.objectContaining({ code: "DEV_OVERRIDE_DISABLED" }),
+    );
+  });
+
+  it("allows developer target override when the flag is enabled", () => {
+    vi.stubEnv("VITE_ALLOW_TARGET_OVERRIDE", "true");
+
+    try {
+      const { runner, detections } = createRunner();
+      const target = newTestManifest().models[0];
+
+      runner.overrideTargetModel(target);
+
+      expect(detections.at(-1)).toMatchObject({ source: "override", verified: true });
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });

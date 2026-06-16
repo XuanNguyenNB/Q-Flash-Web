@@ -56,11 +56,15 @@ const modelBaseSchema = z.object({
 
 export const legacyFtdModelSchema = modelBaseSchema.extend({
   family: z.literal("legacy-ftd").default("legacy-ftd"),
+  chip: z.enum(["8E", "8G2", "8G3", "8SG3", "8SG4"]),
   ablFile: z.string().min(1),
   ftdPackage: z.string().min(1),
   unlock: z.object({
     gptBoth4: z.string().min(1),
     bootImage: z.string().min(1),
+    payloadFile: z.string().min(1).optional(),
+    enneaFile: z.string().min(1).optional(),
+    finalGptFile: z.string().min(1).optional(),
   }),
   finalGpt: z.array(z.string().min(1)).length(6),
   edlAbl: edlAblSchema.optional(),

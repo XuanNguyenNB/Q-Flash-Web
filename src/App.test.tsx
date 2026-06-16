@@ -215,7 +215,7 @@ describe("App simplified FTD workflow", () => {
 
     const input = screen.getByPlaceholderText("fastboot devices");
     fireEvent.change(input, { target: { value: "fastboot devices" } });
-    fireEvent.click(screen.getByRole("button", { name: /Gui lenh/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Gửi lệnh/i }));
 
     expect(runFastbootTerminalCommand).toHaveBeenCalledWith("fastboot devices");
   });

@@ -18,6 +18,10 @@ export type WorkflowErrorCode =
   | "ASSET_PREFETCH_FAILED"
   | "ASSET_CACHE_FAILED"
   | "ASSET_NOT_PREPARED"
+  | "ASSET_DECRYPT_FAILED"
+  | "ASSET_SIGNATURE_INVALID"
+  | "ASSET_SIGNATURE_MISSING"
+  | "DEV_OVERRIDE_DISABLED"
   | "UNKNOWN";
 
 const defaultMessages: Record<WorkflowErrorCode, string> = {
@@ -40,6 +44,10 @@ const defaultMessages: Record<WorkflowErrorCode, string> = {
   ASSET_PREFETCH_FAILED: "Không thể tải và kiểm tra đủ tệp trước khi flash.",
   ASSET_CACHE_FAILED: "Không thể đọc/ghi tệp vào bộ nhớ đệm trình duyệt.",
   ASSET_NOT_PREPARED: "Tệp chưa được chuẩn bị trong phiên hiện tại.",
+  ASSET_DECRYPT_FAILED: "Không giải mã được tệp đã mã hóa hoặc hash plaintext không khớp.",
+  ASSET_SIGNATURE_INVALID: "Chữ ký Ed25519 của asset không hợp lệ. Có thể máy chủ asset bị can thiệp.",
+  ASSET_SIGNATURE_MISSING: "Thiếu file chữ ký .sig đi kèm asset. Không thể xác thực nguồn gốc.",
+  DEV_OVERRIDE_DISABLED: "Override mẫu máy chỉ dùng cho dev build. Production không cho phép.",
   UNKNOWN: "Lỗi chưa phân loại.",
 };
 
@@ -91,6 +99,14 @@ export const toWorkflowError = (error: unknown, fallback: WorkflowErrorCode = "U
       return new WorkflowError("FASTBOOT_FAILED", error.message, error);
     }
 
+    if (message.includes("signature") && message.includes("missing")) {
+      return new WorkflowError("ASSET_SIGNATURE_MISSING", error.message, error);
+    }
+
+    if (message.includes("signature") || message.includes("ed25519")) {
+      return new WorkflowError("ASSET_SIGNATURE_INVALID", error.message, error);
+    }
+
     return new WorkflowError(fallback, error.message, error);
   }
 
@@ -118,5 +134,13 @@ export const errorAdvice: Record<WorkflowErrorCode, string> = {
   ASSET_PREFETCH_FAILED: "Dừng quy trình, kiểm tra máy chủ asset/CORS/sha256sums.json rồi chạy lại bước chuẩn bị tệp ROM.",
   ASSET_CACHE_FAILED: "Kiểm tra dung lượng lưu trữ trình duyệt/IndexedDB. Xóa bộ nhớ đệm site nếu cần và chuẩn bị lại.",
   ASSET_NOT_PREPARED: "Chạy lại bước chuẩn bị tệp ROM; các bước flash không được tải mạng trực tiếp.",
+  ASSET_DECRYPT_FAILED:
+    "Khóa giải mã không có hoặc không khớp dữ liệu. Build lại asset bằng scripts/build-assets.ts để cập nhật keys.json.",
+  ASSET_SIGNATURE_INVALID:
+    "Dừng quy trình ngay. Chữ ký Ed25519 sai có thể là dấu hiệu host bị thay file. Kiểm tra lại nguồn asset trước khi thử lại.",
+  ASSET_SIGNATURE_MISSING:
+    "Chạy lại scripts/build-assets.ts với khóa ký, đồng bộ R2 để mọi sha256sums.json/keys.json có file .sig đi kèm.",
+  DEV_OVERRIDE_DISABLED:
+    "Bật cờ VITE_ALLOW_TARGET_OVERRIDE=true khi build dev nếu cần override mẫu máy. Production tuyệt đối không bật.",
   UNKNOWN: "Tải nhật ký xuống và kiểm tra stack/thông báo chi tiết.",
 };
