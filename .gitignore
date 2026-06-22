@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 dist-assets
+server/dist
 *.local
 
 # Firmware source (binaries, populated locally — see firmware-source/README.md)
@@ -28,3 +29,30 @@ firmware-source/*
 *.njsproj
 *.sln
 *.sw?
+
+# Harness durable layer
+harness.db
+harness.db-wal
+harness.db-shm
+scripts/bin/harness-cli
+scripts/bin/harness-cli.exe
+.harness-backup/
+.khuym/reservations.json
+
+# Payment backend local state and secrets
+server/data
+payments.db
+payments.db-wal
+payments.db-shm
+payment-asset-keys*.json
+asset-keys*.json
+
+# Local agent/browser runtime state
+.codex/config.toml
+.codex-run/
+.playwright-mcp/
+
+# Design drafts and visual QA artifacts
+design-exports/
+fixed-app-screenshot.png
+mockup.html
