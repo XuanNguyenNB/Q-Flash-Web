@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.1",
+  "feature_slug": "developer-override-v2",
+  "mode": "high_risk_feature",
+  "active_skill": "compounding",
+  "phase": "compounding-complete",
+  "phase_number": 6,
+  "epic_id": "QFW-DEVELOPER-OVERRIDE-V2",
+  "approved_gates": {
+    "context": true,
+    "work_shape": true,
+    "phase_plan": false,
+    "execution": true,
+    "review": true
+  },
+  "active_beads": [],
+  "active_workers": [],
+  "blockers": [],
+  "focus": "history/learnings/20260622-developer-override-gate-policy.md",
+  "current_work": "Compounding complete",
+  "summary": "Developer Override V2 complete after final validation. One standard learning was captured; no critical promotion was added.",
+  "next_action": "Perform final completion audit and hand off ready-for-UAT status.",
+  "deferred_beads": [],
+  "last_compounding_run": {
+    "feature": "developer-override-v2",
+    "date": "2026-06-22",
+    "learnings_file": "history/learnings/20260622-developer-override-gate-policy.md",
+    "critical_promotions": 0
+  },
+  "last_updated": "2026-06-22T09:37:45+07:00",
+  "uat": {
+    "browser_ui": "passed for locked desktop and mobile override panel",
+    "real_device": "skipped: locked decision D20 requires separate explicit approval before real-device or destructive execution",
+    "production_deploy": "skipped: locked decision D20 keeps deploy out of scope"
+  }
+}

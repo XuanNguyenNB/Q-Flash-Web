@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { stat } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 
 import { loadScriptEnv } from "./script-env";
@@ -73,6 +73,36 @@ const assertDirectory = async (directory: string) => {
   }
 };
 
+const findForbiddenKeyFiles = async (directory: string): Promise<string[]> => {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const found: string[] = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      found.push(...(await findForbiddenKeyFiles(fullPath)));
+      continue;
+    }
+
+    if (entry.isFile() && entry.name.toLowerCase() === "keys.json") {
+      found.push(path.relative(directory, fullPath) || entry.name);
+    }
+  }
+
+  return found;
+};
+
+const assertNoPublicKeyFiles = async (sourceDir: string) => {
+  const found = await findForbiddenKeyFiles(sourceDir);
+
+  if (found.length > 0) {
+    throw new Error(
+      `Refusing to sync public asset keys from ${sourceDir}: ${found.join(", ")}. Run npm run build:assets to regenerate a clean paid-asset layout.`,
+    );
+  }
+};
+
 const run = async (commandArgs: string[], dryRun: boolean) => {
   console.log(commandLine("rclone", commandArgs));
 
@@ -101,6 +131,7 @@ const run = async (commandArgs: string[], dryRun: boolean) => {
 const main = async () => {
   const options = resolveOptions();
   await assertDirectory(options.sourceDir);
+  await assertNoPublicKeyFiles(options.sourceDir);
 
   const destination = `${options.remote}:${options.bucket}/${options.prefix}`;
   const publicBaseUrl = joinUrl(options.assetDomain, options.prefix);
@@ -129,6 +160,10 @@ const main = async () => {
       "copy",
       ...sharedArgs,
       "--exclude",
+      "keys.json",
+      "--exclude",
+      "**/keys.json",
+      "--exclude",
       "*.json",
       "--exclude",
       "**/*.json",
@@ -142,6 +177,10 @@ const main = async () => {
     [
       "copy",
       ...sharedArgs,
+      "--exclude",
+      "keys.json",
+      "--exclude",
+      "**/keys.json",
       "--include",
       "*.json",
       "--include",

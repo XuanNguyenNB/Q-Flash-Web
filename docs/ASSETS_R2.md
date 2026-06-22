@@ -7,11 +7,11 @@ App tải ROM/ABL/firehose từ asset base URL công khai. Production hiện dù
 - R2 bucket: `unlockxiaomi`
 - Public custom domain: `https://xiaomi.choimaytau.com`
 - S3 endpoint: `https://e807dd1d066d407f04a0801053636a3a.r2.cloudflarestorage.com`
-- Release prefix production: `xiaomi-webusb/releases/20260506-001`
+- Release prefix production: `xiaomi-webusb/releases/20260617-001`
 - App asset base URL:
 
 ```text
-https://xiaomi.choimaytau.com/xiaomi-webusb/releases/20260506-001
+https://xiaomi.choimaytau.com/xiaomi-webusb/releases/20260617-001
 ```
 
 Không commit `R2_ACCESS_KEY_ID` hoặc `R2_SECRET_ACCESS_KEY`. Dùng rclone config hoặc biến môi trường cục bộ.
@@ -32,6 +32,8 @@ dist-assets/
 ```
 
 Browser không giải nén `.rar`; mọi file phải có sẵn trong `dist-assets/` hoặc R2 theo đúng path manifest.
+
+Paid unlock flow không upload public `keys.json` cho asset unlock đã mã hóa. `scripts/build-assets.ts` ghi khóa giải mã vào `PAYMENTS_ASSET_KEYS_PATH` (mặc định `server/data/payment-asset-keys.local.json`) để backend `/api/assets/keys` cấp key sau khi unlock pass được xác thực. File key này là secret vận hành, không commit và không đồng bộ lên R2.
 
 ## Build asset
 
@@ -72,11 +74,11 @@ Có thể đặt trong `.env.local`:
 R2_BUCKET=unlockxiaomi
 R2_REMOTE=r2
 R2_ASSET_DOMAIN=https://xiaomi.choimaytau.com
-R2_RELEASE=20260506-001
-R2_PREFIX=xiaomi-webusb/releases/20260506-001
+R2_RELEASE=20260617-001
+R2_PREFIX=xiaomi-webusb/releases/20260617-001
 R2_SOURCE_DIR=dist-assets
 R2_VERIFY_ORIGIN=https://unlock.choimaytau.com
-VITE_ASSET_BASE_URL=https://xiaomi.choimaytau.com/xiaomi-webusb/releases/20260506-001
+VITE_ASSET_BASE_URL=https://xiaomi.choimaytau.com/xiaomi-webusb/releases/20260617-001
 ```
 
 Nếu tạo release mới, đổi cả `R2_RELEASE`, `R2_PREFIX`, và `VITE_ASSET_BASE_URL`.
@@ -96,6 +98,7 @@ npm run sync:assets:r2
 ```
 
 Script dùng `rclone copy`, không dùng delete/sync, để tránh xóa nhầm release đang active.
+Script sẽ dừng nếu source còn `keys.json`; chạy lại `npm run build:assets` để tạo layout sạch và giữ key giải mã trong backend-only `PAYMENTS_ASSET_KEYS_PATH`.
 
 Cache policy trong script:
 
@@ -112,6 +115,7 @@ Script kiểm tra:
 
 - `manifest.json`
 - `sha256sums.json`
+- `keys.json` phải trả 404 trên release public
 - một số file đại diện như ABL/firehose/file lớn
 - HTTP 200
 - CORS

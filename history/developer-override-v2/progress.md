@@ -1,0 +1,185 @@
+# Developer Override V2 Progress
+
+## 2026-06-22
+
+- User explicitly allowed switching Khuym state from `payos-donations` to `developer-override-v2`.
+- Khuym onboarding is up to date; scout showed no `.khuym/HANDOFF.json`.
+- Feature lane is `high-risk` because it touches auth/session, authorization, audit/security, API contracts, frontend workflow controls, payment gates, and existing safety behavior.
+- Existing code scout found the old developer override in `src/hooks/useUnlockWorkflow.ts` and `src/workflow/runner.ts`; it is frontend/env-flag based, legacy-only, unaudited, and not a backend session.
+- Existing backend uses `server/src/routes.ts`, `server/src/config.ts`, and `server/src/db/store.ts` for payment, admin token auth, pass/key authorization, and audit events.
+- No implementation has started. Exploring must lock the terminal/protocol scope before writing `CONTEXT.md`.
+- Harness intake recorded this as a `high-risk` new initiative.
+- Quick scout for terminal scope:
+  - `src/services/fastboot.ts` has the only current text terminal parser/executor, including read-only `devices`/`getvar`, destructive `erase`/`set_active`, `reboot`, and raw protocol command support, while blocking text-only `flash` and `boot`.
+  - `src/services/adb.ts` exposes shell, push, and reboot bootloader primitives through runner-owned use cases, but no general ADB terminal UI exists yet.
+  - `src/services/edl.ts` exposes structured Sahara/Firehose operations for connect, programmer upload, configure, program raw targets, reset, and close; it does not expose arbitrary raw EDL command input.
+- User locked Full Override terminal scope as option A: use only currently supported surfaces. User also explicitly required no EDL commands.
+- Wrote `history/developer-override-v2/CONTEXT.md` for exploring handoff.
+- User approved `CONTEXT.md` and planning began.
+- `gkg` is not installed on PATH; both required gkg readiness commands failed. Planning discovery is degraded to targeted repo reads and `rg`.
+- Planning artifacts written:
+  - `history/developer-override-v2/discovery.md`
+  - `history/developer-override-v2/approach.md`
+  - `history/developer-override-v2/epic-map.md`
+- User approved the epic map/work shape.
+- Prepared S1 backend authority artifacts:
+  - `history/developer-override-v2/current-story-pack.md`
+  - `docs/stories/developer-override-v2/overview.md`
+  - `docs/stories/developer-override-v2/design.md`
+  - `docs/stories/developer-override-v2/execplan.md`
+  - `docs/stories/developer-override-v2/validation.md`
+  - `docs/decisions/0008-developer-override-authority.md`
+- Harness durable story and decision rows were recorded for `QFW-DEVOVR-S1` and `0008-developer-override-authority`.
+- S1 feasibility validation completed as READY WITH CONSTRAINTS:
+  - `npm.cmd run server:test` passed, 1 file / 15 tests.
+  - `npm.cmd test -- server` passed, 1 file / 15 tests.
+  - Node `v24.16.0` has required crypto primitives.
+  - `br`/`bv` bead tooling is not available, so S1 is prepared as a bounded single backend execution pass unless the user asks to install/enable bead tooling first.
+- User approved S1 execution.
+- Began bounded S1 backend implementation only:
+  - Backend config reads `DEVELOPER_OVERRIDE_MASTER_KEY`.
+  - Override sessions are in-memory, opaque, and cookie-backed.
+  - Override login/status/logout/audit routes are under `/api/developer-override`.
+  - No frontend, runner, terminal, EDL, deploy, or real-device work is included in S1.
+- Completed S1 backend implementation:
+  - Added `developerOverride` backend config with fixed 15-minute TTL and cookie name.
+  - Added Secure/HttpOnly/SameSite override session cookie, in-memory session lifecycle, status, logout, and session-required audit route.
+  - Added sanitized override audit actions for login accepted/rejected, logout, and event records.
+  - Added `server/override.test.ts` covering missing config, wrong key, cookie attributes, status, expiry, logout, session-required audit, sanitized event storage, and secret-like metadata rejection.
+  - Added `DEVELOPER_OVERRIDE_MASTER_KEY=` to `.env.example` with an empty value only.
+- S1 validation after implementation:
+  - `npm.cmd run server:test` passed, 2 files / 23 tests.
+  - `npm.cmd test -- server` passed, 2 files / 23 tests.
+  - `npm.cmd run build` passed.
+  - `npm.cmd test` passed, 15 files / 107 tests.
+  - `npm.cmd run check:csp` passed.
+  - `rg -n "DEVELOPER_OVERRIDE_MASTER_KEY|qflash_dev_override|developer_override|masterKey" dist src` returned no matches, so the new override env/cookie/audit symbols are not in the frontend source or built bundle.
+- Prepared and validated S2 current story:
+  - `history/developer-override-v2/current-story-s2.md`
+  - `history/developer-override-v2/validation-s2.md`
+  - S2 is READY WITH CONSTRAINTS and awaiting separate execution approval.
+  - S2 scope is a default no-override gate policy only; Resume, Selective Bypass, Full Override, and UI session behavior remain out of S2.
+  - Focused baseline for S2 passed: `npm.cmd test -- src/workflow/runner.test.ts src/App.test.tsx`, 2 files / 44 tests.
+- User approved S2 execution.
+- Completed S2 default-preserving gate policy:
+  - Added typed override mode/gate policy and `noOverrideGatePolicy` in `src/workflow/types.ts`.
+  - `UnlockWorkflowRunner` now accepts/stores an explicit override gate policy through dependencies and a setter, but S2 does not use it to bypass any gate.
+  - `useUnlockWorkflow` creates normal and mock runners with `noOverrideGatePolicy`.
+  - Added focused runner tests proving the default policy still enforces model verification, destructive confirmation, asset verification, antirollback, Fastboot product match, and EFISP unlock verification.
+  - Extended the existing App payment-gate test to assert the main workflow action remains disabled before pass readiness.
+- S2 validation after implementation:
+  - `npm.cmd test -- src/workflow/runner.test.ts src/App.test.tsx` passed, 2 files / 47 tests.
+  - `npm.cmd test` passed, 15 files / 110 tests.
+  - `npm.cmd run server:test` passed, 2 files / 23 tests.
+  - `npm.cmd run build` passed with the existing Vite warnings for `android-fastboot` URL externalization and chunk size.
+  - `npm.cmd run check:csp` passed.
+  - `rg -n "DEVELOPER_OVERRIDE_MASTER_KEY|masterKey|qflash_dev_override" dist src` returned no matches.
+- No Resume, Selective Bypass, Full Override, UI session panel, EDL command surface, deploy, or real-device execution was added in S2.
+- Continued into S3 planning/validation.
+- Reality gate rejected the earlier S3 order ("Resume and Selective Bypass behavior") as the immediate next slice because bypass behavior before a frontend backend-session lock would weaken the authority boundary.
+- Repaired the epic queue:
+  - S3 is now "Frontend session client and locked panel shell."
+  - S4 becomes "Resume and Selective Bypass behavior."
+- Wrote S3 artifacts:
+  - `history/developer-override-v2/current-story-s3.md`
+  - `history/developer-override-v2/validation-s3.md`
+- S3 validation result: READY WITH CONSTRAINTS, awaiting execution approval.
+- S3 baseline proof:
+  - `npm.cmd test -- src/App.test.tsx server/override.test.ts src/services/paymentApi.test.ts` passed, 3 files / 23 tests.
+  - `gkg`, `br`, and `bv` are still unavailable on PATH.
+  - Harness impact-analysis provider query returned no present provider output.
+- S3 scope is locked panel/session client only; no Resume, Selective Bypass, Full Override, EDL command surface, deploy, or real-device execution is approved or implemented.
+- User approved S3 execution.
+- Completed S3 frontend session shell:
+  - Added `src/services/developerOverrideApi.ts` with same-origin login/status/logout/audit client calls using backend session cookies.
+  - Added `src/services/developerOverrideApi.test.ts` for login/status/logout/audit request shape and error handling.
+  - Replaced the old always-visible App developer panel with a locked `Developer Override V2` panel.
+  - Without a valid session, the panel exposes only password login and cannot apply model/phase/gate override.
+  - With a mocked valid session, the panel shows mode, bypass gates, remaining time, dangerous warning, logout, and `verified` / `manually assumed` / `bypassed` provenance labels as shell state only.
+  - Mode and gate UI changes send backend audit events but do not change runner gate behavior in S3.
+  - Logout and local expiry lock the panel without page reload.
+- S3 tests added/updated:
+  - App locked state without session.
+  - Login shell after backend session.
+  - Audit on mode and gate selection without runner override calls.
+  - Logout and local expiry.
+  - Frontend override API client request/error behavior.
+- S3 validation after implementation:
+  - `npm.cmd test -- src/App.test.tsx src/services/developerOverrideApi.test.ts server/override.test.ts src/services/paymentApi.test.ts` passed, 4 files / 31 tests.
+  - `npm.cmd test -- src/workflow/runner.test.ts src/App.test.tsx` passed, 2 files / 51 tests.
+  - `npm.cmd test` passed, 16 files / 118 tests.
+  - `npm.cmd run server:test` passed, 2 files / 23 tests.
+  - `npm.cmd run build` passed with existing Vite warnings for `android-fastboot` URL externalization and chunk size.
+  - `npm.cmd run check:csp` passed.
+  - Runtime frontend scan over `dist`, `src/App.tsx`, and `src/services/developerOverrideApi.ts` found no override env name, cookie name, `masterKey`, pass-token, old unlocked panel text, old apply button text, or blazer mock button text.
+  - Realbrowser checked the opened panel stays locked and wrote desktop/mobile artifacts under `.codex-run/developer-override-v2-s3/`.
+- S3 did not implement Resume, Selective Bypass execution, Full Override, EDL command surface, deploy, or real-device execution.
+- Next work is S4 validation for Resume and Selective Bypass behavior; separate execution approval is still required before implementation.
+- Prepared `history/developer-override-v2/current-story-s4.md` as the next story pack for validation only. No S4 source implementation has started.
+- Completed S4 feasibility validation:
+  - Wrote `history/developer-override-v2/validation-s4.md`.
+  - S4 result is READY WITH CONSTRAINTS and still requires explicit S4 execution approval before source implementation.
+  - Focused baseline passed: `npm.cmd test -- src\workflow\runner.test.ts src\App.test.tsx src\services\developerOverrideApi.test.ts server\override.test.ts src\services\paymentApi.test.ts`, 5 files / 66 tests.
+  - Backend baseline passed: `npm.cmd run server:test`, 2 files / 23 tests.
+  - S4 constraints require replacing the old env-gated override path rather than reusing it as-is because it marks manual target selection as `verified: true`.
+  - Asset-key and asset-verification bypass in S4 may bypass gates only; real cached/prepared data is still required and no fake key/blob/success may be created.
+  - No S4 source implementation, Full Override, EDL command surface, deploy, or real-device execution has started.
+- User approved S4 execution.
+- Completed S4 Resume and Selective Bypass implementation:
+  - `UnlockWorkflowRunner.assumeTargetModel(...)` now emits `verified: false` with `provenance: "manually_assumed"` and warning logs/reports for Resume.
+  - Runner gate policy now selectively bypasses confirmation, asset verification, antirollback, compatibility/security patch, Fastboot product, EFISP unlock verification, and model verification checks where applicable.
+  - Bypasses log `Developer override bypassed ...` and do not fabricate device/data success; missing prepared blobs still fail with real asset errors.
+  - `useUnlockWorkflow` now applies backend-session-gated Resume/Selective Bypass selections, marks earlier phases `manually_assumed`, clears policy on logout/expiry, audits technical command outcomes, and keeps normal no-override policy as default.
+  - Asset-key authorization bypass does not request or synthesize keys without a real pass; it fails truthfully instead of calling `/api/assets/keys`.
+  - Developer Override V2 panel can select workflow/model/phase and apply S4 Resume/Selective Bypass only while a valid session is active; Full Override remains visible but non-executable in S4.
+  - Stepper/UI shows provenance states for `verified`, `manually assumed`, and `bypassed`.
+- S4 tests added:
+  - App tests cover locked panel, Resume apply, Selective Bypass gate policy, Full Override disabled in S4, logout/expiry clearing policy, and audit payloads.
+  - Runner tests cover manual assumptions, default no-override gates, confirmation bypass, antirollback bypass, asset verification truthfulness, Fastboot product bypass without verified match, compatibility bypass, and EFISP unlock bypass without fake `unlocked: yes`.
+- S4 validation after implementation:
+  - `npm.cmd test -- src\App.test.tsx src\workflow\runner.test.ts` passed, 2 files / 61 tests.
+  - `npm.cmd test -- src\workflow\runner.test.ts src\App.test.tsx src\services\developerOverrideApi.test.ts server\override.test.ts src\services\paymentApi.test.ts` passed, 5 files / 76 tests.
+  - `npm.cmd test` passed, 16 files / 128 tests.
+  - `npm.cmd run server:test` passed, 2 files / 23 tests.
+  - `npm.cmd run build` passed with the existing Vite warnings for `android-fastboot` URL externalization and chunk size.
+  - `npm.cmd run check:csp` passed.
+  - Frontend/bundle secret scan over `src` and `dist` found no `DEVELOPER_OVERRIDE_MASTER_KEY`, `masterKey`, `qflash_dev_override`, `developer_override`, pass-token, session secret, or reusable master-key strings.
+  - Scope scan found no Developer Override EDL terminal/raw EDL/BrowserEdlClient command surface.
+  - Desktop and mobile locked-panel UI artifacts were captured under `.codex-run/developer-override-v2-s4/`.
+  - Mobile CDP inspection at 390x844 showed master-key field visible, Apply S4 absent while locked, no EDL command text, and no horizontal overflow.
+- S4 did not implement Full Override behavior, terminal expansion, EDL commands, deploy, or real-device execution.
+- Prepared and validated S5 current story:
+  - Wrote `history/developer-override-v2/current-story-s5.md`.
+  - Wrote `history/developer-override-v2/validation-s5.md`.
+  - S5 result is READY WITH CONSTRAINTS and still requires explicit S5 execution approval before source implementation.
+  - S5 scope is Full Override as a policy preset plus access to existing phase surfaces and the existing Fastboot terminal parser/executor only.
+  - Current repo gap confirmed:
+    - `src/App.tsx` still blocks Full Override as `full_override_out_of_scope_s4` and labels the action `Apply S4 override`.
+    - `src/hooks/useUnlockWorkflow.ts` still rejects `options.mode === "full_override"`.
+    - `src/workflow/types.ts` already normalizes Full Override to all `overrideGateIds`.
+    - `src/services/fastboot.ts` already blocks text-only `fastboot flash` and `fastboot boot`.
+  - S5 baseline validation:
+    - `npm.cmd test -- src\App.test.tsx src\workflow\runner.test.ts src\services\fastboot.test.ts src\services\developerOverrideApi.test.ts server\override.test.ts src\services\paymentApi.test.ts` passed, 6 files / 83 tests.
+    - `npm.cmd run server:test` passed, 2 files / 23 tests.
+    - Scope scan found no Developer Override EDL terminal/raw EDL/BrowserEdlClient command surface.
+    - Secret scan over `src` and `dist` found no override master-key/cookie/session symbols; only `pass-token` fixture text in `src/services/paymentApi.test.ts`.
+  - S5 constraints require no ADB terminal, no EDL command surface, no fake device/data/command success, and no deploy or real-device execution.
+- User approved S5 execution.
+- Completed S5 Full Override existing surfaces implementation:
+  - `src/App.tsx` no longer blocks `full_override` as S4-only and the action label is now `Apply override`.
+  - `src/hooks/useUnlockWorkflow.ts` accepts Full Override sessions and reuses `normalizeOverrideGatePolicy`, so Full Override installs every `overrideGateIds` gate.
+  - Added `src/hooks/useUnlockWorkflow.test.tsx` to prove the real hook applies Full Override as all gates while target selection remains `manually_assumed`, not `verified`.
+  - App tests now prove Full Override for legacy Standard, EFISP forced-Standard, and advanced `edl-standard` phase access without EDL terminal controls.
+  - Runner tests now prove Full Override normalizes to every gate, bypasses the combined gate set, still fails on missing prepared blobs, and does not fake EFISP `unlocked: yes`.
+  - No ADB terminal, EDL terminal, raw EDL input, BrowserEdlClient command surface, deploy, or real-device execution was added.
+- S5 validation after implementation:
+  - `npm.cmd test -- src\App.test.tsx src\hooks\useUnlockWorkflow.test.tsx src\workflow\runner.test.ts src\services\fastboot.test.ts src\services\developerOverrideApi.test.ts server\override.test.ts src\services\paymentApi.test.ts` passed, 7 files / 89 tests.
+  - `npm.cmd run server:test` passed, 2 files / 23 tests.
+  - `npm.cmd test` passed, 17 files / 134 tests.
+  - `npm.cmd run build` passed with the existing Vite warnings for `android-fastboot` URL externalization and chunk size.
+  - `npm.cmd run check:csp` passed.
+  - Secret scan over `src` and `dist` found no override master-key/session/cookie secret exposure; only the existing `pass-token` payment test fixture appeared.
+  - Scope scan found no new Developer Override EDL terminal/raw EDL/BrowserEdlClient command surface; the only match was a negative App test assertion.
+  - Desktop and mobile locked-panel UI artifacts were captured under `.codex-run/developer-override-v2-s5/ui/`.
+  - Mobile 390x844 inspection showed no horizontal overflow, Master key visible, Apply Override hidden while locked, Override mode hidden while locked, and no EDL command surface text.
+- S5 is complete. Next work is S6 final validation report/review; production deploy and real-device UAT remain out of scope until separately approved.

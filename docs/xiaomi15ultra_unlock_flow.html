@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xiaomi 15 Ultra (Snapdragon 8 Elite) - Unlock Flow Diagram</title>
+
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: #161e2f;
+      --bg-inset: #0d1321;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+
+      /* Neon Accents */
+      --cyan: #22d3ee;
+      --cyan-glow: rgba(34, 211, 238, 0.15);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.15);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.15);
+      --rose: #f43f5e;
+      --rose-glow: rgba(244, 63, 94, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-col: column;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(180deg, rgba(22, 30, 47, 0.8) 0%, rgba(11, 15, 25, 0) 100%);
+      border-b: 1px solid var(--border-color);
+      padding: 1.5rem 2rem;
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--emerald) 100%);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bg-dark);
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-color);
+      padding: 0.25rem;
+      border-radius: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.5rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--cyan);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    main {
+      max-width: 1400px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-cols: 1fr;
+      gap: 2rem;
+      flex: 1;
+    }
+
+    @media (min-width: 1024px) {
+      main {
+        grid-template-cols: 3fr 2fr;
+      }
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .flow-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .flow-line {
+      position: absolute;
+      left: 24px;
+      top: 24px;
+      bottom: 24px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--cyan) 0%, var(--emerald) 50%, var(--amber) 100%);
+      z-index: 1;
+      opacity: 0.5;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1.5rem;
+      position: relative;
+      z-index: 2;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .step-item:hover {
+      transform: translateX(8px);
+    }
+
+    .step-badge {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background-color: var(--bg-inset);
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+
+    .step-item.active .step-badge {
+      border-color: var(--cyan);
+      background-color: var(--cyan-glow);
+      color: var(--cyan);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .step-item.done .step-badge {
+      border-color: var(--emerald);
+      background-color: var(--emerald-glow);
+      color: var(--emerald);
+    }
+
+    .step-content {
+      flex: 1;
+      background: rgba(13, 19, 33, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .step-item.active .step-content {
+      border-color: rgba(34, 211, 238, 0.3);
+      background: rgba(34, 211, 238, 0.03);
+    }
+
+    .step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .step-mode {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .mode-adb { background-color: rgba(16, 185, 129, 0.15); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .mode-fastboot { background-color: rgba(34, 211, 238, 0.15); color: var(--cyan); border: 1px solid rgba(34, 211, 238, 0.2); }
+    .mode-edl { background-color: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.2); }
+    .mode-manual { background-color: rgba(244, 63, 94, 0.15); color: var(--rose); border: 1px solid rgba(244, 63, 94, 0.2); }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .detail-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .detail-section {
+      background-color: var(--bg-inset);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .detail-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .detail-text {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .code-block {
+      background-color: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--cyan);
+      overflow-x: auto;
+      margin-top: 0.5rem;
+      position: relative;
+    }
+
+    .code-block::before {
+      content: 'Terminal';
+      position: absolute;
+      top: 4px;
+      right: 8px;
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.2);
+      text-transform: uppercase;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .partition-map {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .partition-bar {
+      height: 28px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .partition-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, var(--cyan-glow) 0%, rgba(34, 211, 238, 0.05) 100%);
+      border-right: 2px solid var(--cyan);
+      transition: width 0.3s ease;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-top: 1rem;
+    }
+
+    .alert-warn {
+      background-color: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      color: #fef08a;
+    }
+
+    .alert-info {
+      background-color: rgba(34, 211, 238, 0.08);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      color: #e0f2fe;
+    }
+
+    /* Interactive LUN Visualizer */
+    .lun-visualizer {
+      display: grid;
+      grid-template-cols: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .lun-box {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .lun-box.active {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    .lun-name {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .lun-desc {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-top: 0.25rem;
+    }
+
+    .lun-details {
+      grid-column: span 4;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+      border: 1px dashed var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <i data-lucide="lock-keyhole"></i>
+        </div>
+        <div class="brand-title">
+          <h1>Q-Flash Web Unlock</h1>
+          <p>Xiaomi 15 Ultra (xuanyuan) Flow Guide</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('standard')">
+          <i data-lucide="shuffle"></i> Quy trÃ¬nh chuáº©n (Standard)
+        </button>
+        <button class="tab-btn" onclick="switchTab('edl')">
+          <i data-lucide="usb"></i> Ká»¹ thuáº­t EDL 9008
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Column: Flowchart -->
+    <div class="card">
+      <div class="card-title">
+        <i data-lucide="activity" style="color: var(--cyan);"></i>
+        <span>SÆ¡ Ä‘á»“ cÃ¡c bÆ°á»›c thá»±c hiá»‡n</span>
+      </div>
+
+      <!-- Standard Tab Content -->
+      <div id="content-standard" class="flow-container">
+        <div class="flow-line"></div>
+
+        <!-- Step 1 -->
+        <div class="step-item active" onclick="selectStep(1)" id="step-1">
+          <div class="step-badge">1</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Kiá»ƒm tra ban Ä‘áº§u & Láº¥y thÃ´ng tin</span>
+              <span class="step-mode mode-adb">ADB Android</span>
+            </div>
+            <p class="step-desc">Äá»c thÃ´ng tin mÃ¡y, Ä‘á»‘i chiáº¿u tÃªn mÃ£ 'xuanyuan' vÃ  kiá»ƒm tra báº£n vÃ¡ báº£o máº­t (Security Patch).</p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-item" onclick="selectStep(2)" id="step-2">
+          <div class="step-badge">2</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Ghi Ä‘Ã¨ ABL Engineering (Bá»™ náº¡p khá»Ÿi Ä‘á»™ng phá»¥)</span>
+              <span class="step-mode mode-manual">EDL / Manual</span>
+            </div>
+            <p class="step-desc">Ghi tá»‡p ABL sá»­a Ä‘á»•i (mi15u.elf) Ä‘á»ƒ má»Ÿ khÃ³a cÃ¡c lá»‡nh Fastboot nÃ¢ng cao.</p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-item" onclick="selectStep(3)" id="step-3">
+          <div class="step-badge">3</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">XÃ¡c minh ABL Engineering qua Fastboot</span>
+              <span class="step-mode mode-fastboot">Fastboot</span>
+            </div>
+            <p class="step-desc">Cháº¡y lá»‡nh thÄƒm dÃ² 'erase frp' Ä‘á»ƒ xÃ¡c nháº­n ABL Engineering Ä‘ang hoáº¡t Ä‘á»™ng á»•n Ä‘á»‹nh.</p>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-item" onclick="selectStep(4)" id="step-4">
+          <div class="step-badge">4</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Flash ROM FTD (Há»‡ Ä‘iá»u hÃ nh ká»¹ thuáº­t)</span>
+              <span class="step-mode mode-fastboot">Fastboot</span>
+            </div>
+            <p class="step-desc">Ghi toÃ n bá»™ phÃ¢n vÃ¹ng FTD tá»« gÃ³i 'packages/xiaomi15ultra' thÃ´ng qua WebUSB Fastboot.</p>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step-item" onclick="selectStep(5)" id="step-5">
+          <div class="step-badge">5</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Náº¡p Payload Má»Ÿ khÃ³a & Boot Ennea</span>
+              <span class="step-mode mode-fastboot">Fastboot</span>
+            </div>
+            <p class="step-desc">Flash payload gpt_both4.bin vÃ o partition:4, boot nhÃ¢n Ennea Ä‘á»ƒ vÃ¡ tráº¡ng thÃ¡i Lock.</p>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step-item" onclick="selectStep(6)" id="step-6">
+          <div class="step-badge">6</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">KhÃ´i phá»¥c GPT gá»‘c cá»§a há»‡ thá»‘ng</span>
+              <span class="step-mode mode-fastboot">Fastboot</span>
+            </div>
+            <p class="step-desc">KhÃ´i phá»¥c báº£ng phÃ¢n vÃ¹ng GPT gá»‘c cá»§a mÃ¡y Ä‘á»ƒ chuáº©n bá»‹ cÃ i ROM sáº¡ch.</p>
+          </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="step-item" onclick="selectStep(7)" id="step-7">
+          <div class="step-badge">7</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">CÃ i Ä‘áº·t ROM HyperOS gá»‘c</span>
+              <span class="step-mode mode-manual">MiFlash Tool</span>
+            </div>
+            <p class="step-desc">Sá»­ dá»¥ng MiFlash náº¡p ROM chÃ­nh hÃ£ng Ä‘á»ƒ hoÃ n táº¥t quÃ¡ trÃ¬nh khá»Ÿi Ä‘á»™ng.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- EDL Tab Content -->
+      <div id="content-edl" class="flow-container" style="display: none;">
+        <div class="flow-line" style="background: linear-gradient(180deg, var(--amber) 0%, var(--rose) 100%);"></div>
+
+        <!-- EDL 1 -->
+        <div class="step-item active" onclick="selectEdlStep(1)" id="edl-step-1">
+          <div class="step-badge">1</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Káº¿t ná»‘i EDL 9008 qua WebUSB</span>
+              <span class="step-mode mode-edl">EDL 9008</span>
+            </div>
+            <p class="step-desc">YÃªu cáº§u quyá»n truy cáº­p USB tá»« trÃ¬nh duyá»‡t cho thiáº¿t bá»‹ Qualcomm HS-USB QDLoader 9008.</p>
+          </div>
+        </div>
+
+        <!-- EDL 2 -->
+        <div class="step-item" onclick="selectEdlStep(2)" id="edl-step-2">
+          <div class="step-badge">2</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Sahara Protocol - Táº£i Programmer</span>
+              <span class="step-mode mode-edl">Sahara</span>
+            </div>
+            <p class="step-desc">Gá»­i tá»‡p Firehose MELF (firehose_SM8750.melf) lÃªn RAM cá»§a chip thÃ´ng qua giao thá»©c Sahara.</p>
+          </div>
+        </div>
+
+        <!-- EDL 3 -->
+        <div class="step-item" onclick="selectEdlStep(3)" id="edl-step-3">
+          <div class="step-badge">3</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Cáº¥u hÃ¬nh UFS Memory (Firehose)</span>
+              <span class="step-mode mode-edl">Firehose XML</span>
+            </div>
+            <p class="step-desc">Khá»Ÿi táº¡o káº¿t ná»‘i bá»™ nhá»› UFS. Gá»­i lá»‡nh XML cáº¥u hÃ¬nh Ä‘á»™ lá»›n Payload (4096 bytes).</p>
+          </div>
+        </div>
+
+        <!-- EDL 4 -->
+        <div class="step-item" onclick="selectEdlStep(4)" id="edl-step-4">
+          <div class="step-badge">4</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Ghi ABL Engineering vÃ o UFS LUN 4</span>
+              <span class="step-mode mode-edl">Firehose Write</span>
+            </div>
+            <p class="step-desc">Ghi trá»±c tiáº¿p mi15u.elf vÃ o phÃ¢n vÃ¹ng abl_a vÃ  abl_b theo sector offset chá»‰ Ä‘á»‹nh.</p>
+          </div>
+        </div>
+
+        <!-- EDL 5 -->
+        <div class="step-item" onclick="selectEdlStep(5)" id="edl-step-5">
+          <div class="step-badge">5</div>
+          <div class="step-content">
+            <div class="step-header">
+              <span class="step-title">Reset & Chuyá»ƒn cháº¿ Ä‘á»™</span>
+              <span class="step-mode mode-manual">Manual</span>
+            </div>
+            <p class="step-desc">Gá»­i lá»‡nh reset nguá»“n, ká»¹ thuáº­t viÃªn Ä‘Æ°a mÃ¡y vá» Fastboot Ä‘á»ƒ tiáº¿p tá»¥c flash ROM FTD.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Details Panel -->
+    <div class="detail-panel">
+
+      <!-- Panel Header -->
+      <div class="card">
+        <div class="card-title">
+          <i data-lucide="info" style="color: var(--cyan);"></i>
+          <span id="detail-title">Chi tiáº¿t bÆ°á»›c thá»±c hiá»‡n</span>
+        </div>
+
+        <!-- Description -->
+        <div class="detail-section">
+          <div class="detail-section-title">
+            <i data-lucide="align-left" style="width: 14px;"></i> MÃ´ táº£ hoáº¡t Ä‘á»™ng
+          </div>
+          <p id="detail-desc" class="detail-text">Äang táº£i...</p>
+        </div>
+
+        <!-- Command Executed -->
+        <div class="detail-section" id="section-command">
+          <div class="detail-section-title">
+            <i data-lucide="terminal" style="width: 14px;"></i> Lá»‡nh thá»±c thi trong Code
+          </div>
+          <div id="detail-command" class="code-block">Loading...</div>
+        </div>
+
+        <!-- Required Assets -->
+        <div class="detail-section" id="section-assets">
+          <div class="detail-section-title">
+            <i data-lucide="folder-open" style="width: 14px;"></i> Tá»‡p tin liÃªn quan (R2 Assets)
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>TÃªn tá»‡p</th>
+                  <th>Má»¥c Ä‘Ã­ch</th>
+                  <th>PhÃ¢n vÃ¹ng</th>
+                </tr>
+              </thead>
+              <tbody id="detail-assets">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Partition Map Visualizer -->
+        <div class="detail-section" id="section-partition">
+          <div class="detail-section-title">
+            <i data-lucide="layers" style="width: 14px;"></i> Tráº¡ng thÃ¡i phÃ¢n vÃ¹ng á»• Ä‘Ä©a
+          </div>
+          <div class="partition-map">
+            <div>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">PhÃ¢n vÃ¹ng hiá»‡n táº¡i thay Ä‘á»•i:</span>
+            </div>
+            <div class="partition-bar">
+              <div class="partition-fill" id="part-fill" style="width: 0%;"></div>
+              <span id="part-label" style="position: relative; z-index: 10;">â€”</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert Note -->
+        <div class="alert alert-info" id="detail-note">
+          <i data-lucide="shield-alert" style="color: var(--cyan); flex-shrink:0; width: 20px; height: 20px;"></i>
+          <span id="detail-note-text">LÆ°u Ã½ báº£o máº­t an toÃ n cho ká»¹ thuáº­t viÃªn.</span>
+        </div>
+
+      </div>
+
+      <!-- General Info Block -->
+      <div class="card" style="padding: 1.25rem;">
+        <div class="card-title" style="font-size: 1rem; margin-bottom: 1rem;">
+          <i data-lucide="settings" style="color: var(--amber);"></i>
+          <span>ThÃ´ng sá»‘ ká»¹ thuáº­t Xiaomi 15 Ultra</span>
+        </div>
+
+        <table style="width: 100%;">
+          <tr>
+            <td style="color: var(--text-muted); font-weight: 500;">TÃªn thiáº¿t bá»‹</td>
+            <td>Xiaomi 15 Ultra</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted); font-weight: 500;">TÃªn mÃ£ sáº£n pháº©m (Codename)</td>
+            <td style="font-family: monospace; color: var(--cyan);">xuanyuan</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted); font-weight: 500;">Vi xá»­ lÃ½ (SoC)</td>
+            <td>Snapdragon 8 Elite (SM8750)</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted); font-weight: 500;">PhÃ¢n vÃ¹ng chá»©a ABL</td>
+            <td>UFS LUN 4 (abl_a & abl_b)</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted); font-weight: 500;">MÃ£ gÃ³i FTD</td>
+            <td style="font-family: monospace;">packages/xiaomi15ultra</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Injected steps data for Standard Mode
+    const standardSteps = {
+      1: {
+        title: "Kiá»ƒm tra ban Ä‘áº§u & Káº¿t ná»‘i ADB",
+        desc: "Há»‡ thá»‘ng má»Ÿ cá»•ng WebUSB Ä‘á»ƒ káº¿t ná»‘i vá»›i thiáº¿t bá»‹ á»Ÿ cháº¿ Ä‘á»™ ADB Android. TrÃ­ch xuáº¥t cÃ¡c thuá»™c tÃ­nh há»‡ thá»‘ng nháº±m nháº­n diá»‡n mÃ¡y vÃ  Ä‘áº£m báº£o an toÃ n pháº§n cá»©ng trÆ°á»›c khi can thiá»‡p.",
+        command: "adb shell getprop ro.product.device\nadb shell getprop ro.build.version.security_patch",
+        assets: [
+          { name: "manifest.json", purpose: "Báº£ng kiá»ƒm tra mÃ£ hash SHA-256", part: "Local cache" }
+        ],
+        partWidth: "10%",
+        partLabel: "Verify Device Properties (ro.product.device=xuanyuan)",
+        note: "YÃªu cáº§u ngÆ°á»i dÃ¹ng báº­t 'Gá»¡ lá»—i USB' (USB Debugging) vÃ  cháº¥p nháº­n thÃ´ng bÃ¡o xÃ¡c thá»±c khÃ³a RSA trÃªn mÃ n hÃ¬nh Ä‘iá»‡n thoáº¡i."
+      },
+      2: {
+        title: "Ghi Ä‘Ã¨ ABL Engineering",
+        desc: "Äá»ƒ phÃ¡ vá»¡ cÃ¡c giá»›i háº¡n báº£o máº­t cá»§a Fastboot gá»‘c, chÃºng ta cáº§n náº¡p tá»‡p Bootloader ká»¹ thuáº­t (mi15u.elf) thay tháº¿. Do Xiaomi 15 Ultra chÆ°a cÃ³ exploit root ADB trá»±c tiáº¿p, ká»¹ thuáº­t viÃªn cáº§n Ä‘Æ°a mÃ¡y vá» cháº¿ Ä‘á»™ EDL 9008 Ä‘á»ƒ ghi Ä‘Ã¨ phÃ¢n vÃ¹ng abl_a vÃ  abl_b.",
+        command: "# Cháº¡y thá»§ cÃ´ng trÃªn thiáº¿t bá»‹ EDL hoáº·c qua cÃ´ng cá»¥ ngoÃ i\n# Náº¿u WebUSB EDL á»•n Ä‘á»‹nh:\nprogramRaw(target_abl_a, mi15u.elf)\nprogramRaw(target_abl_b, mi15u.elf)",
+        assets: [
+          { name: "abl/mi15u.elf", purpose: "ABL Engineering cho Xiaomi 15 Ultra", part: "abl_a & abl_b" },
+          { name: "firehose_SM8750.melf", purpose: "Qualcomm Firehose Programmer", part: "RAM" }
+        ],
+        partWidth: "35%",
+        partLabel: "Modify Bootloader partitions: abl_a / abl_b (UFS LUN 4)",
+        note: "Cáº£nh bÃ¡o: Lá»—i náº¡p sai ABL cá»§a thiáº¿t bá»‹ khÃ¡c sáº½ láº­p tá»©c dáº«n Ä‘áº¿n Hard-Brick (máº¥t boot hoÃ n toÃ n)."
+      },
+      3: {
+        title: "XÃ¡c minh ABL Engineering",
+        desc: "Thiáº¿t bá»‹ Ä‘Æ°á»£c khá»Ÿi Ä‘á»™ng láº¡i vÃ o cháº¿ Ä‘á»™ Fastboot. á»¨ng dá»¥ng thá»±c hiá»‡n gá»­i má»™t lá»‡nh thá»­ xÃ³a phÃ¢n vÃ¹ng FRP Ä‘á»ƒ dÃ² xem ABL Engineering Ä‘Ã£ hoáº¡t Ä‘á»™ng hay chÆ°a. Náº¿u thÃ nh cÃ´ng, cÃ¡c lá»‡nh ghi FTD tiáº¿p theo má»›i Ä‘Æ°á»£c phÃ©p cháº¡y.",
+        command: "fastboot erase frp",
+        assets: [],
+        partWidth: "45%",
+        partLabel: "Probe ABL Engineering status (erase frp)",
+        note: "Náº¿u lá»‡nh tráº£ vá» lá»—i, tá»©c lÃ  ABL trÃªn mÃ¡y váº«n lÃ  báº£n báº£o máº­t gá»‘c cá»§a hÃ£ng. HÃ£y kiá»ƒm tra láº¡i bÆ°á»›c náº¡p ABL."
+      },
+      4: {
+        title: "Flash gÃ³i FTD qua WebUSB Fastboot",
+        desc: "á»¨ng dá»¥ng táº£i vá» phÃ¢n Ä‘oáº¡n áº£nh Ä‘Ä©a tá»« tá»‡p flash_plan cá»§a Xiaomi 15 Ultra. Sau Ä‘Ã³ thá»±c thi flash hÃ ng loáº¡t cÃ¡c phÃ¢n vÃ¹ng há»‡ Ä‘iá»u hÃ nh ká»¹ thuáº­t Ä‘á»ƒ náº¡p má»™t OS táº¡m cÃ³ quyá»n can thiá»‡p sÃ¢u.",
+        command: "fastboot flash anti rollback...\nfastboot flash boot boot.img\nfastboot flash init_boot init_boot.img\nfastboot flash vendor_boot vendor_boot.img\n# ... flash toÃ n bá»™ áº£nh phÃ¢n vÃ¹ng FTD",
+        assets: [
+          { name: "packages/xiaomi15ultra/*", purpose: "CÃ¡c tá»‡p Ä‘Ä©a cá»§a há»‡ Ä‘iá»u hÃ nh FTD", part: "Há»‡ thá»‘ng (boot/init_boot...)" }
+        ],
+        partWidth: "65%",
+        partLabel: "Flash FTD System partitions",
+        note: "KhÃ´ng Ä‘Æ°á»£c ngáº¯t káº¿t ná»‘i cÃ¡p USB á»Ÿ giai Ä‘oáº¡n nÃ y. Viá»‡c ghi dá»Ÿ dang phÃ¢n vÃ¹ng boot cÃ³ thá»ƒ gÃ¢y máº¥t bootloader."
+      },
+      5: {
+        title: "Flash Payload Má»Ÿ khÃ³a & Boot Ennea",
+        desc: "Khi thiáº¿t bá»‹ cháº¡y trÃªn ná»n FTD, ta reboot mÃ¡y vá» cháº¿ Ä‘á»™ Fastboot. Ghi Ä‘Ã¨ tá»‡p tin payload gpt_both4.bin vÃ o partition:4 (GPT táº¡m) Ä‘á»ƒ ghi nháº­n cá» Unlock áº£o. Tiáº¿p Ä‘áº¿n, gá»­i lá»‡nh náº¡p nhÃ¢n Linux Ennea táº¡m thá»i Ä‘á»ƒ hoÃ n táº¥t chu trÃ¬nh patch.",
+        command: "fastboot flash partition:4 unlock/gpt_both4.bin\n# Chá» 5s\nfastboot boot unlock/boot.img",
+        assets: [
+          { name: "unlock/gpt_both4.bin", purpose: "PhÃ¢n vÃ¹ng GPT áº£o má»Ÿ khÃ³a", part: "partition:4" },
+          { name: "unlock/boot.img", purpose: "áº¢nh Ä‘Ä©a Ennea kernel vÃ¡ Lock", part: "Boot RAM" }
+        ],
+        partWidth: "85%",
+        partLabel: "Patch Partition Table & Boot Temporary Ennea Kernel",
+        note: "Sau lá»‡nh boot, mÃ n hÃ¬nh mÃ¡y sáº½ hiá»‡n mÃ u tráº¯ng sÃ¡ng hoÃ n toÃ n. Giá»¯ nÃºt Nguá»“n + Giáº£m Ã¢m lÆ°á»£ng trong 10-15s Ä‘á»ƒ báº¯t buá»™c mÃ¡y khá»Ÿi Ä‘á»™ng láº¡i vÃ o Fastboot."
+      },
+      6: {
+        title: "KhÃ´i phá»¥c GPT cuá»‘i cÃ¹ng",
+        desc: "MÃ¡y Ä‘Ã£ Ä‘Æ°á»£c má»Ÿ khÃ³a hoÃ n toÃ n (unlocked: yes). LÃºc nÃ y, ta cáº§n hoÃ n tráº£ báº£ng phÃ¢n vÃ¹ng GPT sáº¡ch (gpt_both0.bin Ä‘áº¿n gpt_both5.bin) vÃ o cÃ¡c khe cáº¯m partition:0 -> partition:5 Ä‘á»ƒ mÃ¡y cÃ³ thá»ƒ phÃ¢n bá»• láº¡i bá»™ nhá»› chÃ­nh xÃ¡c cho ROM HyperOS gá»‘c.",
+        command: "fastboot flash partition:0 packages/xiaomi15ultra/images/gpt_both0.bin\n# ... náº¡p láº§n lÆ°á»£t gpt_both1 Ä‘áº¿n gpt_both5\nfastboot reboot bootloader",
+        assets: [
+          { name: "gpt_both0.bin -> gpt_both5.bin", purpose: "Báº£ng phÃ¢n vÃ¹ng GPT gá»‘c sáº¡ch", part: "partition:0 -> partition:5" }
+        ],
+        partWidth: "95%",
+        partLabel: "Restore Stock Partition Table (GPT0 - GPT5)",
+        note: "Sau bÆ°á»›c nÃ y, thiáº¿t bá»‹ sáº½ hiá»ƒn thá»‹ cáº£nh bÃ¡o 'System destroyed' do OS FTD trÆ°á»›c Ä‘Ã³ bá»‹ xÃ³a. ÄÃ¢y lÃ  hiá»‡n tÆ°á»£ng bÃ¬nh thÆ°á»ng."
+      },
+      7: {
+        title: "CÃ i Ä‘áº·t ROM HyperOS gá»‘c qua MiFlash",
+        desc: "Quy trÃ¬nh trÃªn web hoÃ n táº¥t. Do tá»‡p ROM HyperOS gá»‘c cÃ³ dung lÆ°á»£ng ráº¥t lá»›n (8-12GB), ká»¹ thuáº­t viÃªn chuyá»ƒn sang sá»­ dá»¥ng cÃ´ng cá»¥ MiFlash truyá»n thá»‘ng trÃªn mÃ¡y tÃ­nh Ä‘á»ƒ náº¡p ROM Fastboot nguyÃªn báº£n cho Xiaomi 15 Ultra.",
+        command: "# Thá»±c thi thá»§ cÃ´ng trÃªn mÃ¡y tÃ­nh báº±ng MiFlash Tool\nfastboot flash super super.img\n# ... náº¡p cÃ¡c phÃ¢n vÃ¹ng há»‡ thá»‘ng nguyÃªn báº£n",
+        assets: [
+          { name: "Official Fastboot ROM", purpose: "Há»‡ Ä‘iá»u hÃ nh HyperOS cá»§a nhÃ  phÃ¡t hÃ nh", part: "ToÃ n bá»™ á»• Ä‘Ä©a" }
+        ],
+        partWidth: "100%",
+        partLabel: "System Clean Install (HyperOS Stock ROM)",
+        note: "LÆ°u Ã½ quan trá»ng: Trong MiFlash, hÃ£y tÃ­ch chá»n Ã´ 'Clean All' á»Ÿ gÃ³c dÆ°á»›i. Tuyá»‡t Ä‘á»‘i KHÃ”NG chá»n 'Clean All and Lock' náº¿u khÃ´ng muá»‘n mÃ¡y khÃ³a láº¡i vÃ  Brick."
+      }
+    };
+
+    // Injected steps data for EDL Mode
+    const edlSteps = {
+      1: {
+        title: "Káº¿t ná»‘i EDL 9008",
+        desc: "NgÆ°á»i dÃ¹ng Ä‘Æ°a Ä‘iá»‡n thoáº¡i vá» cháº¿ Ä‘á»™ EDL 9008 (thÆ°á»ng báº±ng cÃ¡p EDL chuyÃªn dá»¥ng hoáº·c testpoint). TrÃ¬nh duyá»‡t kÃ­ch hoáº¡t yÃªu cáº§u WebUSB Ä‘á»ƒ chiáº¿m quyá»n kiá»ƒm soÃ¡t giao tiáº¿p cá»§a thiáº¿t bá»‹ Qualcomm HS-USB QDLoader 9008.",
+        command: "navigator.usb.requestDevice({ filters: [{ vendorId: 0x05c6, productId: 0x9008 }] })",
+        assets: [],
+        partWidth: "15%",
+        partLabel: "Establish Connection with Port 9008",
+        note: "Driver USB trÃªn Windows cáº§n pháº£i lÃ  WinUSB Ä‘á»ƒ Chrome cÃ³ thá»ƒ nháº­n diá»‡n. Cáº§n cÃ i Ä‘áº·t driver qua Zadig náº¿u gáº·p lá»—i."
+      },
+      2: {
+        title: "Giao thá»©c Sahara - Gá»­i Programmer",
+        desc: "Sau khi báº¯t Ä‘Æ°á»£c cá»•ng 9008, thiáº¿t bá»‹ sáº½ gá»­i gÃ³i Sahara HELLO. App tráº£ lá»i HELLO_RESP vÃ  báº¯t Ä‘áº§u truyá»n tá»‡p tin Programmer cá»§a chip Snapdragon 8 Elite (firehose_SM8750.melf) lÃªn RAM cá»§a Ä‘iá»‡n thoáº¡i.",
+        command: "# Chá» gÃ³i Hello tá»« thiáº¿t bá»‹\n# Gá»­i dá»¯ liá»‡u programmer theo yÃªu cáº§u offset\nwrite(sahara_done_packet)",
+        assets: [
+          { name: "firehose/firehose_SM8750.melf", purpose: "Tá»‡p Programmer cho chip SM8750", part: "SRAM" }
+        ],
+        partWidth: "35%",
+        partLabel: "Upload Firehose Programmer to SRAM",
+        note: "MÃ£ hash chuáº©n cá»§a tá»‡p programmer nÃ y lÃ : 95bd33db724706db5da03882c65783d01338df6159ce563be0ce1b963d83668d."
+      },
+      3: {
+        title: "Khá»Ÿi cháº¡y Firehose & Cáº¥u hÃ¬nh UFS",
+        desc: "Khi Programmer cháº¡y trÃªn RAM, thiáº¿t bá»‹ chuyá»ƒn sang cháº¿ Ä‘á»™ Firehose XML. á»¨ng dá»¥ng gá»­i lá»‡nh cáº¥u hÃ¬nh bá»™ nhá»› UFS vá»›i Ä‘á»™ dÃ i gÃ³i dá»¯ liá»‡u lÃ  4096 bytes Ä‘á»ƒ thiáº¿t bá»‹ chuáº©n bá»‹ nháº­n tá»‡p lá»›n.",
+        command: "sendFirehoseCommand('<?xml version=\"1.0\" ?><data><configure MemoryName=\"ufs\" MaxPayloadSizeToTargetInBytes=\"4096\" ... /></data>')",
+        assets: [],
+        partWidth: "55%",
+        partLabel: "Initialize UFS Storage Access & Configure Packet Size",
+        note: "WebUSB thÆ°á»ng gáº·p lá»—i treo/timeout táº¡i thá»i Ä‘iá»ƒm truyá»n lá»‡nh cáº¥u hÃ¬nh nÃ y do cáº¥u trÃºc quáº£n lÃ½ cá»•ng USB cá»§a Chrome khÃ´ng xá»­ lÃ½ ká»‹p quÃ¡ trÃ¬nh chuyá»ƒn giao tráº¡ng thÃ¡i."
+      },
+      4: {
+        title: "Ghi trá»±c tiáº¿p ABL Engineering vÃ o phÃ¢n vÃ¹ng",
+        desc: "á»¨ng dá»¥ng gá»­i lá»‡nh XML náº¡p Ä‘Ä©a (program) cho phÃ¢n vÃ¹ng abl_a vÃ  abl_b thuá»™c LUN 4 cá»§a bá»™ nhá»› UFS. Dá»¯ liá»‡u tá»‡p mi15u.elf Ä‘Æ°á»£c Ä‘áº©y tá»«ng máº£nh cÃ³ kÃ­ch thÆ°á»›c 4096 bytes trá»±c tiáº¿p vÃ o chÃ­p.",
+        command: "sendFirehoseCommand('<?xml version=\"1.0\" ?><data><program filename=\"abl.elf\" label=\"abl_a\" start_sector=\"121734\" ... /></data>')\n# Sau Ä‘Ã³ láº·p láº¡i tÆ°Æ¡ng tá»± cho abl_b á»Ÿ start_sector=\"367036\"",
+        assets: [
+          { name: "abl/mi15u.elf", purpose: "ABL sá»­a Ä‘á»•i má»Ÿ khÃ³a báº£o máº­t", part: "UFS LUN 4 (abl_a & abl_b)" }
+        ],
+        partWidth: "90%",
+        partLabel: "Direct Sector Write: LUN 4 abl_a (121734) & abl_b (367036)",
+        note: "Há»‡ thá»‘ng kiá»ƒm tra giá»›i háº¡n kÃ­ch thÆ°á»›c phÃ¢n vÃ¹ng (maxSectors = 2048) Ä‘á»ƒ Ä‘áº£m báº£o tá»‡p náº¡p vÃ o khÃ´ng ghi Ä‘Ã¨ Ä‘Ã¨ lÃªn phÃ¢n vÃ¹ng lÃ¢n cáº­n."
+      },
+      5: {
+        title: "Gá»­i lá»‡nh Reboot & Reset nguá»“n",
+        desc: "Khi náº¡p xong ABL vÃ o cáº£ hai phÃ¢n vÃ¹ng A vÃ  B, á»©ng dá»¥ng gá»­i lá»‡nh táº¯t vÃ  reset nguá»“n cho chip Ä‘á»ƒ Ä‘Æ°a mÃ¡y thoÃ¡t khá»i cháº¿ Ä‘á»™ EDL 9008.",
+        command: "sendFirehoseCommand('<?xml version=\"1.0\" ?><data><power value=\"reset\" /></data>')",
+        assets: [],
+        partWidth: "100%",
+        partLabel: "Send Reset Signal to Power Management IC",
+        note: "Thiáº¿t bá»‹ sáº½ tá»± Ä‘á»™ng ngáº¯t káº¿t ná»‘i USB. Ká»¹ thuáº­t viÃªn nhanh tay rÃºt cÃ¡p, báº¥m giá»¯ phÃ­m Giáº£m Ã¢m lÆ°á»£ng vÃ  cáº¯m cÃ¡p Ä‘á»ƒ Ä‘Æ°a mÃ¡y vÃ o láº¡i cháº¿ Ä‘á»™ Fastboot."
+      }
+    };
+
+    let currentMode = "standard";
+
+    function switchTab(mode) {
+      currentMode = mode;
+
+      // Update UI active state of tabs
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      if (mode === 'standard') {
+        buttons[0].classList.add('active');
+        document.getElementById('content-standard').style.display = 'flex';
+        document.getElementById('content-edl').style.display = 'none';
+        selectStep(1);
+      } else {
+        buttons[1].classList.add('active');
+        document.getElementById('content-standard').style.display = 'none';
+        document.getElementById('content-edl').style.display = 'flex';
+        selectEdlStep(1);
+      }
+    }
+
+    function selectStep(stepNum) {
+      // Update step items active state in UI
+      const steps = document.querySelectorAll('#content-standard .step-item');
+      steps.forEach((step, idx) => {
+        step.classList.remove('active', 'done');
+        if (idx + 1 < stepNum) {
+          step.classList.add('done');
+        } else if (idx + 1 === stepNum) {
+          step.classList.add('active');
+        }
+      });
+
+      const data = standardSteps[stepNum];
+      updateDetailsPanel(data);
+    }
+
+    function selectEdlStep(stepNum) {
+      // Update step items active state in UI
+      const steps = document.querySelectorAll('#content-edl .step-item');
+      steps.forEach((step, idx) => {
+        step.classList.remove('active', 'done');
+        if (idx + 1 < stepNum) {
+          step.classList.add('done');
+        } else if (idx + 1 === stepNum) {
+          step.classList.add('active');
+        }
+      });
+
+      const data = edlSteps[stepNum];
+      updateDetailsPanel(data);
+    }
+
+    function updateDetailsPanel(data) {
+      document.getElementById('detail-title').textContent = data.title;
+      document.getElementById('detail-desc').textContent = data.desc;
+      document.getElementById('detail-command').textContent = data.command;
+
+      // Update Assets Table
+      const assetsBody = document.getElementById('detail-assets');
+      assetsBody.innerHTML = '';
+
+      if (data.assets.length === 0) {
+        document.getElementById('section-assets').style.display = 'none';
+      } else {
+        document.getElementById('section-assets').style.display = 'block';
+        data.assets.forEach(asset => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="font-family: monospace; color: var(--cyan);">${asset.name}</td>
+            <td>${asset.purpose}</td>
+            <td style="font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">${asset.part}</td>
+          `;
+          assetsBody.appendChild(row);
+        });
+      }
+
+      // Update Partition visualizer
+      document.getElementById('part-fill').style.width = data.partWidth;
+      document.getElementById('part-label').textContent = data.partLabel;
+
+      // Update security note text
+      document.getElementById('detail-note-text').textContent = data.note;
+    }
+
+    // Initialize Page
+    window.addEventListener('DOMContentLoaded', () => {
+      // Activate icons
+      lucide.createIcons();
+      // Select first step
+      selectStep(1);
+    });
+  </script>
+</body>
+</html>

@@ -1,4 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../domain/assetTrust", () => ({
+  isAssetTrustEnabled: () => false,
+  verifyDetachedSignature: async () => undefined,
+}));
 
 import { v1ManifestModels } from "../domain/models";
 import { supportedModelSchema, type FlashPlan } from "../domain/schemas";
@@ -23,13 +28,21 @@ const sha256Hex = async (text: string) => {
 };
 
 describe("requiredAssetPathsForModel", () => {
-  it("keeps only legacy FTD models in the v1 runtime manifest", () => {
+  it("includes legacy FTD and all EFISP Gen 5 models in the v1 runtime manifest", () => {
     const models = v1ManifestModels.map((entry) => supportedModelSchema.parse(entry));
     const legacyModels = models.filter((model) => model.family === "legacy-ftd");
+    const efispModels = models.filter((model) => model.family === "efisp-8e-gen5");
 
     expect(models.length).toBeGreaterThanOrEqual(6);
     expect(legacyModels.length).toBeGreaterThanOrEqual(6);
-    expect(models.some((model) => model.family === "efisp-8e-gen5")).toBe(false);
+    expect(efispModels.map((model) => model.product)).toEqual([
+      "pudding",
+      "pandora",
+      "popsicle",
+      "nezha",
+      "myron",
+    ]);
+    expect(efispModels.every((model) => model.efispUnlockFile === "efisp/gbl_efi_unlock.efi")).toBe(true);
 
     const legacyEdlModels = legacyModels.filter((model) => model.edlAbl);
     expect(legacyEdlModels).toHaveLength(6);
@@ -44,11 +57,14 @@ describe("requiredAssetPathsForModel", () => {
     const legacyAdbModels = legacyModels.filter((model) => model.adbExploit);
     expect(legacyAdbModels.length).toBeGreaterThan(0);
     for (const model of legacyAdbModels) {
-      expect(model.adbExploit).toMatchObject({
-        exploitFile: expect.any(String),
-        suFile: expect.any(String),
-      });
+      const paths = model.adbExploit?.candidates?.flatMap((candidate) => [candidate.exploitFile, candidate.suFile]) ??
+        [model.adbExploit?.exploitFile, model.adbExploit?.suFile];
+
+      expect(paths.filter(Boolean).length).toBeGreaterThanOrEqual(2);
     }
+
+    expect(legacyModels.filter((model) => model.packageStatus !== "missing-mini-eng")).toHaveLength(24);
+    expect(legacyModels.filter((model) => model.packageStatus === "missing-mini-eng")).toHaveLength(2);
   });
 
   it("lists ABL and firehose for EDL ABL phase", () => {
@@ -93,19 +109,81 @@ describe("requiredAssetPathsForModel", () => {
       "abl/mi15.elf",
       "unlock/gpt_both4.bin",
       "unlock/boot.img",
-      "packages/xiaomi15/images/gpt_both0.bin",
-      "packages/xiaomi15/images/gpt_both1.bin",
-      "packages/xiaomi15/images/gpt_both2.bin",
-      "packages/xiaomi15/images/gpt_both3.bin",
       "packages/xiaomi15/images/gpt_both4.bin",
-      "packages/xiaomi15/images/gpt_both5.bin",
       "packages/xiaomi15/images/anti_version.txt",
       "packages/xiaomi15/images/boot.img",
       "packages/xiaomi15/images/vendor_boot.img",
     ]);
   });
 
-  it("filters EFISP models from server manifests before runtime use", async () => {
+  it("does not include FTD package assets for K80 Pro pre-unlock flow", () => {
+    const model = v1ManifestModels.find((entry) => entry.id === "redmi-k80pro");
+    const plan: FlashPlan = {
+      modelId: "redmi-k80pro",
+      product: "miro",
+      antiRollbackFile: "images/anti_version.txt",
+      operations: [
+        { type: "flash", partition: "boot_ab", file: "images/boot.img" },
+        { type: "flash", partition: "vendor_boot_ab", file: "images/vendor_boot.img" },
+      ],
+    };
+
+    if (!model) {
+      throw new Error("redmi-k80pro model fixture missing");
+    }
+
+    expect(requiredAssetPathsForModel(model, plan)).toEqual([
+      "abl/k80pro.elf",
+      "unlock/gpt_both4.bin",
+      "unlock/boot.img",
+      "packages/redmi-k80pro/images/gpt_both4.bin",
+    ]);
+    expect(requiredAssetPathsForPhase(model, plan, "flash-ftd")).toEqual([]);
+  });
+
+  it("prepares only the verified shared EFI for EFISP Gen 5", () => {
+    const model = v1ManifestModels.find((entry) => entry.id === "xiaomi17");
+    const emptyPlan: FlashPlan = {
+      modelId: "xiaomi17",
+      product: "pudding",
+      operations: [],
+    };
+
+    if (!model) {
+      throw new Error("xiaomi17 model fixture missing");
+    }
+
+    expect(requiredAssetPathsForModel(model, emptyPlan)).toEqual(["efisp/gbl_efi_unlock.efi"]);
+    expect(requiredAssetPathsForPhase(model, emptyPlan, "write-efisp")).toEqual([
+      "efisp/gbl_efi_unlock.efi",
+    ]);
+  });
+
+  it("uses per-device final GPT assets when a model defines finalGptFile", () => {
+    const model = v1ManifestModels.find((entry) => entry.id === "xiaomi14");
+    const plan: FlashPlan = {
+      modelId: "xiaomi14",
+      product: "houji",
+      antiRollbackFile: "images/anti_version.txt",
+      operations: [
+        { type: "getvar", name: "product", expect: "houji" },
+        { type: "flash", partition: "abl_ab", file: "images/abl.elf" },
+      ],
+    };
+
+    if (!model) {
+      throw new Error("xiaomi14 model fixture missing");
+    }
+
+    const paths = requiredAssetPathsForModel(model, plan);
+
+    expect(paths).toContain("unlock/gpt/14.bin");
+    expect(paths).toContain("packages/xiaomi14/images/abl.elf");
+    expect(paths).not.toContain("packages/xiaomi14/images/gpt_both0.bin");
+    expect(paths).not.toContain("packages/xiaomi14/images/gpt_both5.bin");
+  });
+
+  it("keeps EFISP models from server manifests for runtime use", async () => {
     const originalFetch = globalThis.fetch;
     const client = new ServerAssetClient("/dist-assets", new MemoryAssetCacheStore());
     const legacyModel = v1ManifestModels.find((entry) => entry.id === "xiaomi15");
@@ -131,7 +209,14 @@ describe("requiredAssetPathsForModel", () => {
 
     try {
       await expect(client.loadManifest()).resolves.toMatchObject({
-        models: [expect.objectContaining({ id: "xiaomi15", family: "legacy-ftd" })],
+        models: [
+          expect.objectContaining({ id: "xiaomi15", family: "legacy-ftd" }),
+          expect.objectContaining({
+            id: "xiaomi17",
+            family: "efisp-8e-gen5",
+            efispUnlockFile: "efisp/gbl_efi_unlock.efi",
+          }),
+        ],
       });
     } finally {
       globalThis.fetch = originalFetch;
@@ -151,12 +236,7 @@ describe("requiredAssetPathsForModel", () => {
     }
 
     expect(requiredAssetPathsForPhase(model, plan, "restore-gpt")).toEqual([
-      "packages/xiaomi15/images/gpt_both0.bin",
-      "packages/xiaomi15/images/gpt_both1.bin",
-      "packages/xiaomi15/images/gpt_both2.bin",
-      "packages/xiaomi15/images/gpt_both3.bin",
       "packages/xiaomi15/images/gpt_both4.bin",
-      "packages/xiaomi15/images/gpt_both5.bin",
     ]);
   });
 

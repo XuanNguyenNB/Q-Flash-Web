@@ -8,7 +8,7 @@ State chính nằm ở `src/workflow/types.ts`:
 
 ```ts
 type WorkflowFamily = "efisp-8e-gen5" | "legacy-ftd";
-type WorkflowMode = "standard-mqsas" | "c06-edl";
+type WorkflowMode = "standard" | "edl-standard";
 ```
 
 ### `legacy-ftd`
@@ -17,14 +17,19 @@ Flow cho Xiaomi 15 / 15 Pro / 15 Ultra / Redmi K80 Pro / Redmi K90 / Xiaomi Pad 
 
 Hai mode ABL:
 
-- `standard-mqsas`: boot Android permissive, ghi ABL qua MQSAS.
-- `c06-edl`: nạp ABL qua EDL 9008 cho máy có bản cập nhật đuôi C06/C07/C08.
+- `standard`: boot Android permissive, ghi ABL qua MQSAS.
+- `edl-standard`: nạp ABL qua EDL 9008 cho máy có bản cập nhật đuôi C06/C07/C08; mode này chỉ hiện khi bật `VITE_ALLOW_ADVANCED_EDL=true`.
 
 Sau ABL là FTD ROM, unlock payload, restore GPT, rồi MiFlash ROM gốc thủ công.
 
 ### `efisp-8e-gen5`
 
 Flow cho Xiaomi 17 / K90 Pro Max 8E Gen 5. Không dùng ABL/FTD/GPT legacy. Chỉ unlock EFISP theo flow riêng.
+
+Flow bắt buộc ADB-first, hard-block security patch mới hơn `2026-02-01`, chuẩn bị
+`efisp/gbl_efi_unlock.efi` qua asset cache/SHA-256, và chỉ cleanup sau khi Fastboot
+trả về chính xác `unlocked: yes`. Xem checklist máy thật tại
+[UAT_EFISP_GEN5.md](UAT_EFISP_GEN5.md).
 
 ## Thứ tự phase chính
 
@@ -69,6 +74,10 @@ Trước thao tác nguy hiểm, runner yêu cầu:
 - EDL ABL kiểm tra firehose SHA-256 và ABL padded sectors không vượt `maxSectors`.
 
 Không tự đoán mode C06+ từ version. Người dùng chọn `Nạp ABL qua EDL mode` thủ công.
+
+### K80 Pro `miro -> dada` sau ABL
+
+Redmi K80 Pro (`miro`) có thể trả Fastboot product `dada` sau khi nạp ABL engineering. Runner chỉ chấp nhận `dada` như alias tạm thời khi cùng phiên đã có một lần Fastboot exact-match `miro` trước đó. Alias này chỉ mở khóa các phase `unlock-payload`, `restore-gpt`, và `verify-unlock`; không dùng để detect model ban đầu, không cho terminal destructive command, và không cho flash FTD.
 
 ## Prepare assets
 

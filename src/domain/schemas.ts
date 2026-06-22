@@ -47,6 +47,12 @@ export const edlAblSchema = z.object({
   targets: z.array(edlAblTargetSchema).length(2),
 });
 
+const adbExploitCandidateSchema = z.object({
+  name: z.string().min(1).optional(),
+  exploitFile: z.string().min(1),
+  suFile: z.string().min(1),
+});
+
 const modelBaseSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -57,8 +63,12 @@ const modelBaseSchema = z.object({
 export const legacyFtdModelSchema = modelBaseSchema.extend({
   family: z.literal("legacy-ftd").default("legacy-ftd"),
   chip: z.enum(["8E", "8G2", "8G3", "8SG3", "8SG4"]),
+  ablProvisioning: z.enum(["mqsas-permissive", "adb-exploit-root", "manual-external"]).optional(),
+  preUnlockFlashPlan: z.boolean().optional(),
+  postAblFastbootAliases: z.array(z.string().min(1)).optional(),
   ablFile: z.string().min(1),
   ftdPackage: z.string().min(1),
+  packageStatus: z.enum(["available", "missing-mini-eng"]).optional(),
   unlock: z.object({
     gptBoth4: z.string().min(1),
     bootImage: z.string().min(1),
@@ -68,10 +78,16 @@ export const legacyFtdModelSchema = modelBaseSchema.extend({
   }),
   finalGpt: z.array(z.string().min(1)).length(6),
   edlAbl: edlAblSchema.optional(),
-  adbExploit: z.object({
-    exploitFile: z.string().min(1),
-    suFile: z.string().min(1),
-  }).optional(),
+  adbExploit: z
+    .object({
+      exploitFile: z.string().min(1).optional(),
+      suFile: z.string().min(1).optional(),
+      candidates: z.array(adbExploitCandidateSchema).min(1).optional(),
+    })
+    .refine((value) => Boolean(value.candidates?.length) || Boolean(value.exploitFile && value.suFile), {
+      message: "adbExploit requires either candidates or exploitFile/suFile.",
+    })
+    .optional(),
 });
 
 export const efisp8eModelSchema = modelBaseSchema.extend({

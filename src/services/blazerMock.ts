@@ -12,7 +12,10 @@ import type { FastbootClient } from "./fastboot";
 
 const delay = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
-export const blazerMockModel = v1ManifestModels.find((model) => model.id === "xiaomi15ultra")!;
+export const blazerMockModel = {
+  ...v1ManifestModels.find((model) => model.id === "xiaomi15ultra")!,
+  packageStatus: "available" as const,
+};
 
 const mockBlob = (path: string) =>
   new Blob([path.endsWith("anti_version.txt") ? "0\n" : `mock blazer asset for ${path}`], {
@@ -176,8 +179,11 @@ export class BlazerMockFastbootClient implements FastbootClient {
     return this.getvar("serialno");
   }
 
-  async runRaw() {
+  async runRaw(command = "") {
     await delay(120);
+    if (command === "oem device-info") {
+      return "(bootloader) Device unlocked: true\nOKAY";
+    }
     return "[MOCK blazer] OKAY";
   }
 
@@ -253,10 +259,13 @@ export class BlazerMockAdbClient implements AdbClient {
   async shell(command: string): Promise<AdbShellResult> {
     await delay(80);
     if (command.startsWith("getprop ")) {
-      return { stdout: "blazer\n", stderr: "", exitCode: 0 };
+      return { stdout: "xuanyuan\n", stderr: "", exitCode: 0 };
     }
     if (command === "getenforce") {
       return { stdout: "Permissive\n", stderr: "", exitCode: 0 };
+    }
+    if (command.startsWith("service call miui.mqsas.IMQSNative")) {
+      return { stdout: "Result: Parcel(00000000 00000001)\n", stderr: "", exitCode: 0 };
     }
     return { stdout: "[MOCK blazer] OK\n", stderr: "", exitCode: 0 };
   }

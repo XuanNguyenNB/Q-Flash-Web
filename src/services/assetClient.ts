@@ -1,12 +1,18 @@
 import { verifySha256Blob } from "../domain/hash";
 import { buildAssetUrl, normalizePath } from "../domain/assets";
 import { isAssetTrustEnabled, verifyDetachedSignature } from "../domain/assetTrust";
-import { isEfisp8eModel, isLegacyFtdModel } from "../domain/models";
+import {
+  isEfisp8eModel,
+  isLegacyFtdModel,
+  legacyAblProvisioning,
+  shouldRunPreUnlockFlashPlan,
+} from "../domain/models";
 import {
   flashPlanSchema,
   manifestSchema,
   sha256SumsSchema,
   type FlashPlan,
+  type LegacyFtdModel,
   type Manifest,
   type Sha256Sums,
   type SupportedModel,
@@ -69,24 +75,46 @@ export interface AssetClient {
   fetchVerifiedBlob(path: string, onProgress?: ProgressHandler): Promise<Blob>;
 }
 
+export const adbExploitAssetPaths = (adbExploit: LegacyFtdModel["adbExploit"]) => {
+  if (!adbExploit) {
+    return [];
+  }
+
+  if (adbExploit.candidates?.length) {
+    return adbExploit.candidates.flatMap((candidate) => [candidate.exploitFile, candidate.suFile]);
+  }
+
+  if (adbExploit.exploitFile && adbExploit.suFile) {
+    return [adbExploit.exploitFile, adbExploit.suFile];
+  }
+
+  return [];
+};
+
+const restoreGptAssetPaths = (model: LegacyFtdModel) =>
+  model.unlock.finalGptFile ? [model.unlock.finalGptFile] : model.finalGpt;
+
 export const requiredAssetPathsForModel = (model: SupportedModel, plan: FlashPlan) => {
   if (isEfisp8eModel(model)) {
     return [normalizePath(model.efispUnlockFile)];
   }
 
+  const provisioning = legacyAblProvisioning(model);
   const paths = [
-    model.ablFile,
+    ...(provisioning === "mqsas-permissive" || provisioning === "adb-exploit-root" ? [model.ablFile] : []),
     model.unlock.gptBoth4,
     model.unlock.bootImage,
-    ...model.finalGpt,
-    ...(plan.antiRollbackFile ? [`${model.ftdPackage}/${plan.antiRollbackFile}`] : []),
-    ...plan.operations
-      .filter((operation) => operation.type === "flash")
-      .map((operation) => `${model.ftdPackage}/${operation.file}`),
+    ...restoreGptAssetPaths(model),
+    ...(shouldRunPreUnlockFlashPlan(model) && plan.antiRollbackFile ? [`${model.ftdPackage}/${plan.antiRollbackFile}`] : []),
+    ...(shouldRunPreUnlockFlashPlan(model)
+      ? plan.operations
+          .filter((operation) => operation.type === "flash")
+          .map((operation) => `${model.ftdPackage}/${operation.file}`)
+      : []),
   ];
 
-  if (isLegacyFtdModel(model) && model.adbExploit) {
-    paths.push(model.adbExploit.exploitFile, model.adbExploit.suFile);
+  if (provisioning === "adb-exploit-root" && model.adbExploit) {
+    paths.push(...adbExploitAssetPaths(model.adbExploit));
   }
 
   return [...new Set(paths.map(normalizePath))];
@@ -96,6 +124,7 @@ export type AssetPhase =
   | "boot-permissive"
   | "downgrade-abl"
   | "edl-abl"
+  | "write-abl"
   | "write-efisp"
   | "flash-ftd"
   | "unlock-payload"
@@ -114,7 +143,7 @@ export const requiredAssetPathsForPhase = (model: SupportedModel, plan: FlashPla
     return requiredAssetPathsForModel(model, plan);
   }
 
-  if (phase === "downgrade-abl") {
+  if (phase === "downgrade-abl" || phase === "write-abl") {
     return [normalizePath(model.ablFile)];
   }
 
@@ -123,14 +152,18 @@ export const requiredAssetPathsForPhase = (model: SupportedModel, plan: FlashPla
   }
 
   if (phase === "flash-ftd") {
+    if (!shouldRunPreUnlockFlashPlan(model)) {
+      return [];
+    }
+
     const flashPaths = [
       ...(plan.antiRollbackFile ? [`${model.ftdPackage}/${plan.antiRollbackFile}`] : []),
       ...plan.operations
         .filter((operation) => operation.type === "flash")
         .map((operation) => `${model.ftdPackage}/${operation.file}`),
     ];
-    if (model.adbExploit) {
-      flashPaths.push(model.adbExploit.exploitFile, model.adbExploit.suFile, model.ablFile);
+    if (legacyAblProvisioning(model) === "adb-exploit-root" && model.adbExploit) {
+      flashPaths.push(...adbExploitAssetPaths(model.adbExploit), model.ablFile);
     }
     return flashPaths.map(normalizePath);
   }
@@ -141,11 +174,7 @@ export const requiredAssetPathsForPhase = (model: SupportedModel, plan: FlashPla
     return [payload, ennea].map(normalizePath);
   }
 
-  if (model.unlock.finalGptFile) {
-    return [normalizePath(model.unlock.finalGptFile)];
-  }
-
-  return model.finalGpt.map(normalizePath);
+  return restoreGptAssetPaths(model).map(normalizePath);
 };
 
 export const assetCacheKey = (baseUrl: string, path: string, sha256: string) =>
@@ -164,11 +193,7 @@ export class ServerAssetClient implements AssetClient {
   }
 
   async loadManifest(): Promise<Manifest> {
-    const manifest = manifestSchema.parse(await this.fetchSignedJson("manifest.json"));
-    return {
-      ...manifest,
-      models: manifest.models.filter(isLegacyFtdModel),
-    };
+    return manifestSchema.parse(await this.fetchSignedJson("manifest.json"));
   }
 
   async loadRootSha256() {

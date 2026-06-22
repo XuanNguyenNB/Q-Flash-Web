@@ -107,10 +107,35 @@ const assertHead = async (options: CliOptions, assetPath: string) => {
   const length = Number(response.headers.get("content-length") ?? "0");
 
   if (!Number.isFinite(length) || length <= 0) {
-    throw new Error(`${assetPath} is missing a positive Content-Length header.`);
+    const fallback = await fetch(url, {
+      headers: { Origin: options.origin, "Accept-Encoding": "identity" },
+    });
+
+    assertOk(fallback, assetPath);
+    assertCors(fallback, options.origin, assetPath);
+
+    const fallbackLength = (await fallback.arrayBuffer()).byteLength;
+
+    if (fallbackLength <= 0) {
+      throw new Error(`${assetPath} is missing a positive Content-Length header.`);
+    }
+
+    return fallbackLength;
   }
 
   return length;
+};
+
+const assertNotPublic = async (options: CliOptions, assetPath: string) => {
+  const url = buildAssetUrl(options.baseUrl, assetPath);
+  const response = await fetch(url, {
+    method: "HEAD",
+    headers: { Origin: options.origin, "Accept-Encoding": "identity" },
+  });
+
+  if (response.status !== 404) {
+    throw new Error(`${assetPath} must not be public in paid asset releases; expected HTTP 404, got ${response.status}.`);
+  }
 };
 
 const collectDistFiles = async (root: string): Promise<string[]> => {
@@ -160,15 +185,15 @@ const sampleAssetPaths = async (options: CliOptions, manifest: Manifest, rootSha
   const firstEfispModel = manifest.models.find((model) => model.family === "efisp-8e-gen5");
   const firstModel = manifest.models.find((model) => model.family === "legacy-ftd");
 
-  if (!firstModel || !firstEfispModel) {
-    throw new Error("manifest.json must contain EFISP and legacy models.");
+  if (!firstModel) {
+    throw new Error("manifest.json must contain at least one legacy model.");
   }
 
   const flashPlanPath = `${firstModel.ftdPackage}/flash-plan.json`;
   const plan = await fetchJson<{ operations?: Array<{ type?: string; file?: string }> }>(options, flashPlanPath);
   const firstFlashFile = plan.operations?.find((operation) => operation.type === "flash" && operation.file)?.file;
   const paths = [
-    firstEfispModel.efispUnlockFile,
+    firstEfispModel?.efispUnlockFile,
     firstModel.ablFile,
     firstModel.edlAbl?.firehoseFile,
     firstModel.finalGpt[0],
@@ -203,6 +228,7 @@ const main = async () => {
 
   await assertHead(options, "manifest.json");
   await assertHead(options, "sha256sums.json");
+  await assertNotPublic(options, "keys.json");
 
   for (const assetPath of samplePaths) {
     const length = await assertHead(options, assetPath);

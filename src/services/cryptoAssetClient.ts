@@ -2,6 +2,7 @@ import { WorkflowError } from "../workflow/errors";
 import { ServerAssetClient } from "./assetClient";
 
 type FirmwareKeys = Record<string, { key: string; iv: string }>;
+export type FirmwareKeyProvider = (paths: readonly string[]) => Promise<FirmwareKeys>;
 
 const ENCRYPTED_PATH_PREFIXES = ["unlock/payloads/", "unlock/gpt/", "ennea/"] as const;
 
@@ -21,7 +22,12 @@ const hexToBytes = (hex: string, label: string) => {
 
 export class CryptoAssetClient extends ServerAssetClient {
   private firmwareKeys: FirmwareKeys | undefined;
-  private firmwareKeysPromise: Promise<void> | undefined;
+  private readonly firmwareKeyProvider: FirmwareKeyProvider | undefined;
+
+  constructor(baseUrl: string, firmwareKeyProvider?: FirmwareKeyProvider) {
+    super(baseUrl);
+    this.firmwareKeyProvider = firmwareKeyProvider;
+  }
 
   protected resolveFetchPath(path: string) {
     if (isEncryptedPath(path) && !path.endsWith(".enc")) {
@@ -35,16 +41,12 @@ export class CryptoAssetClient extends ServerAssetClient {
       return blob;
     }
 
-    await this.loadFirmwareKeys();
+    await this.loadFirmwareKey(path);
 
-    if (!this.firmwareKeys) {
-      throw new WorkflowError("ASSET_DECRYPT_FAILED", "Chua tai firmware keys.json.");
-    }
-
-    const entry = this.firmwareKeys[path];
+    const entry = this.firmwareKeys?.[path];
 
     if (!entry) {
-      throw new WorkflowError("ASSET_DECRYPT_FAILED", `Thieu key/IV cho ${path} trong firmware keys.`);
+      throw new WorkflowError("PAYMENT_REQUIRED", `Backend chua cap key/IV cho ${path}.`);
     }
 
     const rawKey = hexToBytes(entry.key, `key cho ${path}`);
@@ -76,7 +78,7 @@ export class CryptoAssetClient extends ServerAssetClient {
     let plaintext: ArrayBuffer;
 
     try {
-      // WebCrypto AES-CBC validates and strips PKCS#7 padding per W3C spec — do not strip again.
+      // WebCrypto AES-CBC validates and strips PKCS#7 padding per W3C spec; do not strip again.
       plaintext = await crypto.subtle.decrypt({ name: "AES-CBC", iv }, importedKey, ciphertext);
     } catch (error) {
       throw new WorkflowError("ASSET_DECRYPT_FAILED", `Giai ma AES-CBC that bai cho ${path}.`, error);
@@ -85,26 +87,25 @@ export class CryptoAssetClient extends ServerAssetClient {
     return new Blob([plaintext]);
   }
 
-  async loadFirmwareKeys() {
-    if (this.firmwareKeys) {
+  async loadFirmwareKey(path: string) {
+    if (this.firmwareKeys?.[path]) {
       return;
     }
 
-    if (!this.firmwareKeysPromise) {
-      this.firmwareKeysPromise = (async () => {
-        try {
-          const raw = await this.fetchSignedJson("keys.json");
-          this.firmwareKeys = raw as FirmwareKeys;
-        } catch (error) {
-          this.firmwareKeysPromise = undefined;
-          if (error instanceof WorkflowError) {
-            throw error;
-          }
-          throw new WorkflowError("ASSET_DECRYPT_FAILED", "Không tải được firmware keys.json.", error);
-        }
-      })();
+    if (!this.firmwareKeyProvider) {
+      throw new WorkflowError("PAYMENT_REQUIRED", "Can thanh toan va nhan unlock pass truoc khi lay khoa giai ma asset.");
     }
 
-    await this.firmwareKeysPromise;
+    try {
+      this.firmwareKeys = {
+        ...(this.firmwareKeys ?? {}),
+        ...(await this.firmwareKeyProvider([path])),
+      };
+    } catch (error) {
+      if (error instanceof WorkflowError) {
+        throw error;
+      }
+      throw new WorkflowError("PAYMENT_REQUIRED", "Khong lay duoc khoa giai ma asset tu backend.", error);
+    }
   }
 }

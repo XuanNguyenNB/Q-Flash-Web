@@ -10,8 +10,8 @@ describe("manifest schema and model matching", () => {
       models: v1ManifestModels,
     });
 
-    expect(manifest.models.length).toBeGreaterThanOrEqual(6);
-    expect(manifest.models.every((model) => model.family === "legacy-ftd")).toBe(true);
+    expect(manifest.models.filter((model) => model.family === "legacy-ftd").length).toBeGreaterThanOrEqual(6);
+    expect(manifest.models.filter((model) => model.family === "efisp-8e-gen5")).toHaveLength(5);
   });
 
   it("treats legacy R2 manifests without family as legacy FTD models", () => {
@@ -31,14 +31,27 @@ describe("manifest schema and model matching", () => {
     expect(manifest.models[0]?.id).toBe("xiaomi15ultra");
   });
 
-  it("matches only legacy FTD models by fastboot product case-insensitively", () => {
-    expect(findModelByProduct(v1ManifestModels, "PUDDING")).toBeUndefined();
-    expect(findModelByProduct(v1ManifestModels, "PANDORA")).toBeUndefined();
-    expect(findModelByProduct(v1ManifestModels, "POPSICLE")).toBeUndefined();
-    expect(findModelByProduct(v1ManifestModels, "NEZHA")).toBeUndefined();
-    expect(findModelByProduct(v1ManifestModels, "MYRON")).toBeUndefined();
+  it("matches legacy and EFISP models by fastboot product case-insensitively", () => {
+    expect(findModelByProduct(v1ManifestModels, "PUDDING")?.id).toBe("xiaomi17");
+    expect(findModelByProduct(v1ManifestModels, "PANDORA")?.id).toBe("xiaomi17pro");
+    expect(findModelByProduct(v1ManifestModels, "POPSICLE")?.id).toBe("xiaomi17promax");
+    expect(findModelByProduct(v1ManifestModels, "NEZHA")?.id).toBe("xiaomi17ultra");
+    expect(findModelByProduct(v1ManifestModels, "MYRON")?.id).toBe("redmi-k90promax");
     expect(findModelByProduct(v1ManifestModels, "XUANYUAN")?.id).toBe("xiaomi15ultra");
+    expect(findModelByProduct(v1ManifestModels, "PUDDING", "legacy-ftd")).toBeUndefined();
+    expect(findModelByProduct(v1ManifestModels, "PUDDING", "efisp-8e-gen5")?.id).toBe("xiaomi17");
     expect(findModelByProduct(v1ManifestModels, "XUANYUAN", "efisp-8e-gen5")).toBeUndefined();
     expect(findModelByProduct(v1ManifestModels, "unknown")).toBeUndefined();
+  });
+
+  it("keeps K80 Pro post-ABL aliases out of initial product matching", () => {
+    const k80Pro = v1ManifestModels.find((model) => model.id === "redmi-k80pro");
+
+    expect(k80Pro).toMatchObject({
+      product: "miro",
+      postAblFastbootAliases: ["dada"],
+    });
+    expect(findModelByProduct(v1ManifestModels, "dada")?.id).toBe("xiaomi15");
+    expect(findModelByProduct(v1ManifestModels, "dada")?.id).not.toBe("redmi-k80pro");
   });
 });

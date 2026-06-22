@@ -4,6 +4,7 @@ export type WorkflowErrorCode =
   | "USB_PICKER_CANCELLED"
   | "DEVICE_NOT_FOUND"
   | "UNSUPPORTED_PRODUCT"
+  | "ADB_REQUIRED"
   | "WRONG_PRODUCT"
   | "ADB_UNAUTHORIZED"
   | "SELINUX_NOT_PERMISSIVE"
@@ -12,6 +13,9 @@ export type WorkflowErrorCode =
   | "ABL_PROBE_FAILED"
   | "USB_DISCONNECTED"
   | "ANTIROLLBACK_FAILED"
+  | "SECURITY_PATCH_BLOCKED"
+  | "UNLOCK_NOT_VERIFIED"
+  | "FTD_PACKAGE_MISSING"
   | "CONFIRMATION_REQUIRED"
   | "MANIFEST_INVALID"
   | "ASSET_FETCH_FAILED"
@@ -21,6 +25,7 @@ export type WorkflowErrorCode =
   | "ASSET_DECRYPT_FAILED"
   | "ASSET_SIGNATURE_INVALID"
   | "ASSET_SIGNATURE_MISSING"
+  | "PAYMENT_REQUIRED"
   | "DEV_OVERRIDE_DISABLED"
   | "UNKNOWN";
 
@@ -30,6 +35,7 @@ const defaultMessages: Record<WorkflowErrorCode, string> = {
   USB_PICKER_CANCELLED: "Bạn đã hủy chọn thiết bị USB.",
   DEVICE_NOT_FOUND: "Không thấy thiết bị. Kiểm tra cáp, driver USB và chế độ Fastboot/ADB/EDL.",
   UNSUPPORTED_PRODUCT: "Codename máy không nằm trong danh sách hỗ trợ v1.",
+  ADB_REQUIRED: "Cần kết nối Android/ADB trước để kiểm tra phiên bản.",
   WRONG_PRODUCT: "Product hiện tại không khớp mẫu máy đã khóa.",
   ADB_UNAUTHORIZED: "ADB chưa được cấp quyền. Mở khóa màn hình và bấm Cho phép ở hộp RSA.",
   SELINUX_NOT_PERMISSIVE: "SELinux không ở trạng thái Permissive, dừng để tránh ghi ABL sai ngữ cảnh.",
@@ -38,6 +44,9 @@ const defaultMessages: Record<WorkflowErrorCode, string> = {
   ABL_PROBE_FAILED: "ABL engineering/parcel chưa sẵn sàng: fastboot erase frp thất bại.",
   USB_DISCONNECTED: "USB bị ngắt giữa chừng. Cắm lại và dùng nút reconnect.",
   ANTIROLLBACK_FAILED: "Antirollback của máy cao hơn package, không được flash gói này.",
+  SECURITY_PATCH_BLOCKED: "Security patch của máy không nằm trong ngưỡng an toàn cho workflow này.",
+  UNLOCK_NOT_VERIFIED: "Chưa xác minh bootloader đã unlock, không được chạy bước dọn dữ liệu.",
+  FTD_PACKAGE_MISSING: "Chưa có mini engineering ROM VHMOBILE cho model này.",
   CONFIRMATION_REQUIRED: "Cần tick xác nhận cho bước phá dữ liệu trước khi chạy.",
   MANIFEST_INVALID: "Danh sách tệp không đúng schema.",
   ASSET_FETCH_FAILED: "Không tải được tệp từ máy chủ asset.",
@@ -47,6 +56,7 @@ const defaultMessages: Record<WorkflowErrorCode, string> = {
   ASSET_DECRYPT_FAILED: "Không giải mã được tệp đã mã hóa hoặc hash plaintext không khớp.",
   ASSET_SIGNATURE_INVALID: "Chữ ký Ed25519 của asset không hợp lệ. Có thể máy chủ asset bị can thiệp.",
   ASSET_SIGNATURE_MISSING: "Thiếu file chữ ký .sig đi kèm asset. Không thể xác thực nguồn gốc.",
+  PAYMENT_REQUIRED: "Can thanh toan va unlock pass hop le truoc khi chay buoc nay.",
   DEV_OVERRIDE_DISABLED: "Override mẫu máy chỉ dùng cho dev build. Production không cho phép.",
   UNKNOWN: "Lỗi chưa phân loại.",
 };
@@ -107,6 +117,10 @@ export const toWorkflowError = (error: unknown, fallback: WorkflowErrorCode = "U
       return new WorkflowError("ASSET_SIGNATURE_INVALID", error.message, error);
     }
 
+    if (message.includes("payment") || message.includes("unlock pass") || message.includes("thanh toan")) {
+      return new WorkflowError("PAYMENT_REQUIRED", error.message, error);
+    }
+
     return new WorkflowError(fallback, error.message, error);
   }
 
@@ -119,6 +133,8 @@ export const errorAdvice: Record<WorkflowErrorCode, string> = {
   USB_PICKER_CANCELLED: "Bấm kết nối lại và chọn đúng thiết bị trong hộp chọn của trình duyệt.",
   DEVICE_NOT_FOUND: "Đưa máy về đúng mode: Fastboot, ADB Android hoặc Qualcomm 9008 tùy workflow đang chọn.",
   UNSUPPORTED_PRODUCT: "Không tiếp tục với mẫu máy ngoài danh sách hỗ trợ của flow đang chọn.",
+  ADB_REQUIRED:
+    "Bật USB Debugging, kết nối khi máy đang vào Android; sau khi kiểm tra app sẽ tự reboot sang Fastboot để xác minh.",
   WRONG_PRODUCT: "Ngắt kết nối, đưa đúng máy về Fastboot và kết nối lại.",
   ADB_UNAUTHORIZED: "Rút cắm lại nếu hộp xác nhận không hiện, sau đó bấm Cho phép trên màn hình điện thoại.",
   SELINUX_NOT_PERMISSIVE: "Quay lại Fastboot và chạy lại Boot Android Permissive trước khi ghi ABL qua MQSAS.",
@@ -128,6 +144,12 @@ export const errorAdvice: Record<WorkflowErrorCode, string> = {
     "Nạp lại ABL engineering/parcel hoặc đưa máy về đúng Fastboot rồi kết nối lại. Không flash FTD khi erase frp chưa thành công.",
   USB_DISCONNECTED: "Sau reboot hoặc đổi mode, bấm reconnect rồi chọn lại thiết bị.",
   ANTIROLLBACK_FAILED: "Dừng quy trình; package hạ cấp không an toàn cho antirollback hiện tại.",
+  SECURITY_PATCH_BLOCKED:
+    "Dừng quy trình. EFISP 8E Gen 5 chỉ cho phép security patch xác minh được và không mới hơn 2026-02-01.",
+  UNLOCK_NOT_VERIFIED:
+    "Chạy lại bước kiểm tra Fastboot unlocked. App chỉ xóa efisp/metadata/userdata sau khi đọc được unlocked: yes.",
+  FTD_PACKAGE_MISSING:
+    "Model này chưa có archive mini_eng/minieng/mineng trên VHMOBILE, nên app không tải flash-plan hay chạy phase Flash FTD.",
   CONFIRMATION_REQUIRED: "Tick xác nhận riêng của bước hiện tại rồi chạy tiếp.",
   MANIFEST_INVALID: "Tạo lại manifest bằng script build asset.",
   ASSET_FETCH_FAILED: "Kiểm tra VITE_ASSET_BASE_URL, CORS và đường dẫn public object.",
@@ -135,11 +157,13 @@ export const errorAdvice: Record<WorkflowErrorCode, string> = {
   ASSET_CACHE_FAILED: "Kiểm tra dung lượng lưu trữ trình duyệt/IndexedDB. Xóa bộ nhớ đệm site nếu cần và chuẩn bị lại.",
   ASSET_NOT_PREPARED: "Chạy lại bước chuẩn bị tệp ROM; các bước flash không được tải mạng trực tiếp.",
   ASSET_DECRYPT_FAILED:
-    "Khóa giải mã không có hoặc không khớp dữ liệu. Build lại asset bằng scripts/build-assets.ts để cập nhật keys.json.",
+    "Khóa giải mã không có hoặc không khớp dữ liệu. Kiểm tra unlock pass và PAYMENTS_ASSET_KEYS_PATH trên backend.",
   ASSET_SIGNATURE_INVALID:
     "Dừng quy trình ngay. Chữ ký Ed25519 sai có thể là dấu hiệu host bị thay file. Kiểm tra lại nguồn asset trước khi thử lại.",
   ASSET_SIGNATURE_MISSING:
-    "Chạy lại scripts/build-assets.ts với khóa ký, đồng bộ R2 để mọi sha256sums.json/keys.json có file .sig đi kèm.",
+    "Chạy lại scripts/build-assets.ts với khóa ký, đồng bộ R2 để manifest/sha256sums/flash-plan có file .sig đi kèm.",
+  PAYMENT_REQUIRED:
+    "Sau khi app xac minh dung serial/model, tao don payOS 10.000 VND, cho trang thai da thanh toan roi chay lai buoc nay.",
   DEV_OVERRIDE_DISABLED:
     "Bật cờ VITE_ALLOW_TARGET_OVERRIDE=true khi build dev nếu cần override mẫu máy. Production tuyệt đối không bật.",
   UNKNOWN: "Tải nhật ký xuống và kiểm tra stack/thông báo chi tiết.",

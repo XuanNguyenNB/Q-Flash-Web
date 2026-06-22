@@ -1,4 +1,4 @@
-# Xiaomi WebUSB Unlock
+# Q Flash Web
 
 Static Vite + React app for the Xiaomi WebUSB unlock workflow. It uses WebUSB ADB/Fastboot in Chrome/Edge and expects expanded binary assets from a public asset path or same-origin static directory.
 
@@ -22,6 +22,7 @@ Future agents should start from:
 - [docs/DEPLOY.md](docs/DEPLOY.md) for VPS deployment.
 - [docs/ASSETS_R2.md](docs/ASSETS_R2.md) for Cloudflare R2 asset hosting.
 - [docs/WORKFLOW.md](docs/WORKFLOW.md) for workflow, safety gates, and EDL notes.
+- [docs/UAT_EFISP_GEN5.md](docs/UAT_EFISP_GEN5.md) for the real-device EFISP Gen 5 acceptance checklist.
 
 `npm run build:assets` reads the current workspace layout:
 
@@ -66,9 +67,9 @@ Recommended env:
 R2_BUCKET=xiaomi-webusb-assets
 R2_REMOTE=r2
 R2_ASSET_DOMAIN=https://assets.<domain>
-R2_RELEASE=20260506-001
-R2_PREFIX=xiaomi-webusb/releases/20260506-001
-VITE_ASSET_BASE_URL=https://assets.<domain>/xiaomi-webusb/releases/20260506-001
+R2_RELEASE=20260617-001
+R2_PREFIX=xiaomi-webusb/releases/20260617-001
+VITE_ASSET_BASE_URL=https://assets.<domain>/xiaomi-webusb/releases/20260617-001
 ```
 
 Configure `R2_REMOTE` in rclone as an S3-compatible Cloudflare R2 remote. Store the access key/secret in the rclone config, not in this repo. The remote endpoint should be:
@@ -83,7 +84,7 @@ Release upload flow:
 npm run build:assets
 npm run sync:assets:r2:dry-run
 npm run sync:assets:r2
-VITE_ASSET_BASE_URL=https://assets.<domain>/xiaomi-webusb/releases/20260506-001 npm run build
+VITE_ASSET_BASE_URL=https://assets.<domain>/xiaomi-webusb/releases/20260617-001 npm run build
 npm run verify:assets:r2
 ```
 
@@ -93,9 +94,9 @@ PowerShell example:
 $env:R2_BUCKET="xiaomi-webusb-assets"
 $env:R2_REMOTE="r2"
 $env:R2_ASSET_DOMAIN="https://assets.<domain>"
-$env:R2_RELEASE="20260506-001"
-$env:R2_PREFIX="xiaomi-webusb/releases/20260506-001"
-$env:VITE_ASSET_BASE_URL="https://assets.<domain>/xiaomi-webusb/releases/20260506-001"
+$env:R2_RELEASE="20260617-001"
+$env:R2_PREFIX="xiaomi-webusb/releases/20260617-001"
+$env:VITE_ASSET_BASE_URL="https://assets.<domain>/xiaomi-webusb/releases/20260617-001"
 npm run sync:assets:r2:dry-run
 npm run sync:assets:r2
 npm run build
